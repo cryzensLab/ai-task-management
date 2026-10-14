@@ -1618,12 +1618,254 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
+    /* =====================================================================
+       MODULE 4: LIBRARIES (models, poses, backgrounds, props, products, presets)
+       ===================================================================== */
+    .libraries-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 0;
+    }
+
+    .lib-sidebar {
+      border-right: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow-y: auto;
+    }
+
+    .lib-sidebar-title {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      padding: 0 10px 8px;
+    }
+
+    .lib-type-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+    }
+    .lib-type-btn:hover { background: var(--bg-subtle); color: var(--text-main); }
+    .lib-type-btn.active { background: var(--primary-light); color: var(--primary); }
+
+    .lib-type-count {
+      font-size: 0.72rem;
+      font-weight: 700;
+      min-width: 22px;
+      text-align: center;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      background: var(--bg-muted);
+      color: var(--text-muted);
+    }
+
+    .lib-sidebar-footer {
+      margin-top: auto;
+      padding: 12px 6px 0;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .lib-sidebar-footer p { font-size: 0.72rem; color: var(--text-muted); line-height: 1.45; }
+
+    .lib-main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .lib-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .lib-header-text { flex: 1; min-width: 200px; }
+    .lib-header-text h2 { font-size: 1.05rem; font-weight: 800; }
+    .lib-header-text p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .lib-search { width: 220px; height: 32px; padding: 0 10px; }
+
+    .lib-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px 40px;
+    }
+
+    .lib-group { margin-bottom: 24px; }
+    .lib-group-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lib-group-title span { color: var(--text-subtle); font-weight: 600; }
+
+    .lib-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .lib-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      text-align: left;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+    }
+    .lib-item:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+
+    .lib-thumb {
+      aspect-ratio: 4 / 3;
+      background: var(--bg-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .lib-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .lib-thumb.lib-thumb-empty { aspect-ratio: 5 / 2; }
+    .lib-thumb-initials { font-size: 1.6rem; font-weight: 800; color: var(--text-subtle); }
+    .lib-thumb-count {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      background: rgba(15, 23, 42, 0.7);
+      color: #fff;
+    }
+
+    .lib-item-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 4px; }
+    .lib-item-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .lib-item-name {
+      font-size: 0.86rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lib-code {
+      flex-shrink: 0;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .lib-item-snippet {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .lib-item-meta { font-size: 0.7rem; color: var(--text-subtle); font-weight: 600; }
+    .lib-item-missing { color: var(--warning); }
+
+    .lib-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-lg);
+    }
+    .lib-empty strong { display: block; color: var(--text-main); font-size: 0.95rem; margin-bottom: 4px; }
+
+    .lib-form-hint { font-size: 0.72rem; color: var(--text-subtle); }
+    .lib-images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+      gap: 8px;
+    }
+    .lib-image-tile {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+    }
+    .lib-image-tile img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+    .lib-image-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(15, 23, 42, 0.75);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.8rem;
+      line-height: 22px;
+      padding: 0;
+    }
+    .lib-dropzone {
+      border: 1.5px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .lib-dropzone.drag-active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .topbar-center { display: none; }
       .nav-tabs .nav-tab span { display: none; }
       .mobile-move-btn { display: inline-flex; }
       .compare-grid { grid-template-columns: 1fr; }
+      .libraries-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .lib-sidebar { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border-subtle); padding: 8px; }
+      .lib-sidebar-title, .lib-sidebar-footer { display: none; }
+      .lib-type-btn { flex-shrink: 0; }
+      .lib-header, .lib-body { padding-left: 16px; padding-right: 16px; }
+      .lib-search { width: 100%; }
     }
   </style>
 </head>
@@ -1650,6 +1892,10 @@
         <button class="nav-tab" data-view="archive" id="tab-archive">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
           <span>Archive</span>
+        </button>
+        <button class="nav-tab" data-view="libraries" id="tab-libraries">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Libraries</span>
         </button>
       </nav>
     </div>
@@ -1900,6 +2146,31 @@
           </div>
         </div>
 
+      </div>
+    </section>
+
+    <!-- VIEW 4: LIBRARIES -->
+    <section class="app-view" id="view-libraries">
+      <div class="libraries-layout">
+        <aside class="lib-sidebar" id="lib-sidebar">
+          <div class="lib-sidebar-title">Libraries</div>
+          <!-- Type buttons rendered by renderLibrariesView() -->
+          <div class="lib-sidebar-footer">
+            <button class="btn btn-secondary btn-sm" id="lib-seed-btn" title="Create entries for models, paired products and repeated notes found in the tracker">Fill from tracker</button>
+            <p>Shared with the whole team. Prompt snippets here will feed the prompt builder.</p>
+          </div>
+        </aside>
+        <div class="lib-main">
+          <div class="lib-header">
+            <div class="lib-header-text">
+              <h2 id="lib-title">Models</h2>
+              <p id="lib-desc"></p>
+            </div>
+            <input type="search" class="form-input lib-search" id="lib-search" placeholder="Search this library..." />
+            <button class="btn btn-primary" id="lib-add-btn">+ Add</button>
+          </div>
+          <div class="lib-body" id="lib-body"></div>
+        </div>
       </div>
     </section>
 
@@ -2171,6 +2442,36 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" id="team-modal-cancel">Cancel</button>
       <button class="btn btn-primary" id="team-modal-save">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================================
+     LIBRARY ITEM EDITOR MODAL
+     ===================================================================== -->
+<div class="modal-overlay" id="lib-editor-modal">
+  <div class="modal-card" style="max-width:640px;">
+    <div class="modal-header">
+      <h3 style="font-size:1rem; font-weight:700;" id="lib-editor-title">Edit</h3>
+      <button class="icon-btn" id="lib-editor-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="lib-editor-form" autocomplete="off"></form>
+      <div id="lib-editor-images-section">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Reference images</label>
+          <div class="lib-images-grid" id="lib-editor-images"></div>
+          <div class="lib-dropzone" id="lib-editor-dropzone">Drop images here or click to add</div>
+          <input type="file" id="lib-editor-file-input" accept="image/*" multiple style="display:none;" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="lib-editor-delete" style="margin-right:auto;">Delete</button>
+      <button class="btn btn-secondary" id="lib-editor-cancel">Cancel</button>
+      <button class="btn btn-primary" id="lib-editor-save">Save</button>
     </div>
   </div>
 </div>
@@ -2481,6 +2782,7 @@
     activity: new Map(), // cardId -> array of activity
     boards: new Map(),
     shapes: new Map(), // shapeId -> shape object
+    libraries: new Map(), // itemId -> library item (model, pose, background, prop, product, preset)
     settings: { ...DEFAULT_TEAM },
 
     // UI state
@@ -2515,44 +2817,112 @@
     remoteCursors: new Map() // userId -> { x, y, name, color, ts }
   };
 
-  // BroadcastChannel for Realtime Multi-Tab Sync & Live Presence
-  let broadcastChannel = null;
-  try {
-    broadcastChannel = new BroadcastChannel('listingflow_realtime');
-    broadcastChannel.onmessage = handleBroadcastMessage;
-  } catch(e) {
-    console.warn('BroadcastChannel not supported in this environment', e);
+  // -------------------------------------------------------------------
+  // 2. SHARED SERVER PERSISTENCE LAYER
+  // All team data lives on the ListingFlow server (data/db.json) so every
+  // machine sees the same board. Writes are batched; other people's changes
+  // arrive live over /api/events.
+  // -------------------------------------------------------------------
+  const CLIENT_ID = 'tab_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const LEGACY_DB_NAME = 'ListingFlowDB_v1';
+  const LEGACY_STORES = ['cards', 'comments', 'activity', 'boards', 'shapes', 'settings', 'uploaded_images'];
+  const MIGRATION_FLAG = 'listingflow_migrated_to_server_v1';
+  let dbInstance = null; // truthy once the server snapshot is loaded
+  let serverSnapshot = {};
+  let liveEvents = null;
+  let liveEventsHadError = false;
+
+  async function fetchServerSnapshot() {
+    const res = await fetch('/api/store', { cache: 'no-cache' });
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    serverSnapshot = (await res.json()).stores || {};
   }
 
-  // -------------------------------------------------------------------
-  // 2. INDEXEDDB PERSISTENCE LAYER
-  // -------------------------------------------------------------------
-  const DB_NAME = 'ListingFlowDB_v1';
-  const DB_VERSION = 2;
-  let dbInstance = null;
+  async function initDatabase() {
+    try {
+      await fetchServerSnapshot();
+      dbInstance = 'server';
+      try {
+        await migrateBrowserDataIfNeeded();
+      } catch (migrationErr) {
+        console.warn('Moving browser data to the server failed; will retry on next load', migrationErr);
+      }
+      await loadAllDataFromDB();
+      connectLiveEvents();
+    } catch (err) {
+      console.error('Could not load data from the ListingFlow server', err);
+      showToast('Cannot reach the ListingFlow server. Start it with "npm start"; changes are not being saved.', 'warning');
+    }
+  }
 
-  function initDatabase() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-      request.onupgradeneeded = (e) => {
+  function storeKeyOf(item) {
+    if (!item) return null;
+    if (item.id !== undefined) return item.id;
+    if (item.key !== undefined) return item.key;
+    if (item.name !== undefined) return item.name;
+    return null;
+  }
+
+  // One-time move of data that older versions kept inside this browser.
+  // Only items the server does not have yet are added; the browser copy is
+  // left in place as a backup.
+  function readLegacyBrowserDb() {
+    return new Promise((resolve) => {
+      if (!window.indexedDB) return resolve(null);
+      let request;
+      try { request = indexedDB.open(LEGACY_DB_NAME); } catch (e) { return resolve(null); }
+      request.onupgradeneeded = (e) => { e.target.transaction.abort(); };
+      request.onerror = () => resolve(null);
+      request.onsuccess = async (e) => {
         const db = e.target.result;
-        if (!db.objectStoreNames.contains('cards')) db.createObjectStore('cards', { keyPath: 'id' });
-        if (!db.objectStoreNames.contains('comments')) db.createObjectStore('comments', { keyPath: 'id' });
-        if (!db.objectStoreNames.contains('activity')) db.createObjectStore('activity', { keyPath: 'id' });
-        if (!db.objectStoreNames.contains('boards')) db.createObjectStore('boards', { keyPath: 'id' });
-        if (!db.objectStoreNames.contains('shapes')) db.createObjectStore('shapes', { keyPath: 'id' });
-        if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
-        if (!db.objectStoreNames.contains('uploaded_images')) db.createObjectStore('uploaded_images', { keyPath: 'name' });
-      };
-      request.onsuccess = (e) => {
-        dbInstance = e.target.result;
-        loadAllDataFromDB().then(resolve);
-      };
-      request.onerror = (e) => {
-        console.warn('IndexedDB open error; falling back to memory state', e);
-        resolve();
+        const out = {};
+        for (const name of LEGACY_STORES) {
+          if (!db.objectStoreNames.contains(name)) continue;
+          out[name] = await new Promise((res) => {
+            const req = db.transaction(name, 'readonly').objectStore(name).getAll();
+            req.onsuccess = () => res(req.result || []);
+            req.onerror = () => res([]);
+          });
+        }
+        db.close();
+        resolve(out);
       };
     });
+  }
+
+  async function migrateBrowserDataIfNeeded() {
+    try {
+      if (localStorage.getItem(MIGRATION_FLAG)) return;
+    } catch (e) { return; }
+
+    const legacy = await readLegacyBrowserDb();
+    let added = 0;
+    if (legacy) {
+      for (const [storeName, items] of Object.entries(legacy)) {
+        const existing = new Set((serverSnapshot[storeName] || []).map(it => String(storeKeyOf(it))));
+        for (const item of items) {
+          const key = storeKeyOf(item);
+          if (key === null || existing.has(String(key))) continue;
+          if (storeName === 'uploaded_images' && item.blob instanceof Blob) {
+            try {
+              item.dataUrl = await uploadFileToServer(item.blob);
+            } catch (e) {
+              continue;
+            }
+            delete item.blob;
+          }
+          putToStore(storeName, item);
+          added++;
+        }
+      }
+    }
+
+    if (added > 0) {
+      await flushPendingOps();
+      await fetchServerSnapshot();
+      showToast(`Moved ${added} saved items from this browser to the shared server`, 'success');
+    }
+    try { localStorage.setItem(MIGRATION_FLAG, new Date().toISOString()); } catch (e) {}
   }
 
   async function loadAllDataFromDB() {
@@ -2681,73 +3051,265 @@
         }
       });
 
+      // Load Libraries
+      state.libraries.clear();
+      const libraryItems = await getAllFromStore('libraries');
+      libraryItems.forEach(item => state.libraries.set(item.id, item));
+
     } catch(err) {
       console.error('Error loading data from DB', err);
     }
   }
 
   function getAllFromStore(storeName) {
-    return new Promise((resolve) => {
-      if (!dbInstance) return resolve([]);
-      const tx = dbInstance.transaction(storeName, 'readonly');
-      const store = tx.objectStore(storeName);
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => resolve([]);
-    });
+    return Promise.resolve((serverSnapshot[storeName] || []).slice());
+  }
+
+  // Pending writes, keyed by store + key so rapid edits collapse into one.
+  const pendingOps = new Map();
+  let flushTimer = null;
+  let flushInFlight = null;
+  let flushFailures = 0;
+
+  function queueOp(op) {
+    if (!dbInstance) return;
+    pendingOps.set(op.store + '\u0000' + op.key, op);
+    if (!flushTimer) flushTimer = setTimeout(() => { flushTimer = null; flushPendingOps().catch(() => {}); }, 150);
   }
 
   function putToStore(storeName, item) {
-    if (!dbInstance) return;
-    try {
-      const tx = dbInstance.transaction(storeName, 'readwrite');
-      tx.objectStore(storeName).put(item);
-    } catch(e) {
-      console.warn('DB put error', e);
-    }
+    const key = storeKeyOf(item);
+    if (key === null) return;
+    // Clone now, like IndexedDB did, so later in-memory edits need their own put.
+    queueOp({ op: 'put', store: storeName, key: String(key), item: JSON.parse(JSON.stringify(item)) });
   }
 
   function deleteFromStore(storeName, key) {
-    if (!dbInstance) return;
-    try {
-      const tx = dbInstance.transaction(storeName, 'readwrite');
-      tx.objectStore(storeName).delete(key);
-    } catch(e) {
-      console.warn('DB delete error', e);
-    }
+    if (key === undefined || key === null) return;
+    queueOp({ op: 'delete', store: storeName, key: String(key) });
   }
 
-  function saveUploadedImageBlob(name, blob, dataUrl = null) {
-    if (!dbInstance || !name) return;
-    try {
-      putToStore('uploaded_images', {
-        name: name.toLowerCase(),
-        displayName: name,
-        blob: blob,
-        dataUrl: dataUrl,
-        size: blob ? blob.size : 0,
-        type: blob ? blob.type : '',
-        updatedAt: Date.now()
-      });
-    } catch(e) {
-      console.warn('saveUploadedImageBlob error:', e);
+  async function postOpsBatch(ops) {
+    const res = await fetch('/api/store/batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: CLIENT_ID, ops })
+    });
+    if (!res.ok) throw new Error('Save failed (' + res.status + ')');
+  }
+
+  async function flushPendingOps() {
+    if (flushInFlight) await flushInFlight.catch(() => {});
+    if (pendingOps.size === 0) return;
+    const ops = Array.from(pendingOps.values());
+    pendingOps.clear();
+
+    flushInFlight = (async () => {
+      // Send in chunks so a large migration does not become one huge request.
+      let chunk = [];
+      let chunkSize = 0;
+      const sent = [];
+      try {
+        for (const op of ops) {
+          const size = JSON.stringify(op).length;
+          if (chunk.length && chunkSize + size > 8 * 1024 * 1024) {
+            await postOpsBatch(chunk);
+            sent.push(...chunk);
+            chunk = []; chunkSize = 0;
+          }
+          chunk.push(op); chunkSize += size;
+        }
+        if (chunk.length) { await postOpsBatch(chunk); sent.push(...chunk); }
+        if (flushFailures > 0) showToast('Reconnected: all changes saved to the server', 'success');
+        flushFailures = 0;
+      } catch (err) {
+        // Put unsent ops back unless a newer edit for the same item was queued meanwhile.
+        const sentSet = new Set(sent);
+        ops.filter(op => !sentSet.has(op)).forEach(op => {
+          const k = op.store + '\u0000' + op.key;
+          if (!pendingOps.has(k)) pendingOps.set(k, op);
+        });
+        flushFailures++;
+        if (flushFailures === 1) showToast('Could not save to the server. Retrying...', 'warning');
+        const delay = Math.min(30000, 1000 * Math.pow(2, flushFailures));
+        if (!flushTimer) flushTimer = setTimeout(() => { flushTimer = null; flushPendingOps().catch(() => {}); }, delay);
+        throw err;
+      }
+    })();
+
+    try { await flushInFlight; } finally { flushInFlight = null; }
+  }
+
+  window.addEventListener('beforeunload', (e) => {
+    if (pendingOps.size === 0) return;
+    const body = JSON.stringify({ clientId: CLIENT_ID, ops: Array.from(pendingOps.values()) });
+    const sent = navigator.sendBeacon && navigator.sendBeacon('/api/store/batch', new Blob([body], { type: 'application/json' }));
+    if (!sent) {
+      e.preventDefault();
+      e.returnValue = '';
     }
+  });
+
+  async function uploadFileToServer(blob) {
+    const res = await fetch('/api/files', {
+      method: 'POST',
+      headers: { 'Content-Type': blob.type || 'application/octet-stream' },
+      body: blob
+    });
+    if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
+    return (await res.json()).url;
+  }
+
+  async function saveUploadedImageBlob(name, blob, dataUrl = null) {
+    if (!dbInstance || !name) return;
+    let url = dataUrl;
+    if (blob && !(url && url.startsWith('/api/files/'))) {
+      try { url = await uploadFileToServer(blob); } catch (e) { console.warn('Image upload failed:', e); }
+    }
+    putToStore('uploaded_images', {
+      name: name.toLowerCase(),
+      displayName: name,
+      dataUrl: url,
+      size: blob ? blob.size : 0,
+      type: blob ? blob.type : '',
+      updatedAt: Date.now()
+    });
   }
 
   function deleteUploadedImageBlob(name) {
     if (!dbInstance || !name) return;
-    try {
-      deleteFromStore('uploaded_images', name.toLowerCase());
-    } catch(e) {}
+    deleteFromStore('uploaded_images', name.toLowerCase());
   }
 
-  // Realtime Broadcast Dispatcher
+  // Data changes reach other people through the server's store events, so
+  // only presence messages (cursors) are relayed here.
+  let lastCursorSentAt = 0;
   function broadcastChange(action, payload) {
-    if (broadcastChannel) {
-      try {
-        broadcastChannel.postMessage({ action, payload, senderId: state.currentUser.id });
-      } catch(e) {}
+    if (action !== 'cursor') return;
+    const now = Date.now();
+    if (now - lastCursorSentAt < 80) return;
+    lastCursorSentAt = now;
+    fetch('/api/broadcast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: CLIENT_ID, action, payload })
+    }).catch(() => {});
+  }
+
+  function connectLiveEvents() {
+    if (!window.EventSource) return;
+    liveEvents = new EventSource('/api/events?clientId=' + encodeURIComponent(CLIENT_ID));
+    liveEvents.onmessage = (event) => {
+      let msg;
+      try { msg = JSON.parse(event.data); } catch (e) { return; }
+      if (!msg || msg.clientId === CLIENT_ID) return;
+      if (msg.type === 'store') {
+        msg.ops.forEach(applyRemoteOp);
+      } else if (msg.type === 'broadcast') {
+        handleBroadcastMessage({ data: { action: msg.action, payload: msg.payload, senderId: null } });
+      }
+    };
+    liveEvents.onerror = () => { liveEventsHadError = true; };
+    liveEvents.onopen = () => {
+      // Changes made while disconnected were missed; reload everything once.
+      if (liveEventsHadError) {
+        liveEventsHadError = false;
+        reloadFromServer();
+      }
+    };
+  }
+
+  async function reloadFromServer() {
+    try {
+      await flushPendingOps();
+      await fetchServerSnapshot();
+    } catch (e) { return; }
+    state.cards.clear();
+    state.comments.clear();
+    state.activity.clear();
+    state.boards.clear();
+    state.shapes.clear();
+    await loadAllDataFromDB();
+    scheduleRemoteRender(new Set(['cards', 'comments', 'activity', 'shapes', 'settings', 'libraries']));
+  }
+
+  function upsertById(map, groupKey, item) {
+    if (!map.has(groupKey)) map.set(groupKey, []);
+    const list = map.get(groupKey);
+    const idx = list.findIndex(x => x.id === item.id);
+    if (idx >= 0) list[idx] = item; else list.push(item);
+  }
+
+  function removeById(map, id) {
+    for (const list of map.values()) {
+      const idx = list.findIndex(x => x.id === id);
+      if (idx >= 0) { list.splice(idx, 1); return; }
     }
+  }
+
+  const remoteTouched = new Set();
+  let remoteRenderTimer = null;
+
+  function applyRemoteOp(op) {
+    const isPut = op.op === 'put';
+    const item = op.item;
+    switch (op.store) {
+      case 'cards':
+        if (isPut) state.cards.set(op.key, item); else state.cards.delete(op.key);
+        break;
+      case 'comments':
+        if (isPut) upsertById(state.comments, item.cardId, item); else removeById(state.comments, op.key);
+        break;
+      case 'activity':
+        if (isPut) upsertById(state.activity, item.cardId, item); else removeById(state.activity, op.key);
+        break;
+      case 'shapes':
+        if (isPut) state.shapes.set(op.key, item); else state.shapes.delete(op.key);
+        break;
+      case 'boards':
+        if (isPut) state.boards.set(op.key, item); else state.boards.delete(op.key);
+        break;
+      case 'settings':
+        if (isPut && op.key === 'team' && item.value) state.settings = item.value;
+        break;
+      case 'uploaded_images':
+        if (isPut && item.dataUrl) {
+          sessionCache.localFiles.set(op.key, { objectUrl: item.dataUrl, dataUrl: item.dataUrl, name: item.displayName || op.key });
+        } else if (!isPut) {
+          sessionCache.localFiles.delete(op.key);
+        }
+        break;
+      case 'libraries':
+        applyRemoteLibraryOp(op);
+        break;
+    }
+    remoteTouched.add(op.store);
+    if (op.store === 'cards' && op.key === state.activeCardId) remoteTouched.add('activeCard');
+    scheduleRemoteRender();
+  }
+
+  function scheduleRemoteRender(extra) {
+    if (extra) extra.forEach(s => remoteTouched.add(s));
+    if (remoteRenderTimer) return;
+    remoteRenderTimer = setTimeout(() => {
+      remoteRenderTimer = null;
+      const touched = new Set(remoteTouched);
+      remoteTouched.clear();
+      if (touched.has('cards') || touched.has('activity')) {
+        renderKanbanBoard();
+        if (state.currentView === 'archive') updateArchiveStats();
+      }
+      if (state.activeCardId) {
+        const card = state.cards.get(state.activeCardId);
+        if (!card) closeCardDrawer();
+        else if (touched.has('activeCard')) populateCardDrawer(card);
+        if (card && touched.has('comments')) renderCardComments(card.id);
+        if (card && touched.has('activity')) renderCardActivity(card.id);
+      }
+      if (touched.has('shapes')) requestWhiteboardRender();
+      if (touched.has('settings')) updateUserSwitcherUI();
+      if (touched.has('libraries')) renderLibrariesView();
+    }, 120);
   }
 
   function handleBroadcastMessage(event) {
@@ -3449,12 +4011,17 @@
       const lowerName = file.name.toLowerCase();
       const objectUrl = URL.createObjectURL(file);
 
-      // Read as DataURL for permanent persistence and immediate rendering
+      // Store the image on the shared server so every team member can see it
       let dataUrl = null;
       try {
-        dataUrl = await readFileAsDataURL(file);
-      } catch (err) {
-        dataUrl = objectUrl;
+        dataUrl = await uploadFileToServer(file);
+      } catch (uploadErr) {
+        console.warn('Image upload to server failed, embedding instead:', uploadErr);
+        try {
+          dataUrl = await readFileAsDataURL(file);
+        } catch (err) {
+          dataUrl = objectUrl;
+        }
       }
 
       // Add to session cache
@@ -3487,7 +4054,7 @@
         if (!exists) {
           card.rawFiles.push({
             name: file.name,
-            url: objectUrl,
+            url: (dataUrl && dataUrl.startsWith("/api/files/")) ? dataUrl : objectUrl,
             dataUrl: dataUrl,
             size: file.size,
             type: file.type
@@ -3504,7 +4071,7 @@
           card.outputs.push({
             file: file.name,
             name: file.name,
-            url: objectUrl,
+            url: (dataUrl && dataUrl.startsWith("/api/files/")) ? dataUrl : objectUrl,
             dataUrl: dataUrl,
             status: 'pending',
             round: card.round || 1,
@@ -4721,6 +5288,8 @@
         setTimeout(resizeWhiteboardCanvas, 20);
       } else if (view === 'archive') {
         updateArchiveStats();
+      } else if (view === 'libraries') {
+        renderLibrariesView();
       }
     });
   });
@@ -4859,6 +5428,16 @@
   function normalizeProductName(name) {
     if (!name) return '';
     return name.trim().replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  // Stable 32-bit FNV-1a hash, used to derive card ids from product names.
+  function hashString(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
   }
 
   function getCardIdForProduct(name) {
@@ -5727,6 +6306,483 @@
     });
   }
 
+
+  // -------------------------------------------------------------------
+  // LIBRARIES: reusable models, poses, backgrounds, props, products and
+  // note presets. Each item is stored in the shared 'libraries' store.
+  // -------------------------------------------------------------------
+  const POSE_GROUPS = [
+    'Front waist-up',
+    '3/4 waist-up',
+    '90° side profile waist-up',
+    'USP close-up (neck to waist/chest)',
+    'Full body',
+    'Other'
+  ];
+
+  const LIBRARY_TYPES = {
+    model: {
+      label: 'Models', singular: 'model', codePrefix: 'M', hasImages: true,
+      desc: 'Your AI models. The identity lock text is pasted unchanged into every prompt so the face and body stay consistent.',
+      fields: [
+        { key: 'name', label: 'Name', required: true, placeholder: 'e.g. Zayan' },
+        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. M01' },
+        { key: 'snippet', label: 'Identity lock (used in prompts)', type: 'textarea', rows: 4,
+          hint: 'Face, age range, build, height, skin tone, hair. Write it once and keep it identical across jobs.' },
+        { key: 'notes', label: 'Internal notes', type: 'textarea', rows: 2 }
+      ]
+    },
+    pose: {
+      label: 'Poses', singular: 'pose variation', codePrefix: 'P', hasImages: true, groupBy: 'poseGroup',
+      desc: 'Each pose with its body and hand variations. Add a reference image and the exact wording that produces it.',
+      fields: [
+        { key: 'poseGroup', label: 'Pose', type: 'select', options: POSE_GROUPS, required: true },
+        { key: 'name', label: 'Variation name', required: true, placeholder: 'e.g. Hands in pockets, weight on left leg' },
+        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. P01' },
+        { key: 'snippet', label: 'Prompt snippet', type: 'textarea', rows: 4,
+          hint: 'Framing, camera angle, body and hand position. Avoid describing the garment here.' }
+      ]
+    },
+    background: {
+      label: 'Backgrounds', singular: 'background', codePrefix: 'BG', hasImages: true,
+      desc: 'Soft grey studio and your custom backdrops, with the lighting wording that goes with them.',
+      fields: [
+        { key: 'name', label: 'Name', required: true, placeholder: 'e.g. Soft grey studio' },
+        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. BG01' },
+        { key: 'snippet', label: 'Prompt snippet', type: 'textarea', rows: 4, hint: 'Backdrop, floor, lighting setup, shadows.' }
+      ]
+    },
+    prop: {
+      label: 'Props', singular: 'prop', codePrefix: 'PR', hasImages: true,
+      desc: 'Sunglasses and other extras, with where and how they appear.',
+      fields: [
+        { key: 'name', label: 'Name', required: true, placeholder: 'e.g. Black aviator sunglasses' },
+        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. PR01' },
+        { key: 'placement', label: 'Placement', placeholder: 'e.g. Worn on face / held in left hand / hooked on collar' },
+        { key: 'snippet', label: 'Prompt snippet', type: 'textarea', rows: 3 }
+      ]
+    },
+    product: {
+      label: 'Products', singular: 'product', codePrefix: '', hasImages: true, groupBy: 'category',
+      desc: 'Products you reuse as pairings. The garment lock describes fit, fabric and details so they render the same every time.',
+      fields: [
+        { key: 'name', label: 'Product name', required: true },
+        { key: 'code', label: 'SKU' },
+        { key: 'category', label: 'Category', type: 'select', options: ['Top', 'Bottom', 'Outerwear', 'Other'], required: true },
+        { key: 'url', label: 'Product link', placeholder: 'https://' },
+        { key: 'snippet', label: 'Garment lock (used in prompts)', type: 'textarea', rows: 4,
+          hint: 'Fit, length, fabric, colour, buttons/pockets/prints. Only what you can see in the photos.' },
+        { key: 'notes', label: 'Internal notes', type: 'textarea', rows: 2 }
+      ]
+    },
+    preset: {
+      label: 'Note presets', singular: 'note preset', codePrefix: 'N', hasImages: false,
+      desc: 'Instructions that come up again and again in the tracker notes, written once.',
+      fields: [
+        { key: 'name', label: 'Short name', required: true, placeholder: 'e.g. Zara lighting & backdrop' },
+        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. N01' },
+        { key: 'snippet', label: 'Instruction text', type: 'textarea', rows: 5 }
+      ]
+    }
+  };
+
+  const libUI = {
+    activeType: 'model',
+    search: '',
+    editing: null // working copy of the item open in the editor
+  };
+
+  const libSidebar = document.getElementById('lib-sidebar');
+  const libSidebarFooter = libSidebar.querySelector('.lib-sidebar-footer');
+  const libTitle = document.getElementById('lib-title');
+  const libDesc = document.getElementById('lib-desc');
+  const libBody = document.getElementById('lib-body');
+  const libSearchInput = document.getElementById('lib-search');
+  const libAddBtn = document.getElementById('lib-add-btn');
+  const libSeedBtn = document.getElementById('lib-seed-btn');
+  const libEditorModal = document.getElementById('lib-editor-modal');
+  const libEditorTitle = document.getElementById('lib-editor-title');
+  const libEditorForm = document.getElementById('lib-editor-form');
+  const libEditorImagesSection = document.getElementById('lib-editor-images-section');
+  const libEditorImages = document.getElementById('lib-editor-images');
+  const libEditorDropzone = document.getElementById('lib-editor-dropzone');
+  const libEditorFileInput = document.getElementById('lib-editor-file-input');
+  const libEditorDelete = document.getElementById('lib-editor-delete');
+
+  function libItemsOfType(type) {
+    return Array.from(state.libraries.values()).filter(it => it.type === type);
+  }
+
+  function nextLibraryCode(type) {
+    const prefix = LIBRARY_TYPES[type].codePrefix;
+    if (!prefix) return '';
+    const re = new RegExp('^' + prefix + '(\\d+)$', 'i');
+    let max = 0;
+    libItemsOfType(type).forEach(it => {
+      const m = re.exec(it.code || '');
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    return prefix + String(max + 1).padStart(2, '0');
+  }
+
+  function newLibraryId() {
+    return 'lib_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function saveLibraryItem(item) {
+    item.updatedAt = new Date().toISOString();
+    state.libraries.set(item.id, item);
+    putToStore('libraries', item);
+  }
+
+  function applyRemoteLibraryOp(op) {
+    if (op.op === 'put') state.libraries.set(op.key, op.item);
+    else state.libraries.delete(op.key);
+  }
+
+  function normalizeUrl(u) {
+    return String(u || '').trim().split(/[?#]/)[0].replace(/\/+$/, '').toLowerCase();
+  }
+
+  // The same product is often linked through different paths
+  // (/products/x, /collections/y/products/x), so match on host + final slug.
+  function productKeyFromUrl(u) {
+    const n = normalizeUrl(u);
+    if (!n) return '';
+    const parts = n.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/').filter(Boolean);
+    const slug = (parts[parts.length - 1] || '').replace(/\.html?$/, '');
+    return parts[0] + '/' + slug;
+  }
+
+  function cardMentionsProduct(card, product) {
+    const target = productKeyFromUrl(product.url);
+    if (!target || !card.pairedWith) return false;
+    return String(card.pairedWith).split(/[\s,]+/).some(u => productKeyFromUrl(u) === target);
+  }
+
+  // How many tracker jobs reference this item (models by character name, products by link).
+  function libUsageCount(item) {
+    let n = 0;
+    state.cards.forEach(card => {
+      if (item.type === 'model' && card.character && card.character.trim().toLowerCase() === (item.name || '').trim().toLowerCase()) n++;
+      else if (item.type === 'product' && cardMentionsProduct(card, item)) n++;
+    });
+    return n;
+  }
+
+  function renderLibrariesView() {
+    if (!libBody) return;
+    const def = LIBRARY_TYPES[libUI.activeType];
+
+    // Sidebar type list
+    libSidebar.querySelectorAll('.lib-type-btn').forEach(b => b.remove());
+    Object.entries(LIBRARY_TYPES).forEach(([type, t]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'lib-type-btn' + (type === libUI.activeType ? ' active' : '');
+      btn.innerHTML = `<span>${escapeHtml(t.label)}</span><span class="lib-type-count">${libItemsOfType(type).length}</span>`;
+      btn.addEventListener('click', () => {
+        libUI.activeType = type;
+        libUI.search = '';
+        libSearchInput.value = '';
+        renderLibrariesView();
+      });
+      libSidebar.insertBefore(btn, libSidebarFooter);
+    });
+
+    libTitle.textContent = def.label;
+    libDesc.textContent = def.desc;
+    libAddBtn.textContent = '+ Add ' + def.singular;
+
+    const q = libUI.search.trim().toLowerCase();
+    const items = libItemsOfType(libUI.activeType)
+      .filter(it => !q || [it.name, it.code, it.snippet, it.notes, it.poseGroup, it.category, it.url]
+        .some(v => v && String(v).toLowerCase().includes(q)))
+      .sort((a, b) => (a.code || a.name || '').localeCompare(b.code || b.name || '', undefined, { numeric: true }));
+
+    if (items.length === 0) {
+      libBody.innerHTML = q
+        ? `<div class="lib-empty"><strong>No matches</strong>Nothing in ${escapeHtml(def.label.toLowerCase())} matches "${escapeHtml(libUI.search)}".</div>`
+        : `<div class="lib-empty"><strong>No ${escapeHtml(def.label.toLowerCase())} yet</strong>Add your first ${escapeHtml(def.singular)}, or use "Fill from tracker" to start from what's already in the tracker.</div>`;
+      return;
+    }
+
+    libBody.innerHTML = '';
+    const groups = new Map();
+    if (def.groupBy) {
+      const order = (def.fields.find(f => f.key === def.groupBy) || {}).options || [];
+      order.forEach(g => groups.set(g, []));
+      items.forEach(it => {
+        const g = it[def.groupBy] || 'Other';
+        if (!groups.has(g)) groups.set(g, []);
+        groups.get(g).push(it);
+      });
+    } else {
+      groups.set('', items);
+    }
+
+    groups.forEach((groupItems, groupName) => {
+      if (groupItems.length === 0) return;
+      const section = document.createElement('div');
+      section.className = 'lib-group';
+      if (groupName) {
+        section.innerHTML = `<div class="lib-group-title">${escapeHtml(groupName)} <span>${groupItems.length}</span></div>`;
+      }
+      const grid = document.createElement('div');
+      grid.className = 'lib-grid';
+      groupItems.forEach(it => grid.appendChild(createLibraryItemElement(it)));
+      section.appendChild(grid);
+      libBody.appendChild(section);
+    });
+  }
+
+  function createLibraryItemElement(item) {
+    const def = LIBRARY_TYPES[item.type];
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'lib-item';
+    const images = item.images || [];
+    const initials = (item.name || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const usage = (item.type === 'model' || item.type === 'product') ? libUsageCount(item) : 0;
+    const metaParts = [];
+    if (item.type === 'prop' && item.placement) metaParts.push(escapeHtml(item.placement));
+    if (usage) metaParts.push(`Used in ${usage} job${usage > 1 ? 's' : ''}`);
+    if (!item.snippet) metaParts.push(`<span class="lib-item-missing">No prompt text yet</span>`);
+
+    el.innerHTML = `
+      ${def.hasImages ? `
+      <div class="lib-thumb${images.length ? "" : " lib-thumb-empty"}">
+        ${images.length
+          ? `<img src="${escapeHtml(images[0].url)}" alt="" loading="lazy" />${images.length > 1 ? `<span class="lib-thumb-count">${images.length}</span>` : ''}`
+          : `<span class="lib-thumb-initials">${escapeHtml(initials)}</span>`}
+      </div>` : ''}
+      <div class="lib-item-body">
+        <div class="lib-item-top">
+          ${item.code ? `<span class="lib-code">${escapeHtml(item.code)}</span>` : ''}
+          <span class="lib-item-name" title="${escapeHtml(item.name || '')}">${escapeHtml(item.name || 'Untitled')}</span>
+        </div>
+        ${item.snippet ? `<div class="lib-item-snippet">${escapeHtml(item.snippet)}</div>` : ''}
+        ${metaParts.length ? `<div class="lib-item-meta">${metaParts.join(' · ')}</div>` : ''}
+      </div>`;
+    el.addEventListener('click', () => openLibraryEditor(item));
+    return el;
+  }
+
+  function openLibraryEditor(item) {
+    const isNew = !item;
+    const type = isNew ? libUI.activeType : item.type;
+    const def = LIBRARY_TYPES[type];
+    libUI.editing = isNew
+      ? { id: newLibraryId(), type, images: [], createdAt: new Date().toISOString(), createdBy: state.currentUser.id, _isNew: true }
+      : JSON.parse(JSON.stringify(item));
+    if (!libUI.editing.images) libUI.editing.images = [];
+
+    libEditorTitle.textContent = (isNew ? 'New ' : 'Edit ') + def.singular;
+    libEditorDelete.style.display = isNew ? 'none' : '';
+    libEditorImagesSection.style.display = def.hasImages ? '' : 'none';
+
+    libEditorForm.innerHTML = '';
+    def.fields.forEach(f => {
+      const group = document.createElement('div');
+      group.className = 'form-group';
+      const id = 'lib-field-' + f.key;
+      const value = libUI.editing[f.key] || (f.key === 'poseGroup' && isNew ? POSE_GROUPS[0] : '') || '';
+      let control;
+      if (f.type === 'textarea') {
+        control = `<textarea class="form-textarea" id="${id}" name="${f.key}" rows="${f.rows || 3}" placeholder="${escapeHtml(f.placeholder || '')}">${escapeHtml(value)}</textarea>`;
+      } else if (f.type === 'select') {
+        control = `<select class="form-select" id="${id}" name="${f.key}">${f.options.map(o =>
+          `<option value="${escapeHtml(o)}"${o === value ? ' selected' : ''}>${escapeHtml(o)}</option>`).join('')}</select>`;
+      } else {
+        control = `<input class="form-input" id="${id}" name="${f.key}" value="${escapeHtml(value)}" placeholder="${escapeHtml(f.placeholder || '')}" />`;
+      }
+      group.innerHTML = `<label for="${id}">${escapeHtml(f.label)}${f.required ? ' *' : ''}</label>${control}${f.hint ? `<span class="lib-form-hint">${escapeHtml(f.hint)}</span>` : ''}`;
+      libEditorForm.appendChild(group);
+    });
+
+    renderLibraryEditorImages();
+    libEditorModal.classList.add('active');
+    const first = libEditorForm.querySelector('input, textarea, select');
+    if (first) setTimeout(() => first.focus(), 30);
+  }
+
+  function renderLibraryEditorImages() {
+    const images = libUI.editing ? libUI.editing.images : [];
+    libEditorImages.innerHTML = '';
+    images.forEach((img, idx) => {
+      const tile = document.createElement('div');
+      tile.className = 'lib-image-tile';
+      tile.innerHTML = `<img src="${escapeHtml(img.url)}" alt="${escapeHtml(img.name || '')}" /><button type="button" class="lib-image-remove" title="Remove image" aria-label="Remove image">✕</button>`;
+      tile.querySelector('img').addEventListener('click', () => openImageZoomModal(img.url, img.name || ''));
+      tile.querySelector('.lib-image-remove').addEventListener('click', () => {
+        libUI.editing.images.splice(idx, 1);
+        renderLibraryEditorImages();
+      });
+      libEditorImages.appendChild(tile);
+    });
+  }
+
+  async function addLibraryEditorImages(fileList) {
+    if (!libUI.editing) return;
+    const files = Array.from(fileList || []).filter(f => isImageFile(f.name));
+    if (files.length === 0) {
+      showToast('No valid images selected', 'warning');
+      return;
+    }
+    libEditorDropzone.textContent = `Uploading ${files.length} image${files.length > 1 ? 's' : ''}...`;
+    for (const file of files) {
+      try {
+        const url = await uploadFileToServer(file);
+        libUI.editing.images.push({ url, name: file.name });
+      } catch (e) {
+        showToast(`Could not upload ${file.name}`, 'error');
+      }
+    }
+    libEditorDropzone.textContent = 'Drop images here or click to add';
+    renderLibraryEditorImages();
+  }
+
+  function closeLibraryEditor() {
+    libEditorModal.classList.remove('active');
+    libUI.editing = null;
+  }
+
+  function saveLibraryEditor() {
+    const item = libUI.editing;
+    if (!item) return;
+    const def = LIBRARY_TYPES[item.type];
+    for (const f of def.fields) {
+      const el = libEditorForm.elements[f.key];
+      item[f.key] = el ? el.value.trim() : '';
+      if (f.required && !item[f.key]) {
+        showToast(`${f.label} is required`, 'warning');
+        if (el) el.focus();
+        return;
+      }
+    }
+    if (!item.code && def.codePrefix) item.code = nextLibraryCode(item.type);
+    const isNew = item._isNew;
+    delete item._isNew;
+    saveLibraryItem(item);
+    closeLibraryEditor();
+    renderLibrariesView();
+    showToast(`${isNew ? 'Added' : 'Saved'} ${def.singular} "${item.name}"`, 'success');
+  }
+
+  function deleteLibraryEditorItem() {
+    const item = libUI.editing;
+    if (!item) return;
+    const def = LIBRARY_TYPES[item.type];
+    if (!confirm(`Delete ${def.singular} "${item.name || 'Untitled'}"? This removes it for the whole team.`)) return;
+    state.libraries.delete(item.id);
+    deleteFromStore('libraries', item.id);
+    closeLibraryEditor();
+    renderLibrariesView();
+    showToast(`Deleted ${def.singular} "${item.name || 'Untitled'}"`, 'info');
+  }
+
+  function guessProductCategory(text) {
+    const s = text.toLowerCase();
+    if (/\b(jacket|coat|blazer|overshirt|gilet)s?\b/.test(s)) return 'Outerwear';
+    if (/\b(pants?|trousers?|shorts|jeans?|joggers?|cargos?|chinos?|bottoms?|skirts?|bermudas?)\b/.test(s)) return 'Bottom';
+    if (/\b(shirt|tee|t-shirt|tshirt|top|polo|henley|sweater|sweatshirt|hoodie|cardigan|vest|tank|knit)s?\b/.test(s)) return 'Top';
+    if (/\bdenim\b/.test(s)) return 'Bottom';
+    return 'Other';
+  }
+
+  function productNameFromUrl(u) {
+    // ASOS-style links end in a numeric id (/brand/name-slug/prd/210083227);
+    // use the last descriptive path segment for the name instead.
+    const segments = normalizeUrl(u).replace(/^https?:\/\//, '').split('/').slice(1).filter(Boolean);
+    const descriptive = segments.filter(seg => !/^(prd|p|products?|collections?|\d+)$/.test(seg));
+    const slug = (descriptive[descriptive.length - 1] || productKeyFromUrl(u).split('/').pop() || u).replace(/\.html?$/, '');
+    return slug
+      .replace(/[-_]+p?\d{6,}$/i, '')   // trailing store product ids, e.g. -p06045420
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+p?\d{6,}$/i, '')
+      .trim()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function normalizeNoteText(t) {
+    return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  // Seed libraries from what the tracker already contains: model names from
+  // "Character", paired products from "Paired With", and repeated "Note" text.
+  function fillLibrariesFromTracker() {
+    const cards = Array.from(state.cards.values());
+    const knownModels = new Set(libItemsOfType('model').map(m => (m.name || '').trim().toLowerCase()));
+    const knownProducts = new Set(libItemsOfType('product').map(p => productKeyFromUrl(p.url)).filter(Boolean));
+    const knownPresets = new Set(libItemsOfType('preset').map(p => normalizeNoteText(p.snippet)));
+
+    const modelCounts = new Map();
+    const productUrls = new Map();
+    const noteCounts = new Map(); // normalized text -> { text, count }
+    cards.forEach(card => {
+      const name = (card.character || '').trim();
+      if (name) modelCounts.set(name, (modelCounts.get(name) || 0) + 1);
+      String(card.pairedWith || '').split(/[\s,]+/).forEach(u => {
+        const key = productKeyFromUrl(u);
+        if (/^https?:\/\//i.test(u) && key && !productUrls.has(key)) productUrls.set(key, u.split(/[?#]/)[0]);
+      });
+      const note = (card.notes || '').trim();
+      const noteKey = normalizeNoteText(note);
+      if (noteKey) {
+        const entry = noteCounts.get(noteKey) || { text: note, count: 0 };
+        entry.count++;
+        noteCounts.set(noteKey, entry);
+      }
+    });
+
+    const newModels = Array.from(modelCounts.keys()).filter(n => !knownModels.has(n.toLowerCase()));
+    const newProducts = Array.from(productUrls.entries()).filter(([key]) => !knownProducts.has(key));
+    const newPresets = Array.from(noteCounts.entries())
+      .filter(([key, e]) => e.count >= 2 && !knownPresets.has(key))
+      .map(([, e]) => [e.text, e.count]);
+
+    const total = newModels.length + newProducts.length + newPresets.length;
+    if (total === 0) {
+      showToast('Nothing new to add: the libraries already cover what is in the tracker', 'info');
+      return;
+    }
+    if (!confirm(`Add from the tracker:\n\n• ${newModels.length} models (from Character)\n• ${newProducts.length} products (from Paired With links)\n• ${newPresets.length} note presets (notes used 2+ times)\n\nYou can edit or delete any of them afterwards.`)) return;
+
+    const now = new Date().toISOString();
+    const base = () => ({ id: newLibraryId(), createdAt: now, createdBy: state.currentUser.id, images: [] });
+    newModels.forEach(name => {
+      saveLibraryItem({ ...base(), type: 'model', name, code: nextLibraryCode('model'), snippet: '', notes: 'Added from tracker' });
+    });
+    newProducts.forEach(([, url]) => {
+      const name = productNameFromUrl(url);
+      saveLibraryItem({ ...base(), type: 'product', name, code: '', category: guessProductCategory(name), url, snippet: '', notes: 'Added from tracker' });
+    });
+    newPresets.forEach(([note]) => {
+      const shortName = note.split(/\s+/).slice(0, 6).join(' ') + (note.split(/\s+/).length > 6 ? '…' : '');
+      saveLibraryItem({ ...base(), type: 'preset', name: shortName, code: nextLibraryCode('preset'), snippet: note });
+    });
+
+    renderLibrariesView();
+    showToast(`Added ${newModels.length} models, ${newProducts.length} products and ${newPresets.length} note presets`, 'success');
+  }
+
+  libSearchInput.addEventListener('input', (e) => {
+    libUI.search = e.target.value;
+    renderLibrariesView();
+  });
+  libAddBtn.addEventListener('click', () => openLibraryEditor(null));
+  libSeedBtn.addEventListener('click', fillLibrariesFromTracker);
+  document.getElementById('lib-editor-close').addEventListener('click', closeLibraryEditor);
+  document.getElementById('lib-editor-cancel').addEventListener('click', closeLibraryEditor);
+  document.getElementById('lib-editor-save').addEventListener('click', saveLibraryEditor);
+  libEditorDelete.addEventListener('click', deleteLibraryEditorItem);
+  libEditorForm.addEventListener('submit', (e) => { e.preventDefault(); saveLibraryEditor(); });
+  libEditorDropzone.addEventListener('click', () => libEditorFileInput.click());
+  libEditorFileInput.addEventListener('change', (e) => {
+    addLibraryEditorImages(e.target.files);
+    e.target.value = '';
+  });
+  setupDropzoneListeners(libEditorDropzone, addLibraryEditorImages);
 
   initDatabase().then(() => {
     // Populate Assignees filter
