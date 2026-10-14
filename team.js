@@ -8,7 +8,8 @@ const store = require('./store');
 
 const ROLES = ['creator', 'reviewer', 'admin'];
 const DEMO_MEMBER_IDS = ['user_alex', 'user_taylor', 'user_jordan'];
-const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9', '#ec4899', '#14b8a6', '#f97316', '#64748b'];
+// Muted, print-like avatar colours that read on light and dark backgrounds.
+const COLORS = ['#3f5a4a', '#8a4b2e', '#4a5578', '#7a6a3a', '#6b4060', '#2f6670', '#7d3b3b', '#5a5a52', '#46607e', '#6e5a3e'];
 const MAX_NAME_LENGTH = 40;
 
 class TeamError extends Error {

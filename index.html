@@ -6,89 +6,93 @@
   <title>ListingFlow - AI Clothing Listing Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     /* =====================================================================
        CSS VARIABLES & THEMES
        ===================================================================== */
     :root {
-      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+      --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
       --font-hand: 'Caveat', cursive, sans-serif;
 
-      /* Light Theme (Default) */
-      --bg-base: #f8fafc;
+      /* Light theme: paper, ink and one accent */
+      --bg-base: #f3f2ee;
       --bg-surface: #ffffff;
       --bg-surface-elevated: #ffffff;
-      --bg-subtle: #f1f5f9;
-      --bg-muted: #e2e8f0;
-      --border-subtle: #e2e8f0;
-      --border-strong: #cbd5e1;
-      
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --text-subtle: #94a3b8;
-      
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --primary-light: #eef2ff;
+      --bg-subtle: #f7f6f2;
+      --bg-muted: #e8e6df;
+      --border-subtle: #e2dfd7;
+      --border-strong: #c9c5bb;
+
+      --text-main: #1b1a17;
+      --text-muted: #5f5b53;
+      --text-subtle: #8f8a7f;
+
+      --primary: #1b1a17;
+      --primary-hover: #3a3833;
+      --primary-light: #ebe9e3;
       --primary-text: #ffffff;
 
-      --accent: #0ea5e9;
-      --success: #10b981;
-      --success-light: #ecfdf5;
-      --warning: #f59e0b;
-      --warning-light: #fffbeb;
-      --danger: #ef4444;
-      --danger-light: #fef2f2;
-      --purple: #8b5cf6;
-      --purple-light: #f5f3ff;
+      --accent: #c2410c;
+      --accent-light: #fbeee6;
+      --success: #2f6f47;
+      --success-light: #e6f0e8;
+      --warning: #9a5b0b;
+      --warning-light: #f7eedc;
+      --danger: #b42318;
+      --danger-light: #f8e7e4;
+      --purple: #5b4b8a;
+      --purple-light: #eceaf3;
 
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      /* Flat by default; only overlays (drawer, modals, toasts) lift off the page */
+      --shadow-sm: none;
+      --shadow-md: none;
+      --shadow-lg: 0 6px 18px rgba(20, 19, 16, 0.10);
+      --shadow-xl: 0 14px 36px rgba(20, 19, 16, 0.16);
 
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
-      --radius-full: 9999px;
+      --radius-sm: 2px;
+      --radius-md: 2px;
+      --radius-lg: 2px;
+      --radius-full: 2px;
 
-      --topbar-height: 58px;
+      --topbar-height: 52px;
     }
 
     [data-theme="dark"] {
-      --bg-base: #0b0f19;
-      --bg-surface: #111827;
-      --bg-surface-elevated: #1f2937;
-      --bg-subtle: #1a2234;
-      --bg-muted: #2d3748;
-      --border-subtle: #1f2937;
-      --border-strong: #374151;
-      
-      --text-main: #f9fafb;
-      --text-muted: #9ca3af;
-      --text-subtle: #6b7280;
-      
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
-      --primary-light: #1e1b4b;
-      --primary-text: #ffffff;
+      --bg-base: #121210;
+      --bg-surface: #1a1917;
+      --bg-surface-elevated: #22211e;
+      --bg-subtle: #1f1e1b;
+      --bg-muted: #2c2a26;
+      --border-subtle: #2c2a26;
+      --border-strong: #45423b;
 
-      --accent: #38bdf8;
-      --success: #10b981;
-      --success-light: #064e3b;
-      --warning: #f59e0b;
-      --warning-light: #78350f;
-      --danger: #f87171;
-      --danger-light: #7f1d1d;
-      --purple: #a78bfa;
-      --purple-light: #3b0764;
+      --text-main: #ecebe6;
+      --text-muted: #a8a49a;
+      --text-subtle: #7a766c;
 
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
-      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+      --primary: #ecebe6;
+      --primary-hover: #ffffff;
+      --primary-light: #2c2a26;
+      --primary-text: #141412;
+
+      --accent: #f07a3c;
+      --accent-light: #3a2418;
+      --success: #6fbf8a;
+      --success-light: #1f3226;
+      --warning: #e0a548;
+      --warning-light: #3a2e18;
+      --danger: #f0776b;
+      --danger-light: #3d1f1b;
+      --purple: #a99be0;
+      --purple-light: #2a2638;
+
+      --shadow-sm: none;
+      --shadow-md: none;
+      --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.45);
+      --shadow-xl: 0 14px 36px rgba(0, 0, 0, 0.55);
     }
 
     /* Reset & Base */
@@ -137,55 +141,54 @@
     .topbar-left {
       display: flex;
       align-items: center;
-      gap: 16px;
+      align-self: stretch;
+      gap: 0;
     }
 
     .logo-badge {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      font-size: 1.15rem;
-      letter-spacing: -0.02em;
+      gap: 9px;
+      font-weight: 600;
+      font-size: 1rem;
       color: var(--text-main);
+      padding-right: 18px;
     }
 
     .logo-icon {
-      width: 30px;
-      height: 30px;
-      background: linear-gradient(135deg, var(--primary), #818cf8);
-      border-radius: var(--radius-sm);
+      width: 26px;
+      height: 26px;
+      background: var(--text-main);
+      color: var(--bg-surface);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-weight: 800;
-      font-size: 0.95rem;
-      box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.76rem;
     }
 
     .nav-tabs {
       display: flex;
-      background: var(--bg-subtle);
-      padding: 3px;
-      border-radius: var(--radius-md);
-      gap: 2px;
-      border: 1px solid var(--border-subtle);
+      align-self: stretch;
+      border-left: 1px solid var(--border-subtle);
+      padding-left: 6px;
     }
 
     .nav-tab {
-      padding: 6px 14px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: calc(var(--radius-md) - 2px);
+      padding: 0 12px;
+      font-size: 0.84rem;
+      font-weight: 500;
       cursor: pointer;
       color: var(--text-muted);
       border: none;
+      border-bottom: 2px solid transparent;
+      border-top: 2px solid transparent;
       background: transparent;
-      transition: all 0.15s ease;
+      font-family: inherit;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
     }
 
     .nav-tab:hover {
@@ -193,9 +196,9 @@
     }
 
     .nav-tab.active {
-      background: var(--bg-surface);
-      color: var(--primary);
-      box-shadow: var(--shadow-sm);
+      color: var(--text-main);
+      font-weight: 600;
+      border-bottom-color: var(--accent);
     }
 
     .topbar-center {
@@ -273,33 +276,30 @@
     }
     .sync-chip.synced .sync-dot {
       background: var(--success);
-      box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
     }
     .sync-chip.syncing .sync-dot {
       background: var(--primary);
       animation: pulseSyncDot 1s infinite;
     }
     .sync-chip.failed {
-      border-color: rgba(239, 68, 68, 0.3);
+      border-color: var(--danger);
       background: var(--danger-light);
       color: var(--danger);
     }
     .sync-chip.failed .sync-dot {
       background: var(--danger);
-      box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
     }
     @keyframes pulseSyncDot {
-      0% { transform: scale(0.9); opacity: 0.6; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(0.9); opacity: 0.6; }
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 1; }
     }
 
     /* Sheet Badges */
     .card-sheet-badge {
       font-size: 0.65rem;
-      font-weight: 700;
-      background: #e0f2fe;
-      color: #0369a1;
+      font-weight: 500;
+      background: var(--bg-muted);
+      color: var(--text-muted);
       padding: 2px 6px;
       border-radius: var(--radius-sm);
       display: inline-flex;
@@ -307,8 +307,8 @@
       gap: 3px;
     }
     [data-theme="dark"] .card-sheet-badge {
-      background: #082f49;
-      color: #7dd3fc;
+      background: var(--bg-muted);
+      color: var(--text-muted);
     }
 
     /* Folder linking status chip */
@@ -334,7 +334,7 @@
 
     .folder-chip.connected {
       background: var(--success-light);
-      border-color: rgba(16, 185, 129, 0.3);
+      border-color: var(--success);
       color: var(--success);
     }
 
@@ -347,7 +347,6 @@
 
     .folder-chip.connected .status-dot {
       background: var(--success);
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
     }
 
     /* User Profile Switcher */
@@ -460,11 +459,11 @@
     }
 
     .filter-select {
-      height: 32px;
-      padding: 0 10px;
+      height: 30px;
+      padding: 0 8px;
       border-radius: var(--radius-sm);
-      border: 1px solid var(--border-subtle);
-      background: var(--bg-subtle);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface);
       color: var(--text-main);
       font-size: 0.8rem;
       font-family: inherit;
@@ -477,13 +476,13 @@
       padding: 0 14px;
       border-radius: var(--radius-sm);
       font-size: 0.82rem;
-      font-weight: 600;
+      font-weight: 500;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       cursor: pointer;
       border: 1px solid transparent;
-      transition: all 0.15s;
+      transition: background 0.12s, border-color 0.12s;
       font-family: inherit;
       white-space: nowrap;
     }
@@ -529,8 +528,8 @@
 
     .qc-badge-pill {
       background: var(--warning-light);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #b45309;
+      border: 1px solid var(--warning);
+      color: var(--warning);
       font-size: 0.75rem;
       font-weight: 700;
       padding: 3px 8px;
@@ -541,26 +540,26 @@
     }
 
     [data-theme="dark"] .qc-badge-pill {
-      color: #fcd34d;
+      color: var(--warning);
     }
 
     .kanban-board {
       flex: 1;
       display: flex;
-      gap: 16px;
-      padding: 16px 20px;
+      gap: 0;
+      padding: 0 8px;
       overflow-x: auto;
       overflow-y: hidden;
       align-items: stretch;
     }
 
     .kanban-column {
-      width: 290px;
-      min-width: 290px;
-      max-width: 290px;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
+      width: 284px;
+      min-width: 284px;
+      max-width: 284px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
       max-height: 100%;
@@ -569,12 +568,11 @@
     }
 
     .kanban-column.drag-over {
-      background: rgba(99, 102, 241, 0.08);
-      border-color: var(--primary);
+      background: var(--accent-light);
     }
 
     .kanban-column-header {
-      padding: 12px 14px;
+      padding: 14px 12px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -588,27 +586,27 @@
     }
 
     .column-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--text-main);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
     }
 
     .column-count {
+      font-family: var(--font-mono);
       font-size: 0.72rem;
-      font-weight: 700;
-      background: var(--bg-muted);
-      color: var(--text-muted);
-      padding: 2px 7px;
-      border-radius: var(--radius-full);
+      font-weight: 500;
+      color: var(--text-subtle);
     }
 
     .kanban-column-body {
       flex: 1;
-      padding: 10px;
+      padding: 10px 10px 16px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     /* Task Card */
@@ -616,17 +614,14 @@
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 12px;
-      box-shadow: var(--shadow-sm);
+      padding: 11px 12px;
       cursor: grab;
-      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      transition: border-color 0.12s;
       position: relative;
     }
 
     .kanban-card:hover {
-      box-shadow: var(--shadow-md);
-      border-color: var(--border-strong);
-      transform: translateY(-1px);
+      border-color: var(--text-subtle);
     }
 
     .kanban-card.dragging {
@@ -642,25 +637,21 @@
     }
 
     .card-sku {
+      font-family: var(--font-mono);
       font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
+      font-weight: 500;
+      color: var(--text-muted);
     }
 
     .card-category-badge {
       font-size: 0.68rem;
-      background: var(--bg-subtle);
-      color: var(--text-muted);
-      padding: 2px 6px;
-      border-radius: var(--radius-sm);
-      font-weight: 600;
+      color: var(--text-subtle);
+      font-weight: 500;
     }
 
     .card-title {
-      font-size: 0.88rem;
-      font-weight: 700;
+      font-size: 0.86rem;
+      font-weight: 600;
       color: var(--text-main);
       margin-bottom: 8px;
       line-height: 1.25;
@@ -712,22 +703,18 @@
     }
     .card-cover-wrap:hover img.card-cover-img {
       opacity: 1;
-      transform: scale(1.02);
     }
 
     .card-thumb-more-badge {
       position: absolute;
       top: 5px;
       right: 5px;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(4px);
+      background: rgba(20, 19, 16, 0.85);
       color: #ffffff;
+      font-family: var(--font-mono);
       font-size: 0.68rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      font-weight: 500;
+      padding: 2px 6px;
       z-index: 2;
       pointer-events: none;
       display: inline-flex;
@@ -756,9 +743,8 @@
       transition: all 0.15s ease;
     }
     .card-cover-placeholder:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: var(--primary-light);
+      border-color: var(--text-muted);
+      color: var(--text-main);
     }
     .card-cover-placeholder.empty {
       height: 62px;
@@ -770,9 +756,8 @@
       border: 1px dashed var(--border-strong);
     }
     .kanban-card.file-drop-target {
-      border-color: var(--primary) !important;
-      background: rgba(99, 102, 241, 0.08) !important;
-      box-shadow: 0 0 0 2px var(--primary) !important;
+      border-color: var(--accent) !important;
+      background: var(--accent-light) !important;
     }
     .card-quick-upload-row {
       display: flex;
@@ -781,8 +766,8 @@
       margin-top: 2px;
     }
     .card-quick-btn {
-      font-size: 0.65rem;
-      font-weight: 700;
+      font-size: 0.66rem;
+      font-weight: 500;
       padding: 2px 7px;
       border-radius: var(--radius-sm);
       background: var(--bg-surface);
@@ -795,9 +780,7 @@
       transition: all 0.15s ease;
     }
     .card-quick-btn:hover {
-      background: var(--primary);
-      color: #ffffff;
-      border-color: var(--primary);
+      border-color: var(--text-muted);
     }
     .card-cover-actions {
       position: absolute;
@@ -814,18 +797,15 @@
     }
     .card-cover-quick-btn {
       font-size: 0.62rem;
-      font-weight: 700;
+      font-weight: 500;
       padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(15, 23, 42, 0.82);
+      background: rgba(20, 19, 16, 0.82);
       color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      border: none;
       cursor: pointer;
-      backdrop-filter: blur(4px);
     }
     .card-cover-quick-btn:hover {
-      background: var(--primary);
-      border-color: var(--primary);
+      background: #000000;
     }
 
     /* Upload Dropzone */
@@ -836,12 +816,11 @@
       justify-content: center;
       padding: 20px 16px;
       background: var(--bg-subtle);
-      border: 2px dashed var(--border-strong);
-      border-radius: var(--radius-md);
+      border: 1px dashed var(--border-strong);
       color: var(--text-muted);
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: border-color 0.12s;
     }
     .image-dropzone:hover, .image-dropzone.drag-active {
       border-color: var(--primary);
@@ -849,7 +828,7 @@
       color: var(--primary);
     }
     [data-theme="dark"] .image-dropzone:hover, [data-theme="dark"] .image-dropzone.drag-active {
-      background: rgba(79, 70, 229, 0.15);
+      background: var(--primary-light);
     }
 
     .raw-thumb-card .img-wrap, .output-thumb-card .img-wrap {
@@ -865,9 +844,9 @@
       position: absolute;
       bottom: 6px;
       right: 6px;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(20, 19, 16, 0.75);
       color: #ffffff;
-      border-radius: 4px;
+      border-radius: 2px;
       padding: 3px 5px;
       opacity: 0;
       transition: opacity 0.15s ease;
@@ -890,7 +869,7 @@
     }
     .thumb-delete-btn:hover {
       color: var(--danger) !important;
-      background: rgba(239, 68, 68, 0.1) !important;
+      background: var(--danger-light) !important;
     }
 
     .card-missing-preview {
@@ -937,12 +916,10 @@
     }
 
     .card-round-badge {
+      font-family: var(--font-mono);
       font-size: 0.68rem;
-      font-weight: 700;
-      background: var(--purple-light);
-      color: var(--purple);
-      padding: 1px 5px;
-      border-radius: var(--radius-sm);
+      font-weight: 500;
+      color: var(--text-subtle);
     }
 
     .card-assignee-avatar {
@@ -1001,8 +978,7 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+      background: var(--success);
       animation: pulseDot 2s infinite ease-in-out;
     }
 
@@ -1023,9 +999,9 @@
       font-weight: 700;
       text-transform: uppercase;
       padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(16, 185, 129, 0.12);
-      color: #10b981;
+      border-radius: 2px;
+      background: var(--success-light);
+      color: var(--success);
       letter-spacing: 0.04em;
     }
 
@@ -1084,7 +1060,6 @@
     .tldraw-btn:hover {
       background: var(--bg-surface);
       border-color: var(--border-strong, #cbd5e1);
-      transform: translateY(-1px);
     }
 
     .tldraw-btn.primary {
@@ -1135,7 +1110,7 @@
     .tldraw-spinner {
       width: 36px;
       height: 36px;
-      border: 3px solid rgba(99, 102, 241, 0.2);
+      border: 3px solid var(--primary);
       border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
@@ -1188,7 +1163,7 @@
 
     .archive-title {
       font-size: 1.15rem;
-      font-weight: 800;
+      font-weight: 700;
       margin-bottom: 8px;
       color: var(--text-main);
     }
@@ -1217,7 +1192,7 @@
 
     .stat-number {
       font-size: 1.5rem;
-      font-weight: 800;
+      font-weight: 700;
       color: var(--primary);
     }
 
@@ -1252,7 +1227,6 @@
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(2px);
       z-index: 100;
       display: none;
       align-items: center;
@@ -1303,7 +1277,6 @@
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(3px);
       z-index: 150;
       display: none;
       align-items: center;
@@ -1522,8 +1495,9 @@
     }
 
     .qc-status-tag {
-      font-size: 0.65rem;
-      font-weight: 700;
+      font-size: 0.64rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
       padding: 2px 6px;
       border-radius: var(--radius-sm);
       display: inline-block;
@@ -1640,7 +1614,7 @@
 
     .lib-sidebar-title {
       font-size: 0.7rem;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--text-subtle);
@@ -1667,6 +1641,7 @@
     .lib-type-btn.active { background: var(--primary-light); color: var(--primary); }
 
     .lib-type-count {
+      font-family: var(--font-mono);
       font-size: 0.72rem;
       font-weight: 700;
       min-width: 22px;
@@ -1704,7 +1679,7 @@
       flex-wrap: wrap;
     }
     .lib-header-text { flex: 1; min-width: 200px; }
-    .lib-header-text h2 { font-size: 1.05rem; font-weight: 800; }
+    .lib-header-text h2 { font-size: 1.05rem; font-weight: 700; }
     .lib-header-text p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
     .lib-search { width: 220px; height: 32px; padding: 0 10px; }
 
@@ -1717,7 +1692,7 @@
     .lib-group { margin-bottom: 24px; }
     .lib-group-title {
       font-size: 0.8rem;
-      font-weight: 800;
+      font-weight: 700;
       color: var(--text-main);
       margin-bottom: 10px;
       display: flex;
@@ -1759,7 +1734,7 @@
     }
     .lib-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
     .lib-thumb.lib-thumb-empty { aspect-ratio: 5 / 2; }
-    .lib-thumb-initials { font-size: 1.6rem; font-weight: 800; color: var(--text-subtle); }
+    .lib-thumb-initials { font-size: 1.6rem; font-weight: 700; color: var(--text-subtle); }
     .lib-thumb-count {
       position: absolute;
       right: 6px;
@@ -1768,7 +1743,7 @@
       font-weight: 700;
       padding: 1px 6px;
       border-radius: var(--radius-full);
-      background: rgba(15, 23, 42, 0.7);
+      background: rgba(20, 19, 16, 0.7);
       color: #fff;
     }
 
@@ -1783,10 +1758,11 @@
     }
     .lib-code {
       flex-shrink: 0;
+      font-family: var(--font-mono);
       font-size: 0.68rem;
-      font-weight: 800;
+      font-weight: 700;
       padding: 1px 6px;
-      border-radius: 4px;
+      border-radius: 2px;
       background: var(--primary-light);
       color: var(--primary);
     }
@@ -1835,7 +1811,7 @@
       height: 22px;
       border-radius: 50%;
       border: none;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(20, 19, 16, 0.75);
       color: #fff;
       cursor: pointer;
       font-size: 0.8rem;
@@ -1880,8 +1856,9 @@
       gap: 6px;
     }
     .drawer-tab:hover { color: var(--text-main); }
-    .drawer-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .drawer-tab.active { color: var(--text-main); border-bottom-color: var(--accent); }
     .drawer-tab-hint {
+      font-family: var(--font-mono);
       font-size: 0.68rem;
       font-weight: 700;
       padding: 1px 6px;
@@ -1890,7 +1867,7 @@
       color: var(--text-muted);
     }
     .drawer-tab-hint:empty { display: none; }
-    .drawer-tab-hint.warn { background: var(--warning-light); color: #b45309; }
+    .drawer-tab-hint.warn { background: var(--warning-light); color: var(--warning); }
 
     .drawer-tab-pane { display: none; flex-direction: column; gap: 20px; }
     .drawer-tab-pane.active { display: flex; }
@@ -1905,7 +1882,7 @@
       gap: 10px;
     }
     .job-section-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-    .job-section-title { font-size: 0.82rem; font-weight: 800; color: var(--text-main); }
+    .job-section-title { font-size: 0.82rem; font-weight: 700; color: var(--text-main); }
     .job-section-sub { font-size: 0.74rem; color: var(--text-muted); line-height: 1.45; }
     .job-row { display: flex; align-items: center; gap: 10px; }
     .job-row > select, .job-row > .form-select { flex: 1; min-width: 0; }
@@ -1919,8 +1896,8 @@
       flex-shrink: 0;
       cursor: zoom-in;
     }
-    .job-warn { font-size: 0.74rem; color: #b45309; font-weight: 600; }
-    [data-theme="dark"] .job-warn { color: #fcd34d; }
+    .job-warn { font-size: 0.74rem; color: var(--warning); font-weight: 600; }
+    [data-theme="dark"] .job-warn { color: var(--warning); }
 
     .chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
     .chip {
@@ -1952,7 +1929,7 @@
     .chip button:hover { background: var(--danger); color: #fff; }
 
     .shot-group { display: flex; flex-direction: column; gap: 4px; }
-    .shot-group-title { font-size: 0.74rem; font-weight: 800; color: var(--text-muted); margin-top: 4px; }
+    .shot-group-title { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); margin-top: 4px; }
     .shot-option {
       display: flex;
       align-items: center;
@@ -1991,18 +1968,19 @@
       font-size: 0.78rem;
     }
     .ref-num {
+      font-family: var(--font-mono);
       flex-shrink: 0;
       min-width: 58px;
       font-size: 0.7rem;
-      font-weight: 800;
+      font-weight: 700;
       color: var(--primary);
     }
     .ref-thumbs { display: flex; gap: 4px; flex-shrink: 0; }
-    .ref-thumbs img { width: 30px; height: 38px; object-fit: cover; object-position: top; border-radius: 4px; cursor: zoom-in; background: var(--bg-muted); }
+    .ref-thumbs img { width: 30px; height: 38px; object-fit: cover; object-position: top; border-radius: 2px; cursor: zoom-in; background: var(--bg-muted); }
     .ref-label { flex: 1; min-width: 0; }
     .ref-label strong { display: block; }
     .ref-label span { color: var(--text-muted); font-size: 0.72rem; }
-    .ref-missing { color: #b45309; font-weight: 700; }
+    .ref-missing { color: var(--warning); font-weight: 700; }
 
     .shot-card {
       border: 1px solid var(--border-subtle);
@@ -2018,7 +1996,7 @@
       background: var(--bg-subtle);
       border-bottom: 1px solid var(--border-subtle);
     }
-    .shot-card-title { flex: 1; min-width: 0; font-size: 0.82rem; font-weight: 800; }
+    .shot-card-title { flex: 1; min-width: 0; font-size: 0.82rem; font-weight: 700; }
     .shot-card-title span { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
     .shot-card-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
     .shot-prompt {
@@ -2029,17 +2007,17 @@
       line-height: 1.5;
       resize: vertical;
     }
-    .shot-edited { font-size: 0.7rem; font-weight: 700; color: #b45309; }
+    .shot-edited { font-size: 0.7rem; font-weight: 700; color: var(--warning); }
     .prompt-warnings {
       background: var(--warning-light);
       border-radius: var(--radius-sm);
       padding: 10px 12px;
       font-size: 0.78rem;
-      color: #92400e;
+      color: var(--warning);
       line-height: 1.5;
     }
     .prompt-warnings ul { margin: 4px 0 0 18px; padding: 0; }
-    [data-theme="dark"] .prompt-warnings { color: #fcd34d; }
+    [data-theme="dark"] .prompt-warnings { color: var(--warning); }
 
     /* =====================================================================
        TEAM, IDENTITY & ROLE REQUESTS
@@ -2055,7 +2033,7 @@
       background: var(--danger);
       color: #fff;
       font-size: 0.62rem;
-      font-weight: 800;
+      font-weight: 700;
       line-height: 16px;
       text-align: center;
     }
@@ -2115,9 +2093,9 @@
       white-space: nowrap;
     }
     .role-pill.owner { background: var(--primary-light); color: var(--primary); }
-    .role-pill.pending { background: var(--warning-light); color: #b45309; }
+    .role-pill.pending { background: var(--warning-light); color: var(--warning); }
 
-    .user-role-badge.pending { color: #b45309; font-weight: 700; }
+    .user-role-badge.pending { color: var(--warning); font-weight: 700; }
 
     .identity-intro { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
     .identity-list { display: flex; flex-direction: column; gap: 6px; max-height: 50vh; overflow-y: auto; }
@@ -2156,18 +2134,26 @@
       padding: 10px 12px;
       border-radius: var(--radius-sm);
       background: var(--warning-light);
-      color: #92400e;
+      color: var(--warning);
       margin: 12px 0;
       line-height: 1.45;
     }
     [data-theme="dark"] .role-pill.pending,
     [data-theme="dark"] .user-role-badge.pending,
-    [data-theme="dark"] .profile-status { color: #fcd34d; }
+    [data-theme="dark"] .profile-status { color: var(--warning); }
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .topbar-center { display: none; }
       .nav-tabs .nav-tab span { display: none; }
+      /* Keep every top-bar control reachable on a phone: icons and status dots only */
+      header.topbar { padding: 0 10px; }
+      .logo-badge { padding-right: 10px; }
+      .logo-badge > span, #sync-status-label, #folder-name-label, .user-meta, .user-switcher > svg { display: none; }
+      .nav-tab { padding: 0 9px; }
+      .topbar-right { gap: 4px; min-width: 0; }
+      .sync-chip, .folder-chip { padding: 0 8px; height: 30px; }
+      .user-switcher { padding: 2px; }
       .mobile-move-btn { display: inline-flex; }
       .compare-grid { grid-template-columns: 1fr; }
       .libraries-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
@@ -2303,10 +2289,10 @@
           <input type="file" id="card-quick-folder-input" webkitdirectory directory multiple style="display:none;" />
           <input type="file" id="card-quick-files-input" multiple accept="image/*" style="display:none;" />
           <button class="btn btn-primary btn-sm" id="header-bulk-upload-folder-btn" title="Select a local folder of product images to attach and view">
-            📁 Upload Images Folder
+            Upload Images Folder
           </button>
           <button class="btn btn-secondary btn-sm" id="header-bulk-upload-files-btn" title="Select raw image files to attach and view">
-            📷 Upload Image Files
+            Upload Image Files
           </button>
         </div>
       </div>
@@ -2537,16 +2523,16 @@
         <div id="drawer-raw-header-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <label style="font-size:0.8rem; font-weight:700;">Raw Product Photos</label>
-            <span class="badge" id="drawer-raw-count" style="font-size:0.68rem; padding:2px 8px; border-radius:10px; background:var(--bg-subtle); color:var(--text-muted); font-weight:700;">0 photos</span>
+            <span class="badge" id="drawer-raw-count" style="font-size:0.68rem; padding:2px 8px; border-radius: 2px; background:var(--bg-subtle); color:var(--text-muted); font-weight:700;">0 photos</span>
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
             <input type="file" id="drawer-raw-folder-input" webkitdirectory directory multiple style="display:none;" />
             <input type="file" id="drawer-raw-files-input" multiple accept="image/*" style="display:none;" />
             <button class="btn btn-secondary btn-sm" id="drawer-upload-raw-folder-btn" title="Select a local folder containing raw photos">
-              📁 Upload Folder
+              Upload Folder
             </button>
             <button class="btn btn-secondary btn-sm" id="drawer-upload-raw-files-btn" title="Upload image files">
-              ➕ Upload Files
+              Upload Files
             </button>
             <button class="btn btn-secondary btn-sm" id="drawer-add-raw-btn" title="Add offline photo filename">
               + Filename
@@ -2563,16 +2549,16 @@
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <label style="font-size:0.8rem; font-weight:700;">AI Generated Outputs (Review & QC)</label>
-            <span class="badge" id="drawer-output-count" style="font-size:0.68rem; padding:2px 8px; border-radius:10px; background:var(--bg-subtle); color:var(--text-muted); font-weight:700;">0 outputs</span>
+            <span class="badge" id="drawer-output-count" style="font-size:0.68rem; padding:2px 8px; border-radius: 2px; background:var(--bg-subtle); color:var(--text-muted); font-weight:700;">0 outputs</span>
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
             <input type="file" id="drawer-output-folder-input" webkitdirectory directory multiple style="display:none;" />
             <input type="file" id="drawer-output-files-input" multiple accept="image/*" style="display:none;" />
             <button class="btn btn-secondary btn-sm" id="drawer-upload-output-folder-btn" title="Select a local folder containing AI output images">
-              📁 Upload Folder
+              Upload Folder
             </button>
             <button class="btn btn-secondary btn-sm" id="drawer-upload-output-files-btn" title="Upload AI output image files">
-              ➕ Upload Files
+              Upload Files
             </button>
             <button class="btn btn-secondary btn-sm" id="drawer-add-output-btn" title="Add output filename">
               + Filename
@@ -2889,7 +2875,7 @@
           Row Processing Breakdown (<span id="sync-skipped-total">0</span> skipped)
         </summary>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; font-size:0.75rem; color:var(--text-muted);">
-          <div>&bull; Completed &rarr; Delivered: <b id="sync-skip-completed" style="color:#10b981;">0</b></div>
+          <div>&bull; Completed &rarr; Delivered: <b id="sync-skip-completed" style="color:var(--success);">0</b></div>
           <div>&bull; Marked with #: <b id="sync-skip-hash" style="color:var(--text-main);">0</b></div>
           <div>&bull; Link-only (URLs): <b id="sync-skip-link" style="color:var(--text-main);">0</b></div>
           <div>&bull; Blank rows: <b id="sync-skip-blank" style="color:var(--text-main);">0</b></div>
@@ -2899,7 +2885,7 @@
       </details>
 
       <!-- Errors Log (if any) -->
-      <div id="sync-errors-container" style="display:none; background:var(--danger-light); padding:10px 14px; border-radius:var(--radius-md); border:1px solid rgba(239,68,68,0.3);">
+      <div id="sync-errors-container" style="display:none; background:var(--danger-light); padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--danger);">
         <span style="font-size:0.75rem; font-weight:700; color:var(--danger); display:block; margin-bottom:4px;">Row Parsing Warnings:</span>
         <div id="sync-errors-list" style="font-size:0.72rem; color:var(--danger); display:flex; flex-direction:column; gap:3px;"></div>
       </div>
@@ -2982,7 +2968,7 @@
       <div class="form-group">
         <label style="font-size:0.8rem; font-weight:700;">Target Product / Assignment Mode</label>
         <select id="bulk-upload-target-select" class="form-select">
-          <option value="auto">⚡ Auto-match by SKU / Product Name</option>
+          <option value="auto">Auto-match by SKU / Product Name</option>
         </select>
       </div>
 
@@ -2990,10 +2976,10 @@
         <input type="file" id="bulk-upload-folder-input" webkitdirectory directory multiple style="display:none;" />
         <input type="file" id="bulk-upload-files-input" multiple accept="image/*" style="display:none;" />
         <button class="btn btn-primary" id="bulk-upload-folder-btn" style="flex:1;">
-          📁 Select Local Folder
+          Select Local Folder
         </button>
         <button class="btn btn-secondary" id="bulk-upload-files-btn" style="flex:1;">
-          📷 Select Image Files
+          Select Image Files
         </button>
       </div>
 
@@ -3019,7 +3005,7 @@
 <div class="modal-overlay" id="guide-modal-overlay">
   <div class="modal-card" style="max-width:700px;">
     <div class="modal-header">
-      <h3 style="font-size:1.05rem; font-weight:800;">ListingFlow Quick Reference Guide</h3>
+      <h3 style="font-size:1.05rem; font-weight: 700;">ListingFlow Quick Reference Guide</h3>
       <button class="icon-btn" id="guide-modal-close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -3120,7 +3106,7 @@
   };
 
   // Who is using this browser until they pick their name.
-  const GUEST_USER = { id: 'guest', name: 'Guest', role: 'guest', color: '#94a3b8' };
+  const GUEST_USER = { id: 'guest', name: 'Guest', role: 'guest', color: 'var(--text-subtle)' };
 
   const ROLE_LABELS = {
     owner: 'Owner',
@@ -3136,6 +3122,18 @@
     reviewer: 'Reviewer: checks outputs and passes QC',
     admin: 'Admin: full access to the board and QC rules'
   };
+
+  // Members created before the redesign have bright avatar colours saved;
+  // show them in the muted palette that team.js now assigns.
+  const LEGACY_AVATAR_COLORS = {
+    '#4f46e5': '#3f5a4a', '#10b981': '#8a4b2e', '#f59e0b': '#4a5578', '#ef4444': '#7a6a3a', '#8b5cf6': '#6b4060',
+    '#0ea5e9': '#2f6670', '#ec4899': '#7d3b3b', '#14b8a6': '#5a5a52', '#f97316': '#46607e', '#64748b': '#6e5a3e'
+  };
+
+  function memberColor(member) {
+    const c = member && member.color ? String(member.color).toLowerCase() : '';
+    return LEGACY_AVATAR_COLORS[c] || (member && member.color) || 'var(--text-subtle)';
+  }
 
   function isAdminRole(role) {
     return role === 'admin' || role === 'owner';
@@ -4066,8 +4064,8 @@
             <img class="card-cover-img" src="${coverUrl}" alt="${escapeHtml(coverFilename)}" />
             ${remaining > 0 ? `<span class="card-thumb-more-badge">+${remaining}</span>` : ''}
             <div class="card-cover-actions" onclick="event.stopPropagation()">
-              <button class="card-cover-quick-btn btn-card-upload-folder" data-card-id="${card.id}" title="Upload more photos from folder">📁 Folder</button>
-              <button class="card-cover-quick-btn btn-card-upload-files" data-card-id="${card.id}" title="Upload more photo files">📷 Files</button>
+              <button class="card-cover-quick-btn btn-card-upload-folder" data-card-id="${card.id}" title="Upload more photos from folder">Folder</button>
+              <button class="card-cover-quick-btn btn-card-upload-files" data-card-id="${card.id}" title="Upload more photo files">Files</button>
             </div>
           </div>
         `;
@@ -4079,8 +4077,8 @@
               <span>Upload Raw Photos</span>
             </div>
             <div class="card-quick-upload-row" onclick="event.stopPropagation()">
-              <button class="card-quick-btn btn-card-upload-folder" data-card-id="${card.id}" title="Upload photos folder for this product">📁 Folder</button>
-              <button class="card-quick-btn btn-card-upload-files" data-card-id="${card.id}" title="Upload photo files for this product">📷 Files</button>
+              <button class="card-quick-btn btn-card-upload-folder" data-card-id="${card.id}" title="Upload photos folder for this product">Folder</button>
+              <button class="card-quick-btn btn-card-upload-files" data-card-id="${card.id}" title="Upload photo files for this product">Files</button>
             </div>
           </div>
         `;
@@ -4093,14 +4091,14 @@
             <span>Upload Raw Photos</span>
           </div>
           <div class="card-quick-upload-row" onclick="event.stopPropagation()">
-            <button class="card-quick-btn btn-card-upload-folder" data-card-id="${card.id}" title="Upload photos folder for this product">📁 Folder</button>
-            <button class="card-quick-btn btn-card-upload-files" data-card-id="${card.id}" title="Upload photo files for this product">📷 Files</button>
+            <button class="card-quick-btn btn-card-upload-folder" data-card-id="${card.id}" title="Upload photos folder for this product">Folder</button>
+            <button class="card-quick-btn btn-card-upload-files" data-card-id="${card.id}" title="Upload photo files for this product">Files</button>
           </div>
         </div>
       `;
     }
 
-    const assignee = state.settings.members[card.assigneeId] || { name: 'Unassigned', color: '#94a3b8' };
+    const assignee = state.settings.members[card.assigneeId] || { name: 'Unassigned', color: 'var(--text-subtle)' };
     const initials = assignee.name.split(' ').map(n => n[0]).join('').substring(0, 2);
 
     cardEl.innerHTML = `
@@ -4108,7 +4106,7 @@
         <div style="display:flex; align-items:center; gap:6px;">
           ${card.sku ? `<span class="card-sku">${escapeHtml(card.sku)}</span>` : ''}
           ${card.fromSheet ? `<span class="card-sheet-badge" title="Imported from Google Sheet Tracker">From sheet</span>` : ''}
-          ${card.stage === 'Delivered' ? `<span class="card-delivered-badge" style="font-size:0.65rem; font-weight:700; background:rgba(16,185,129,0.12); color:#10b981; border:1px solid rgba(16,185,129,0.25); padding:1px 6px; border-radius:4px;">Delivered</span>` : ''}
+          ${card.stage === 'Delivered' ? `<span class="card-delivered-badge" style="font-size:0.65rem; font-weight:700; background:var(--success-light); color:var(--success); border:1px solid var(--success); padding:1px 6px; border-radius: 2px;">Delivered</span>` : ''}
         </div>
         <span class="card-category-badge">${escapeHtml(card.category || 'Apparel')}</span>
       </div>
@@ -4126,7 +4124,7 @@
             </span>
           ` : ''}
         </div>
-        <div class="card-assignee-avatar" style="background:${assignee.color};" title="${escapeHtml(assignee.name)}">
+        <div class="card-assignee-avatar" style="background:${escapeHtml(memberColor(assignee))};" title="${escapeHtml(assignee.name)}">
           ${initials}
         </div>
       </div>
@@ -4561,8 +4559,8 @@
           <div style="font-weight:700; font-size:0.82rem; margin-top:4px;">Drag & drop raw photos here</div>
           <div style="font-size:0.72rem; color:var(--text-subtle); margin-top:2px; margin-bottom:8px;">or click below to choose a folder or files</div>
           <div style="display:flex; gap:6px; justify-content:center;" onclick="event.stopPropagation()">
-            <button class="btn btn-primary btn-sm" id="dz-raw-folder-btn">📁 Select Folder</button>
-            <button class="btn btn-secondary btn-sm" id="dz-raw-files-btn">📷 Select Files</button>
+            <button class="btn btn-primary btn-sm" id="dz-raw-folder-btn">Select Folder</button>
+            <button class="btn btn-secondary btn-sm" id="dz-raw-files-btn">Select Files</button>
           </div>
         </div>
       `;
@@ -4593,7 +4591,7 @@
           <span class="image-filename" title="${escapeHtml(filename)}">${escapeHtml(filename)}</span>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:3px;">
             <span style="font-size:0.68rem; font-weight:700; color:var(--primary);">Photo #${idx + 1}</span>
-            <button class="thumb-delete-btn" title="Remove this photo from task" style="background:none; border:none; cursor:pointer; color:var(--text-subtle); padding:2px; display:inline-flex; align-items:center; border-radius:3px;">
+            <button class="thumb-delete-btn" title="Remove this photo from task" style="background:none; border:none; cursor:pointer; color:var(--text-subtle); padding:2px; display:inline-flex; align-items:center; border-radius: 2px;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>
@@ -4643,8 +4641,8 @@
           <div style="font-weight:700; font-size:0.82rem; margin-top:4px;">Drag & drop AI generated outputs here</div>
           <div style="font-size:0.72rem; color:var(--text-subtle); margin-top:2px; margin-bottom:8px;">or click below to choose a folder or files</div>
           <div style="display:flex; gap:6px; justify-content:center;" onclick="event.stopPropagation()">
-            <button class="btn btn-primary btn-sm" id="dz-out-folder-btn">📁 Select Folder</button>
-            <button class="btn btn-secondary btn-sm" id="dz-out-files-btn">📷 Select Files</button>
+            <button class="btn btn-primary btn-sm" id="dz-out-folder-btn">Select Folder</button>
+            <button class="btn btn-secondary btn-sm" id="dz-out-files-btn">Select Files</button>
           </div>
         </div>
       `;
@@ -4676,7 +4674,7 @@
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
             <span class="qc-status-tag ${out.status || 'pending'}">${out.status || 'pending'}</span>
             <span style="font-size:0.65rem; color:var(--text-subtle);">R${out.round || 1}</span>
-            <button class="thumb-delete-btn" title="Remove this output from task" style="background:none; border:none; cursor:pointer; color:var(--text-subtle); padding:2px; display:inline-flex; align-items:center; border-radius:3px;">
+            <button class="thumb-delete-btn" title="Remove this output from task" style="background:none; border:none; cursor:pointer; color:var(--text-subtle); padding:2px; display:inline-flex; align-items:center; border-radius: 2px;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>
@@ -5137,7 +5135,7 @@
       state.currentMarkupShapes.push({
         type: 'pen',
         points: currentMarkupPath,
-        color: '#ef4444'
+        color: '#e0382b'
       });
     } else if (state.markupActiveTool === 'rect' || state.markupActiveTool === 'arrow') {
       state.currentMarkupShapes.push({
@@ -5150,7 +5148,7 @@
         startY: markupStart.y,
         endX: nx,
         endY: ny,
-        color: '#ef4444'
+        color: '#e0382b'
       });
     }
     drawMarkupOverlay();
@@ -5162,7 +5160,7 @@
     const H = markupCanvas.height;
 
     state.currentMarkupShapes.forEach(shape => {
-      markupCtx.strokeStyle = shape.color || '#ef4444';
+      markupCtx.strokeStyle = shape.color || '#e0382b';
       markupCtx.lineWidth = 3;
       markupCtx.lineCap = 'round';
 
@@ -5184,7 +5182,7 @@
   function drawPreviewShape(type, start, current) {
     const W = markupCanvas.width;
     const H = markupCanvas.height;
-    markupCtx.strokeStyle = '#ef4444';
+    markupCtx.strokeStyle = '#e0382b';
     markupCtx.lineWidth = 2.5;
 
     if (type === 'rect') {
@@ -5201,7 +5199,7 @@
   function drawPreviewPath(path) {
     const W = markupCanvas.width;
     const H = markupCanvas.height;
-    markupCtx.strokeStyle = '#ef4444';
+    markupCtx.strokeStyle = '#e0382b';
     markupCtx.lineWidth = 2.5;
     markupCtx.beginPath();
     path.forEach((pt, idx) => {
@@ -5702,7 +5700,7 @@
   }
 
   function avatarHtml(member, size) {
-    const style = `background:${escapeHtml(member.color || '#94a3b8')};` + (size ? `width:${size}px;height:${size}px;font-size:${size / 2.6}px;` : '');
+    const style = `background:${escapeHtml(memberColor(member))};` + (size ? `width:${size}px;height:${size}px;font-size:${size / 2.6}px;` : '');
     return `<div class="member-avatar" style="${style}">${escapeHtml(initialsOf(member.name))}</div>`;
   }
 
@@ -5725,7 +5723,7 @@
     const user = state.currentUser;
     const isGuest = user.id === 'guest';
     currentUserAvatar.textContent = isGuest ? '?' : initialsOf(user.name);
-    currentUserAvatar.style.background = user.color || '#4f46e5';
+    currentUserAvatar.style.background = memberColor(user);
     currentUserName.textContent = isGuest ? 'Pick your name' : user.name;
     currentUserRole.textContent = isGuest ? 'Not signed in' : roleLabel(user.role);
     currentUserRole.classList.toggle('pending', user.role === 'pending');
@@ -7055,7 +7053,7 @@
 
     // Populate target select with current cards
     if (bulkUploadTargetSelect) {
-      bulkUploadTargetSelect.innerHTML = '<option value="auto">⚡ Auto-match by SKU / Product Name</option>';
+      bulkUploadTargetSelect.innerHTML = '<option value="auto">Auto-match by SKU / Product Name</option>';
       const sortedCards = Array.from(state.cards.values()).sort((a,b) => (a.name || '').localeCompare(b.name || ''));
       sortedCards.forEach(c => {
         const opt = document.createElement('option');
@@ -7164,9 +7162,9 @@
       if (unassignedCount > 0) {
         const item = document.createElement('div');
         item.style.padding = '6px 10px';
-        item.style.background = 'rgba(239,68,68,0.08)';
+        item.style.background = 'var(--danger-light)';
         item.style.borderRadius = 'var(--radius-sm)';
-        item.style.border = '1px solid rgba(239,68,68,0.2)';
+        item.style.border = '1px solid var(--danger)';
         item.innerHTML = `<span style="color:var(--danger); font-weight:700;">! ${unassignedCount} photo${unassignedCount>1?'s':''}</span> did not match any SKU/name in the folder name. Select a specific product above to attach them.`;
         bulkUploadResultsList.appendChild(item);
       }
