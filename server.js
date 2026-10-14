@@ -3,6 +3,30 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const store = require('./store');
+const team = require('./team');
+
+// Owner forgot the PIN: `npm run set-owner-pin -- 1234` sets a new one and signs out old owner sessions.
+const pinArg = process.argv.indexOf('--set-owner-pin');
+if (pinArg !== -1) {
+  // A running server keeps the data in memory and would overwrite the new PIN.
+  const probe = http.get({ host: '127.0.0.1', port: process.env.PORT || 3000, path: '/api/store', timeout: 1500 }, () => {
+    console.error('Stop the ListingFlow server first, then run this command again.');
+    process.exit(1);
+  });
+  probe.on('timeout', () => probe.destroy());
+  probe.on('error', () => {
+    try {
+      if (!team.getTeam().ownerId) throw new Error('No owner has been set up yet; open the app to set one up.');
+      team.setOwnerPin(process.argv[pinArg + 1]);
+      store.flushNow();
+      console.log('Owner PIN updated. Start the server again with "npm start".');
+      process.exit(0);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+}
 
 const PORT = process.env.PORT || 3000;
 const ROOT = __dirname;
@@ -84,6 +108,17 @@ async function handleDataApi(req, res, reqPath, query) {
     return sendJson(res, 200, { ok: true });
   }
 
+  const teamRoute = /^\/api\/team\/([a-z-]+)$/.exec(reqPath);
+  if (teamRoute && req.method === 'POST' && team.ROUTES[teamRoute[1]]) {
+    const body = JSON.parse((await readBody(req)).toString('utf8') || '{}');
+    try {
+      return sendJson(res, 200, team.ROUTES[teamRoute[1]](body));
+    } catch (err) {
+      if (err instanceof team.TeamError) return sendJson(res, err.status, { error: err.message });
+      throw err;
+    }
+  }
+
   return false;
 }
 
@@ -91,7 +126,7 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   let reqPath = decodeURI(parsedUrl.pathname);
 
-  if (/^\/api\/(store|files|events|broadcast)\b/.test(reqPath)) {
+  if (/^\/api\/(store|files|events|broadcast|team)\b/.test(reqPath)) {
     try {
       const handled = await handleDataApi(req, res, reqPath, parsedUrl.query);
       if (handled !== false) return;
@@ -104,7 +139,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Never serve the database, git internals or dependencies as static files.
-  if (/^\/(data|\.git|node_modules)(\/|$)/i.test(reqPath) || /^\/(store|server)\.js$/i.test(reqPath)) {
+  if (/^\/(data|\.git|node_modules)(\/|$)/i.test(reqPath) || /^\/(store|server|team)\.js$/i.test(reqPath)) {
     res.writeHead(403, { 'Content-Type': 'text/plain' });
     return res.end('403 Forbidden');
   }
@@ -181,7 +216,7 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-server.listen(PORT, () => {
+if (pinArg === -1) server.listen(PORT, () => {
   console.log(`ListingFlow server is running at http://localhost:${PORT}`);
   const nets = Object.values(require('os').networkInterfaces()).flat();
   nets.filter(n => n && n.family === 'IPv4' && !n.internal)

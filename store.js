@@ -70,11 +70,17 @@ function extractDataUrls(value) {
   return value;
 }
 
+// Items only the server may write (team membership and roles go through /api/team).
+function isProtected(storeName, key) {
+  return storeName === 'settings' && key === 'team';
+}
+
 function applyOps(ops) {
   const applied = [];
   for (const op of ops || []) {
     if (!op || !STORE_NAME_RE.test(op.store) || op.key === undefined || op.key === null) continue;
     const key = String(op.key);
+    if (isProtected(op.store, key)) continue;
     const store = db.stores[op.store] || (db.stores[op.store] = {});
     if (op.op === 'put' && op.item && typeof op.item === 'object') {
       const item = extractDataUrls(op.item);
@@ -137,4 +143,24 @@ function flushNow() {
   fs.writeFileSync(DB_FILE, JSON.stringify(db));
 }
 
-module.exports = { applyOps, snapshot, addClient, emit, saveFileBuffer, filePath, fileType, flushNow };
+function getItem(storeName, key) {
+  return (db.stores[storeName] || {})[key];
+}
+
+// Server-side write that bypasses isProtected; tells every browser about it.
+function putItemAsServer(storeName, key, item) {
+  (db.stores[storeName] || (db.stores[storeName] = {}))[key] = item;
+  scheduleSave();
+  emit({ type: 'store', clientId: null, ops: [{ op: 'put', store: storeName, key, item }] });
+}
+
+// Secrets (owner PIN hash, session tokens) live outside `stores`, so they are
+// never part of the snapshot sent to browsers.
+function getPrivate() {
+  return db.private || (db.private = {});
+}
+
+module.exports = {
+  applyOps, snapshot, addClient, emit, saveFileBuffer, filePath, fileType, flushNow,
+  getItem, putItemAsServer, getPrivate, scheduleSave
+};

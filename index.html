@@ -1854,6 +1854,129 @@
     }
     .lib-dropzone.drag-active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
 
+    /* =====================================================================
+       TEAM, IDENTITY & ROLE REQUESTS
+       ===================================================================== */
+    .team-request-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: var(--radius-full);
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 800;
+      line-height: 16px;
+      text-align: center;
+    }
+    .team-request-badge[hidden] { display: none; }
+
+    .team-owner-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      margin-bottom: 14px;
+    }
+    .team-owner-note:empty { display: none; }
+
+    .team-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-subtle);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+    }
+    .team-row-name { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .team-row-name strong { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .team-row-name span { font-size: 0.72rem; color: var(--text-muted); }
+    .team-row-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .team-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .member-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .role-pill {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--bg-muted);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .role-pill.owner { background: var(--primary-light); color: var(--primary); }
+    .role-pill.pending { background: var(--warning-light); color: #b45309; }
+
+    .user-role-badge.pending { color: #b45309; font-weight: 700; }
+
+    .identity-intro { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+    .identity-list { display: flex; flex-direction: column; gap: 6px; max-height: 50vh; overflow-y: auto; }
+    .identity-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+    }
+    .identity-option:hover { border-color: var(--primary); background: var(--primary-light); }
+    .identity-option .identity-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .identity-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 16px; }
+    .identity-link {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--primary);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .identity-error { color: var(--danger); font-size: 0.78rem; font-weight: 600; min-height: 1em; margin-top: 4px; }
+    .profile-status {
+      font-size: 0.8rem;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--warning-light);
+      color: #92400e;
+      margin: 12px 0;
+      line-height: 1.45;
+    }
+    [data-theme="dark"] .role-pill.pending,
+    [data-theme="dark"] .user-role-badge.pending,
+    [data-theme="dark"] .profile-status { color: #fcd34d; }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .topbar-center { display: none; }
@@ -1925,12 +2048,12 @@
         <span id="folder-name-label">Link Local Folder</span>
       </div>
 
-      <!-- User persona switcher for multi-user identity -->
-      <div class="user-switcher" id="user-switcher-btn" title="Switch User Identity / Role">
-        <div class="user-avatar" id="current-user-avatar">AC</div>
+      <!-- Who is using this browser: name, role, role requests -->
+      <div class="user-switcher" id="user-switcher-btn" title="Your profile and role" role="button" tabindex="0">
+        <div class="user-avatar" id="current-user-avatar">?</div>
         <div class="user-meta">
-          <span class="user-name" id="current-user-name">Alex Chen</span>
-          <span class="user-role-badge" id="current-user-role">Admin</span>
+          <span class="user-name" id="current-user-name">Pick your name</span>
+          <span class="user-role-badge" id="current-user-role">Not signed in</span>
         </div>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
@@ -1944,8 +2067,9 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       </button>
 
-      <button class="icon-btn" id="team-settings-btn" title="Team Settings & Permissions">
+      <button class="icon-btn" id="team-settings-btn" title="Team &amp; roles" style="position:relative;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="team-request-badge" id="team-request-badge" hidden></span>
       </button>
     </div>
   </header>
@@ -2422,9 +2546,11 @@
       </button>
     </div>
     <div class="modal-body">
+      <p class="team-owner-note" id="team-owner-note"></p>
+      <div id="team-requests-section" style="margin-bottom:16px;"></div>
       <div style="margin-bottom:16px;">
         <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:8px;">
-          Team Members & Role Matrix
+          Team members
         </label>
         <div id="team-members-list" style="display:flex; flex-direction:column; gap:8px;">
           <!-- Dynamically populated -->
@@ -2440,8 +2566,41 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" id="team-modal-cancel">Cancel</button>
-      <button class="btn btn-primary" id="team-modal-save">Save Settings</button>
+      <button class="btn btn-secondary" id="team-modal-cancel">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================================
+     WHO ARE YOU? (pick a name, join the team, or set up the owner)
+     ===================================================================== -->
+<div class="modal-overlay" id="identity-modal">
+  <div class="modal-card" style="max-width:460px;">
+    <div class="modal-header">
+      <h3 style="font-size:1rem; font-weight:700;" id="identity-title">Who are you?</h3>
+      <button class="icon-btn" id="identity-close" aria-label="Close" style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="identity-body"></div>
+  </div>
+</div>
+
+<!-- =====================================================================
+     YOUR PROFILE (role, role requests, switch person)
+     ===================================================================== -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal-card" style="max-width:440px;">
+    <div class="modal-header">
+      <h3 style="font-size:1rem; font-weight:700;">Your profile</h3>
+      <button class="icon-btn" id="profile-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="profile-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="profile-switch-btn" style="margin-right:auto;">Not you? Switch person</button>
+      <button class="btn btn-primary" id="profile-done-btn">Done</button>
     </div>
   </div>
 </div>
@@ -2753,14 +2912,33 @@
     'Delivered'
   ];
 
+  // The team (members, roles, owner) is managed by the server; see team.js.
   const DEFAULT_TEAM = {
-    members: {
-      'user_alex': { id: 'user_alex', name: 'Alex Chen', role: 'admin', color: '#4f46e5' },
-      'user_taylor': { id: 'user_taylor', name: 'Taylor Swift', role: 'reviewer', color: '#10b981' },
-      'user_jordan': { id: 'user_jordan', name: 'Jordan Lee', role: 'creator', color: '#f59e0b' }
-    },
+    members: {},
     creatorCannotPassOwnWork: true
   };
+
+  // Who is using this browser until they pick their name.
+  const GUEST_USER = { id: 'guest', name: 'Guest', role: 'guest', color: '#94a3b8' };
+
+  const ROLE_LABELS = {
+    owner: 'Owner',
+    admin: 'Admin',
+    reviewer: 'Reviewer',
+    creator: 'Creator',
+    pending: 'Pending approval',
+    guest: 'Guest'
+  };
+
+  const ROLE_DESCRIPTIONS = {
+    creator: 'Creator: makes the images and moves their own work to QC',
+    reviewer: 'Reviewer: checks outputs and passes QC',
+    admin: 'Admin: full access to the board and QC rules'
+  };
+
+  function isAdminRole(role) {
+    return role === 'admin' || role === 'owner';
+  }
 
   // Local Session Caches (Never uploaded)
   const sessionCache = {
@@ -2772,7 +2950,7 @@
 
   // App Global State
   const state = {
-    currentUser: DEFAULT_TEAM.members['user_alex'],
+    currentUser: GUEST_USER,
     currentView: 'pipeline',
     theme: 'light',
     
@@ -2842,10 +3020,13 @@
     try {
       await fetchServerSnapshot();
       dbInstance = 'server';
+      systemWriteDepth++;
       try {
         await migrateBrowserDataIfNeeded();
       } catch (migrationErr) {
         console.warn('Moving browser data to the server failed; will retry on next load', migrationErr);
+      } finally {
+        systemWriteDepth--;
       }
       await loadAllDataFromDB();
       connectLiveEvents();
@@ -2925,14 +3106,24 @@
     try { localStorage.setItem(MIGRATION_FLAG, new Date().toISOString()); } catch (e) {}
   }
 
+  // Loading also prunes orphaned records; that cleanup is a system write.
   async function loadAllDataFromDB() {
+    systemWriteDepth++;
+    try {
+      await loadAllDataFromDBUnguarded();
+    } finally {
+      systemWriteDepth--;
+    }
+  }
+
+  async function loadAllDataFromDBUnguarded() {
     if (!dbInstance) return;
     try {
       // Load Settings
       const settings = await getAllFromStore('settings');
       if (settings && settings.length > 0) {
         const teamSetting = settings.find(s => s.key === 'team');
-        if (teamSetting) state.settings = teamSetting.value;
+        if (teamSetting && teamSetting.value) state.settings = { ...DEFAULT_TEAM, ...teamSetting.value };
       }
 
       // Restore persisted uploaded images into local session cache
@@ -3071,8 +3262,50 @@
   let flushInFlight = null;
   let flushFailures = 0;
 
+  // People waiting for the owner to approve their role can look and comment,
+  // but not change the board. Automatic work (migration, tracker sync) runs
+  // inside systemWriteDepth and is always allowed.
+  let systemWriteDepth = 0;
+  let blockedWriteTimer = null;
+
+  function canCurrentUserWrite(storeName) {
+    if (systemWriteDepth > 0) return true;
+    const role = state.currentUser && state.currentUser.role;
+    if (role === 'pending') return storeName === 'comments';
+    return role !== 'guest';
+  }
+
+  function writeBlockedMessage() {
+    const owner = state.settings.members[state.settings.ownerId];
+    return state.currentUser.role === 'guest'
+      ? 'Pick your name first (top right) to make changes.'
+      : `You can view and comment until ${owner ? owner.name : 'the owner'} approves your role.`;
+  }
+
+  // Check before an action starts, so nothing changes on screen first.
+  function ensureCanEdit(storeName = 'cards') {
+    if (canCurrentUserWrite(storeName)) return true;
+    showToast(writeBlockedMessage(), 'warning');
+    return false;
+  }
+
+  // Safety net for any write that slipped past ensureCanEdit.
+  function onWriteBlocked() {
+    if (blockedWriteTimer) return;
+    showToast(writeBlockedMessage(), 'warning');
+    // Undo the change shown on screen by reloading the shared data.
+    blockedWriteTimer = setTimeout(() => {
+      blockedWriteTimer = null;
+      reloadFromServer();
+    }, 300);
+  }
+
   function queueOp(op) {
     if (!dbInstance) return;
+    if (!canCurrentUserWrite(op.store)) {
+      onWriteBlocked();
+      return;
+    }
     pendingOps.set(op.store + '\u0000' + op.key, op);
     if (!flushTimer) flushTimer = setTimeout(() => { flushTimer = null; flushPendingOps().catch(() => {}); }, 150);
   }
@@ -3270,7 +3503,7 @@
         if (isPut) state.boards.set(op.key, item); else state.boards.delete(op.key);
         break;
       case 'settings':
-        if (isPut && op.key === 'team' && item.value) state.settings = item.value;
+        if (isPut && op.key === 'team' && item.value) state.settings = { ...DEFAULT_TEAM, ...item.value };
         break;
       case 'uploaded_images':
         if (isPut && item.dataUrl) {
@@ -3307,7 +3540,7 @@
         if (card && touched.has('activity')) renderCardActivity(card.id);
       }
       if (touched.has('shapes')) requestWhiteboardRender();
-      if (touched.has('settings')) updateUserSwitcherUI();
+      if (touched.has('settings')) onTeamChanged();
       if (touched.has('libraries')) renderLibrariesView();
     }, 120);
   }
@@ -3750,6 +3983,7 @@
 
   // Strict Stage Transition Logic Enforcing Business Rules
   function handleStageTransition(cardId, targetStage) {
+    if (!ensureCanEdit('cards')) return;
     const card = state.cards.get(cardId);
     if (!card) return;
     if (card.stage === targetStage) return;
@@ -3798,7 +4032,7 @@
       }
 
       // Creator self-pass check
-      if (state.settings.creatorCannotPassOwnWork && card.createdBy === actor.id && actor.role !== 'admin') {
+      if (state.settings.creatorCannotPassOwnWork && card.createdBy === actor.id && !isAdminRole(actor.role)) {
         showToast('Rule Violation: Creator cannot pass own work! Requires reviewer approval.', 'error');
         return;
       }
@@ -3808,7 +4042,7 @@
 
     // Workflow Rule 5: Delivered records delivery note
     if (targetStage === 'Delivered') {
-      if (currentStage !== 'Passed QC' && actor.role !== 'admin') {
+      if (currentStage !== 'Passed QC' && !isAdminRole(actor.role)) {
         showToast('Cards must pass QC before delivery.', 'error');
         return;
       }
@@ -3999,6 +4233,7 @@
   }
 
   async function handleUploadFilesForCard(card, fileList, isRaw = true) {
+    if (!ensureCanEdit('cards')) return;
     if (!card || !fileList || fileList.length === 0) return;
     const files = Array.from(fileList).filter(f => isImageFile(f.name));
     if (files.length === 0) {
@@ -5173,8 +5408,13 @@
 
 
   // -------------------------------------------------------------------
-  // 11. USER IDENTITY SWITCHER & ROLES MANAGEMENT
+  // 11. WHO'S WHO: NAME PICKER, ROLE REQUESTS & OWNER-ONLY ROLE MANAGEMENT
+  // People pick their name; only the owner (PIN-protected on the server)
+  // can give roles or accept role requests. See team.js.
   // -------------------------------------------------------------------
+  const MEMBER_ID_KEY = 'listingflow_member_id';
+  const OWNER_TOKEN_KEY = 'listingflow_owner_token';
+
   const userSwitcherBtn = document.getElementById('user-switcher-btn');
   const currentUserAvatar = document.getElementById('current-user-avatar');
   const currentUserName = document.getElementById('current-user-name');
@@ -5182,31 +5422,401 @@
   const teamModalOverlay = document.getElementById('team-modal-overlay');
   const teamModalClose = document.getElementById('team-modal-close');
   const teamModalCancel = document.getElementById('team-modal-cancel');
-  const teamModalSave = document.getElementById('team-modal-save');
   const teamMembersList = document.getElementById('team-members-list');
+  const teamRequestsSection = document.getElementById('team-requests-section');
+  const teamOwnerNote = document.getElementById('team-owner-note');
+  const teamRequestBadge = document.getElementById('team-request-badge');
   const settingCreatorNoSelfPass = document.getElementById('setting-creator-no-self-pass');
+  const identityModal = document.getElementById('identity-modal');
+  const identityTitle = document.getElementById('identity-title');
+  const identityBody = document.getElementById('identity-body');
+  const identityClose = document.getElementById('identity-close');
+  const profileModal = document.getElementById('profile-modal');
+  const profileBody = document.getElementById('profile-body');
 
-  userSwitcherBtn.addEventListener('click', cycleUserPersona);
+  function lsGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
 
-  function cycleUserPersona() {
-    const members = Object.values(state.settings.members);
-    const currentIndex = members.findIndex(m => m.id === state.currentUser.id);
-    const nextIndex = (currentIndex + 1) % members.length;
-    state.currentUser = members[nextIndex];
+  function lsSet(key, value) {
+    try {
+      if (value === null || value === undefined) localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    } catch (e) {}
+  }
+
+  async function teamApi(route, body) {
+    const res = await fetch('/api/team/' + route, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {})
+    });
+    let data = {};
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok) {
+      const err = new Error(data.error || 'Something went wrong. Is the server running?');
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  function teamMembers() {
+    return Object.values(state.settings.members || {});
+  }
+
+  function teamOwner() {
+    return state.settings.members[state.settings.ownerId] || null;
+  }
+
+  function ownerName() {
+    const owner = teamOwner();
+    return owner ? owner.name : 'the owner';
+  }
+
+  function isOwner() {
+    return state.currentUser.role === 'owner' && state.currentUser.id === state.settings.ownerId;
+  }
+
+  function initialsOf(name) {
+    return (name || '?').split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  function roleLabel(role) {
+    return ROLE_LABELS[role] || role;
+  }
+
+  function rolePill(role) {
+    const cls = role === 'owner' ? 'owner' : role === 'pending' ? 'pending' : '';
+    return `<span class="role-pill ${cls}">${escapeHtml(roleLabel(role))}</span>`;
+  }
+
+  function avatarHtml(member, size) {
+    const style = `background:${escapeHtml(member.color || '#94a3b8')};` + (size ? `width:${size}px;height:${size}px;font-size:${size / 2.6}px;` : '');
+    return `<div class="member-avatar" style="${style}">${escapeHtml(initialsOf(member.name))}</div>`;
+  }
+
+  function sortedMembers() {
+    return teamMembers().sort((a, b) => {
+      if (a.role === 'owner') return -1;
+      if (b.role === 'owner') return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  function setCurrentUser(member) {
+    state.currentUser = member || GUEST_USER;
+    lsSet(MEMBER_ID_KEY, member ? member.id : null);
     updateUserSwitcherUI();
-    showToast(`Switched active persona to ${state.currentUser.name} (${state.currentUser.role})`, 'info');
+    updateTeamBadge();
   }
 
   function updateUserSwitcherUI() {
-    currentUserAvatar.textContent = state.currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2);
-    currentUserAvatar.style.background = state.currentUser.color || '#4f46e5';
-    currentUserName.textContent = state.currentUser.name;
-    currentUserRole.textContent = state.currentUser.role;
-    if (state.activeCardId) {
+    const user = state.currentUser;
+    const isGuest = user.id === 'guest';
+    currentUserAvatar.textContent = isGuest ? '?' : initialsOf(user.name);
+    currentUserAvatar.style.background = user.color || '#4f46e5';
+    currentUserName.textContent = isGuest ? 'Pick your name' : user.name;
+    currentUserRole.textContent = isGuest ? 'Not signed in' : roleLabel(user.role);
+    currentUserRole.classList.toggle('pending', user.role === 'pending');
+    if (state.activeCardId && state.cards.get(state.activeCardId)) {
       populateCardDrawer(state.cards.get(state.activeCardId));
     }
   }
 
+  function updateTeamBadge() {
+    const count = teamMembers().filter(m => m.requestedRole).length;
+    teamRequestBadge.hidden = !(isOwner() && count > 0);
+    teamRequestBadge.textContent = count;
+  }
+
+  function refreshAssigneeFilter() {
+    const selected = filterAssigneeSelect.value;
+    Array.from(filterAssigneeSelect.options).forEach(opt => { if (opt.value !== 'all') opt.remove(); });
+    sortedMembers().forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.name;
+      filterAssigneeSelect.appendChild(opt);
+    });
+    filterAssigneeSelect.value = Array.from(filterAssigneeSelect.options).some(o => o.value === selected) ? selected : 'all';
+  }
+
+  // Runs whenever the team changes, here or in another browser.
+  function onTeamChanged() {
+    const me = state.settings.members[state.currentUser.id];
+    if (state.currentUser.id !== 'guest') {
+      if (!me) {
+        lsSet(OWNER_TOKEN_KEY, null);
+        setCurrentUser(null);
+        showToast('You are no longer on the team list. Pick your name again or ask the owner.', 'warning');
+        openIdentityModal('pick');
+      } else {
+        const before = state.currentUser;
+        state.currentUser = me;
+        if (before.role !== me.role) {
+          showToast(`${ownerName()} set your role to ${roleLabel(me.role)}`, 'success');
+        } else if (before.requestedRole && !me.requestedRole) {
+          showToast(`${ownerName()} declined your request to become ${roleLabel(before.requestedRole)}`, 'warning');
+        }
+        updateUserSwitcherUI();
+      }
+    }
+    refreshAssigneeFilter();
+    updateTeamBadge();
+    if (teamModalOverlay.classList.contains('active')) populateTeamModal();
+    if (profileModal.classList.contains('active')) renderProfile();
+    if (identityModal.classList.contains('active') && identityMode === 'pick') renderIdentity('pick');
+  }
+
+  function applyTeamFromResponse(team) {
+    if (team) state.settings = { ...DEFAULT_TEAM, ...team };
+    onTeamChanged();
+  }
+
+  // ---- "Who are you?" modal -------------------------------------------------
+  let identityMode = 'pick';
+
+  function openIdentityModal(mode, target) {
+    renderIdentity(mode || (state.settings.ownerId ? 'pick' : 'setup'), target);
+    identityModal.classList.add('active');
+  }
+
+  function closeIdentityModal() {
+    identityModal.classList.remove('active');
+  }
+
+  identityClose.addEventListener('click', closeIdentityModal);
+
+  function identityForm(innerHtml, onSubmit) {
+    identityBody.innerHTML = `<form autocomplete="off" novalidate>${innerHtml}</form>`;
+    const form = identityBody.querySelector('form');
+    const errorEl = form.querySelector('.identity-error');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (errorEl) errorEl.textContent = '';
+      if (submitBtn) submitBtn.disabled = true;
+      try {
+        await onSubmit(form);
+      } catch (err) {
+        if (errorEl) errorEl.textContent = err.message;
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+    const first = form.querySelector('input, select');
+    if (first) setTimeout(() => first.focus(), 30);
+    return form;
+  }
+
+  function renderIdentity(mode, target) {
+    if (!state.settings.ownerId) mode = 'setup';
+    identityMode = mode;
+    identityClose.style.display = state.currentUser.id !== 'guest' ? '' : 'none';
+
+    if (mode === 'setup') {
+      identityTitle.textContent = 'Set up your team';
+      identityForm(`
+        <p class="identity-intro">Nobody has set up ListingFlow on this server yet. You will be the <strong>owner</strong>: only you can give people roles and accept their role requests.</p>
+        <div class="form-group"><label for="id-setup-name">Your name</label><input class="form-input" id="id-setup-name" name="name" maxlength="40" /></div>
+        <div class="form-group"><label for="id-setup-pin">Owner PIN (4 to 12 digits)</label><input class="form-input" id="id-setup-pin" name="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" /><span class="lib-form-hint">You will need it when you sign in as owner on another computer.</span></div>
+        <div class="form-group"><label for="id-setup-pin2">Repeat PIN</label><input class="form-input" id="id-setup-pin2" name="pin2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" /></div>
+        <div class="identity-error"></div>
+        <div class="identity-actions"><span></span><button type="submit" class="btn btn-primary">Create team</button></div>
+      `, async (form) => {
+        if (form.elements.pin.value !== form.elements.pin2.value) throw new Error('The two PINs do not match.');
+        const res = await teamApi('claim-owner', { name: form.elements.name.value, pin: form.elements.pin.value });
+        lsSet(OWNER_TOKEN_KEY, res.token);
+        state.settings.members = { [res.member.id]: res.member };
+        state.settings.ownerId = res.member.id;
+        setCurrentUser(res.member);
+        onTeamChanged();
+        closeIdentityModal();
+        showToast(`You're the owner, ${res.member.name}. Share this page's address with your team.`, 'success');
+      });
+      return;
+    }
+
+    if (mode === 'owner-pin') {
+      const owner = target || teamOwner();
+      identityTitle.textContent = 'Owner sign-in';
+      identityForm(`
+        <p class="identity-intro">Enter the owner PIN for <strong>${escapeHtml(owner ? owner.name : 'the owner')}</strong>.</p>
+        <div class="form-group"><label for="id-owner-pin">PIN</label><input class="form-input" id="id-owner-pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="12" /></div>
+        <div class="identity-error"></div>
+        <div class="identity-actions"><button type="button" class="identity-link" data-back>← Not the owner</button><button type="submit" class="btn btn-primary">Sign in</button></div>
+      `, async (form) => {
+        const res = await teamApi('owner-login', { pin: form.elements.pin.value });
+        lsSet(OWNER_TOKEN_KEY, res.token);
+        setCurrentUser(res.member);
+        closeIdentityModal();
+        showToast(`Signed in as owner: ${res.member.name}`, 'success');
+      });
+      identityBody.querySelector('[data-back]').addEventListener('click', () => renderIdentity('pick'));
+      return;
+    }
+
+    if (mode === 'join') {
+      identityTitle.textContent = 'Join the team';
+      identityForm(`
+        <p class="identity-intro">Tell us your name and the role you need. ${escapeHtml(ownerName())} (owner) will approve it. Until then you can view the board and add comments.</p>
+        <div class="form-group"><label for="id-join-name">Your name</label><input class="form-input" id="id-join-name" name="name" maxlength="40" /></div>
+        <div class="form-group"><label for="id-join-role">Role you need</label>
+          <select class="form-select" id="id-join-role" name="role">
+            ${['creator', 'reviewer', 'admin'].map(r => `<option value="${r}">${escapeHtml(ROLE_DESCRIPTIONS[r])}</option>`).join('')}
+          </select>
+        </div>
+        <div class="identity-error"></div>
+        <div class="identity-actions"><button type="button" class="identity-link" data-back>← Back to the list</button><button type="submit" class="btn btn-primary">Send request</button></div>
+      `, async (form) => {
+        const res = await teamApi('join', { name: form.elements.name.value, requestedRole: form.elements.role.value });
+        state.settings.members[res.member.id] = res.member;
+        setCurrentUser(res.member);
+        onTeamChanged();
+        closeIdentityModal();
+        showToast(`Request sent to ${ownerName()}. You can view and comment meanwhile.`, 'success');
+      });
+      identityBody.querySelector('[data-back]').addEventListener('click', () => renderIdentity('pick'));
+      return;
+    }
+
+    // mode === 'pick'
+    identityTitle.textContent = 'Who are you?';
+    const members = sortedMembers();
+    identityBody.innerHTML = `
+      <p class="identity-intro">Pick your name. This browser will remember you.</p>
+      <div class="identity-list">
+        ${members.map(m => `
+          <button type="button" class="identity-option" data-member="${escapeHtml(m.id)}">
+            ${avatarHtml(m)}<span class="identity-name">${escapeHtml(m.name)}</span>${rolePill(m.role)}
+          </button>`).join('')}
+      </div>
+      <div class="identity-actions"><button type="button" class="identity-link" data-join>I'm new here →</button></div>
+    `;
+    identityBody.querySelectorAll('[data-member]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const member = state.settings.members[btn.dataset.member];
+        if (!member) return;
+        if (member.role === 'owner') {
+          let valid = false;
+          try { valid = (await teamApi('check-token', { token: lsGet(OWNER_TOKEN_KEY) })).valid; } catch (e) {}
+          if (!valid) {
+            renderIdentity('owner-pin', member);
+            return;
+          }
+        }
+        setCurrentUser(member);
+        closeIdentityModal();
+        showToast(`Hi ${member.name}!`, 'success');
+      });
+    });
+    identityBody.querySelector('[data-join]').addEventListener('click', () => renderIdentity('join'));
+  }
+
+  // ---- Profile: your role, role requests, switch person ---------------------
+  function renderProfile() {
+    const me = state.currentUser;
+    let html = `
+      <div style="display:flex; gap:12px; align-items:center;">
+        ${avatarHtml(me, 44)}
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <strong style="font-size:1rem;">${escapeHtml(me.name)}</strong>
+          <div>${rolePill(me.role)}</div>
+        </div>
+      </div>`;
+
+    if (me.role === 'pending') {
+      html += me.requestedRole
+        ? `<div class="profile-status">Waiting for ${escapeHtml(ownerName())} to approve you as <strong>${escapeHtml(roleLabel(me.requestedRole))}</strong>. You can view the board and comment meanwhile.</div>`
+        : `<div class="profile-status">Your last request was declined. You can ask for a role again below.</div>`;
+    } else if (me.requestedRole) {
+      html += `<div class="profile-status">You asked to become <strong>${escapeHtml(roleLabel(me.requestedRole))}</strong>. Waiting for ${escapeHtml(ownerName())}.</div>`;
+    }
+
+    if (me.role === 'owner') {
+      html += `
+        <p class="identity-intro" style="margin-top:14px;">You're the owner. Give people roles and answer requests from the team button (the gear at the top right).</p>
+        <form id="profile-pin-form" novalidate>
+          <div class="team-section-title">Change owner PIN</div>
+          <div style="display:flex; gap:8px;">
+            <input class="form-input" name="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" placeholder="New PIN" style="flex:1; min-width:0;" />
+            <input class="form-input" name="pin2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" placeholder="Repeat" style="flex:1; min-width:0;" />
+            <button type="submit" class="btn btn-secondary">Change</button>
+          </div>
+          <div class="identity-error"></div>
+        </form>`;
+    } else {
+      const options = ['creator', 'reviewer', 'admin'].filter(r => r !== me.role);
+      html += `
+        <form id="profile-request-form" novalidate style="margin-top:14px;">
+          <div class="team-section-title">Ask for a different role</div>
+          <div style="display:flex; gap:8px;">
+            <select class="form-select" name="role" style="flex:1; min-width:0;">
+              ${options.map(r => `<option value="${r}"${r === me.requestedRole ? ' selected' : ''}>${escapeHtml(ROLE_DESCRIPTIONS[r])}</option>`).join('')}
+            </select>
+            <button type="submit" class="btn btn-primary">Send request</button>
+          </div>
+          <div class="identity-error"></div>
+        </form>`;
+    }
+    profileBody.innerHTML = html;
+
+    const requestForm = document.getElementById('profile-request-form');
+    if (requestForm) {
+      requestForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorEl = requestForm.querySelector('.identity-error');
+        errorEl.textContent = '';
+        try {
+          const res = await teamApi('request-role', { memberId: me.id, role: requestForm.elements.role.value });
+          state.settings.members[res.member.id] = res.member;
+          state.currentUser = res.member;
+          onTeamChanged();
+          showToast(`Request sent to ${ownerName()}`, 'success');
+        } catch (err) {
+          errorEl.textContent = err.message;
+        }
+      });
+    }
+
+    const pinForm = document.getElementById('profile-pin-form');
+    if (pinForm) {
+      pinForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorEl = pinForm.querySelector('.identity-error');
+        errorEl.textContent = '';
+        try {
+          if (pinForm.elements.pin.value !== pinForm.elements.pin2.value) throw new Error('The two PINs do not match.');
+          const res = await teamApi('change-pin', { token: lsGet(OWNER_TOKEN_KEY), newPin: pinForm.elements.pin.value });
+          lsSet(OWNER_TOKEN_KEY, res.token);
+          pinForm.reset();
+          showToast('Owner PIN changed. Other owner sign-ins were signed out.', 'success');
+        } catch (err) {
+          errorEl.textContent = err.message;
+        }
+      });
+    }
+  }
+
+  userSwitcherBtn.addEventListener('click', () => {
+    if (state.currentUser.id === 'guest') {
+      openIdentityModal();
+      return;
+    }
+    renderProfile();
+    profileModal.classList.add('active');
+  });
+  document.getElementById('profile-close').addEventListener('click', () => profileModal.classList.remove('active'));
+  document.getElementById('profile-done-btn').addEventListener('click', () => profileModal.classList.remove('active'));
+  document.getElementById('profile-switch-btn').addEventListener('click', () => {
+    profileModal.classList.remove('active');
+    lsSet(OWNER_TOKEN_KEY, null); // a shared computer should not stay signed in as owner
+    setCurrentUser(null);
+    openIdentityModal('pick');
+  });
+
+  // ---- Team modal: everyone can see it, only the owner can change it ---------
   document.getElementById('team-settings-btn').addEventListener('click', () => {
     populateTeamModal();
     teamModalOverlay.classList.add('active');
@@ -5215,42 +5825,145 @@
   teamModalClose.addEventListener('click', () => teamModalOverlay.classList.remove('active'));
   teamModalCancel.addEventListener('click', () => teamModalOverlay.classList.remove('active'));
 
-  function populateTeamModal() {
-    teamMembersList.innerHTML = '';
-    settingCreatorNoSelfPass.checked = state.settings.creatorCannotPassOwnWork;
+  async function runOwnerAction(body) {
+    try {
+      const res = await teamApi('owner-action', { ...body, token: lsGet(OWNER_TOKEN_KEY) });
+      applyTeamFromResponse(res.team);
+      return true;
+    } catch (err) {
+      if (err.status === 403) {
+        lsSet(OWNER_TOKEN_KEY, null);
+        teamModalOverlay.classList.remove('active');
+        showToast('Please sign in as the owner again.', 'warning');
+        openIdentityModal('owner-pin', teamOwner());
+      } else {
+        showToast(err.message, 'error');
+      }
+      populateTeamModal();
+      return false;
+    }
+  }
 
-    Object.values(state.settings.members).forEach(m => {
+  function populateTeamModal() {
+    const amOwner = isOwner();
+    teamOwnerNote.textContent = amOwner
+      ? "You're the owner. Changes here apply right away for everyone."
+      : `Only the owner (${ownerName()}) can change roles. To ask for a different role, click your name at the top right.`;
+
+    settingCreatorNoSelfPass.checked = state.settings.creatorCannotPassOwnWork;
+    settingCreatorNoSelfPass.disabled = !amOwner;
+
+    // Role requests
+    const requests = teamMembers().filter(m => m.requestedRole)
+      .sort((a, b) => String(a.requestedAt || '').localeCompare(String(b.requestedAt || '')));
+    teamRequestsSection.innerHTML = '';
+    if (requests.length > 0) {
+      teamRequestsSection.innerHTML = `<div class="team-section-title">Role requests (${requests.length})</div>`;
+      const list = document.createElement('div');
+      list.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+      requests.forEach(m => {
+        const row = document.createElement('div');
+        row.className = 'team-row';
+        row.innerHTML = `
+          ${avatarHtml(m)}
+          <div class="team-row-name">
+            <strong>${escapeHtml(m.name)}</strong>
+            <span>${m.role === 'pending' ? 'New to the team' : 'Currently ' + escapeHtml(roleLabel(m.role))} · asks for <strong>${escapeHtml(roleLabel(m.requestedRole))}</strong></span>
+          </div>
+          <div class="team-row-actions">
+            ${amOwner
+              ? `<button class="btn btn-success btn-sm" data-accept>Accept</button><button class="btn btn-secondary btn-sm" data-decline>Decline</button>`
+              : `<span class="role-pill pending">Waiting for owner</span>`}
+          </div>`;
+        if (amOwner) {
+          row.querySelector('[data-accept]').addEventListener('click', async () => {
+            if (await runOwnerAction({ action: 'accept-request', memberId: m.id })) {
+              showToast(`${m.name} is now ${roleLabel(m.requestedRole)}`, 'success');
+            }
+          });
+          row.querySelector('[data-decline]').addEventListener('click', async () => {
+            if (await runOwnerAction({ action: 'decline-request', memberId: m.id })) {
+              showToast(`Declined ${m.name}'s request`, 'info');
+            }
+          });
+        }
+        list.appendChild(row);
+      });
+      teamRequestsSection.appendChild(list);
+    }
+
+    // Members
+    teamMembersList.innerHTML = '';
+    sortedMembers().forEach(m => {
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:var(--bg-subtle); padding:8px 12px; border-radius:var(--radius-sm);';
+      row.className = 'team-row';
+      const isTheOwner = m.id === state.settings.ownerId;
+      let actions = rolePill(m.role);
+      if (amOwner && !isTheOwner) {
+        actions = `
+          <select class="form-select" data-role style="height:28px; padding:0 8px; font-size:0.75rem;" aria-label="Role for ${escapeHtml(m.name)}">
+            ${m.role === 'pending' ? '<option value="pending" selected disabled>Pending</option>' : ''}
+            ${['creator', 'reviewer', 'admin'].map(r => `<option value="${r}"${m.role === r ? ' selected' : ''}>${escapeHtml(roleLabel(r))}</option>`).join('')}
+          </select>
+          <button class="btn btn-secondary btn-sm" data-remove title="Remove from team">Remove</button>`;
+      }
       row.innerHTML = `
-        <div style="display:flex; align-items:center; gap:8px;">
-          <div style="width:24px; height:24px; border-radius:50%; background:${m.color}; color:white; font-size:0.7rem; font-weight:700; display:flex; align-items:center; justify-content:center;">${m.name[0]}</div>
-          <span style="font-weight:700; font-size:0.85rem;">${escapeHtml(m.name)}</span>
+        ${avatarHtml(m)}
+        <div class="team-row-name">
+          <strong>${escapeHtml(m.name)}${m.id === state.currentUser.id ? ' (you)' : ''}</strong>
+          <span>${escapeHtml(isTheOwner ? 'Owner: manages roles' : (ROLE_DESCRIPTIONS[m.role] || 'Waiting for a role')).replace(/^[A-Za-z]+: /, '')}</span>
         </div>
-        <select class="form-select role-select" data-user="${m.id}" style="height:28px; font-size:0.75rem;">
-          <option value="creator" ${m.role === 'creator' ? 'selected' : ''}>Creator</option>
-          <option value="reviewer" ${m.role === 'reviewer' ? 'selected' : ''}>Reviewer</option>
-          <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Admin</option>
-        </select>
-      `;
+        <div class="team-row-actions">${actions}</div>`;
+      const roleSelect = row.querySelector('[data-role]');
+      if (roleSelect) {
+        roleSelect.addEventListener('change', async () => {
+          if (await runOwnerAction({ action: 'set-role', memberId: m.id, role: roleSelect.value })) {
+            showToast(`${m.name} is now ${roleLabel(roleSelect.value)}`, 'success');
+          }
+        });
+      }
+      const removeBtn = row.querySelector('[data-remove]');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', async () => {
+          if (!confirm(`Remove ${m.name} from the team? Their comments and history stay on the board.`)) return;
+          if (await runOwnerAction({ action: 'remove', memberId: m.id })) {
+            showToast(`Removed ${m.name}`, 'info');
+          }
+        });
+      }
       teamMembersList.appendChild(row);
     });
   }
 
-  teamModalSave.addEventListener('click', () => {
-    document.querySelectorAll('.role-select').forEach(sel => {
-      const uid = sel.dataset.user;
-      if (state.settings.members[uid]) {
-        state.settings.members[uid].role = sel.value;
-      }
-    });
-
-    state.settings.creatorCannotPassOwnWork = settingCreatorNoSelfPass.checked;
-    putToStore('settings', { key: 'team', value: state.settings });
-    teamModalOverlay.classList.remove('active');
-    updateUserSwitcherUI();
-    showToast('Team roles and permissions saved!', 'success');
+  settingCreatorNoSelfPass.addEventListener('change', async () => {
+    if (!isOwner()) return;
+    if (await runOwnerAction({ action: 'set-rule', value: settingCreatorNoSelfPass.checked })) {
+      showToast('QC rule updated for everyone', 'success');
+    }
   });
+
+  // Decide who is using this browser once the shared data has loaded.
+  async function resolveIdentity() {
+    if (!dbInstance) return; // server unreachable; initDatabase already warned
+    if (!state.settings.ownerId) {
+      openIdentityModal('setup');
+      return;
+    }
+    const saved = state.settings.members[lsGet(MEMBER_ID_KEY)];
+    if (!saved) {
+      openIdentityModal('pick');
+      return;
+    }
+    if (saved.role === 'owner') {
+      let valid = false;
+      try { valid = (await teamApi('check-token', { token: lsGet(OWNER_TOKEN_KEY) })).valid; } catch (e) {}
+      if (!valid) {
+        openIdentityModal('owner-pin', saved);
+        return;
+      }
+    }
+    setCurrentUser(saved);
+  }
 
   // -------------------------------------------------------------------
   // 12. THEME & USER GUIDE MODAL
@@ -5678,7 +6391,18 @@
     }
   });
 
+  // Tracker imports are system writes: they run for everyone, including
+  // people still waiting for the owner to approve their role.
   async function parseAndSyncWorkbook(arrayBufferOrBinary, isManual = false) {
+    systemWriteDepth++;
+    try {
+      return await parseAndSyncWorkbookUnguarded(arrayBufferOrBinary, isManual);
+    } finally {
+      systemWriteDepth--;
+    }
+  }
+
+  async function parseAndSyncWorkbookUnguarded(arrayBufferOrBinary, isManual = false) {
     if (typeof XLSX === 'undefined') {
       throw new Error('SheetJS library is not loaded');
     }
@@ -6569,6 +7293,7 @@
   }
 
   function openLibraryEditor(item) {
+    if (!ensureCanEdit('libraries')) return;
     const isNew = !item;
     const type = isNew ? libUI.activeType : item.type;
     const def = LIBRARY_TYPES[type];
@@ -6648,6 +7373,7 @@
   }
 
   function saveLibraryEditor() {
+    if (!ensureCanEdit('libraries')) return;
     const item = libUI.editing;
     if (!item) return;
     const def = LIBRARY_TYPES[item.type];
@@ -6670,6 +7396,7 @@
   }
 
   function deleteLibraryEditorItem() {
+    if (!ensureCanEdit('libraries')) return;
     const item = libUI.editing;
     if (!item) return;
     const def = LIBRARY_TYPES[item.type];
@@ -6711,6 +7438,7 @@
   // Seed libraries from what the tracker already contains: model names from
   // "Character", paired products from "Paired With", and repeated "Note" text.
   function fillLibrariesFromTracker() {
+    if (!ensureCanEdit('libraries')) return;
     const cards = Array.from(state.cards.values());
     const knownModels = new Set(libItemsOfType('model').map(m => (m.name || '').trim().toLowerCase()));
     const knownProducts = new Set(libItemsOfType('product').map(p => productKeyFromUrl(p.url)).filter(Boolean));
@@ -6785,13 +7513,8 @@
   setupDropzoneListeners(libEditorDropzone, addLibraryEditorImages);
 
   initDatabase().then(() => {
-    // Populate Assignees filter
-    Object.values(state.settings.members).forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m.id;
-      opt.textContent = m.name;
-      filterAssigneeSelect.appendChild(opt);
-    });
+    refreshAssigneeFilter();
+    resolveIdentity();
 
     // Populate board select dropdown (if legacy selector exists)
     if (boardSelect && boardSelect.id === 'board-select') {

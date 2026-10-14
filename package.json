@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "set-owner-pin": "node server.js --set-owner-pin"
   },
   "dependencies": {
     "xlsx": "^0.18.5"
