@@ -7251,6 +7251,7 @@
     '90° side profile waist-up',
     'USP close-up (neck to waist/chest)',
     'Full body',
+    'Back view',
     'Other'
   ];
 
@@ -7910,6 +7911,9 @@
       lines.push(`Paired with: ${sentence(p.name)}${p.snippet ? ' ' + sentence(p.snippet) : ''}`);
     });
     lines.push(`Pose (${pose.poseGroup || 'pose'}): ${sentence(pose.snippet || pose.name)}`);
+    if (pose.poseGroup === 'Back view') {
+      lines.push('Back view: the model faces away from the camera. Show the back of the garment exactly as in the product photos; if no back photo is given, do not invent prints, logos or seams on the back.');
+    }
     if (bg) lines.push(`Background and lighting: ${sentence(bg.snippet || bg.name)}`);
     job.propIds.map(libItem).filter(Boolean).forEach(pr => {
       lines.push(`Prop: ${sentence(pr.name + (pr.placement ? ', ' + pr.placement.trim() : ''))}${pr.snippet ? ' ' + sentence(pr.snippet) : ''}`);
