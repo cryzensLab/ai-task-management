@@ -1855,6 +1855,193 @@
     .lib-dropzone.drag-active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
 
     /* =====================================================================
+       CARD DRAWER TABS: JOB SETUP & PROMPTS
+       ===================================================================== */
+    .drawer-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+    }
+    .drawer-tab {
+      border: none;
+      background: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 10px 12px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .drawer-tab:hover { color: var(--text-main); }
+    .drawer-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .drawer-tab-hint {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      background: var(--bg-muted);
+      color: var(--text-muted);
+    }
+    .drawer-tab-hint:empty { display: none; }
+    .drawer-tab-hint.warn { background: var(--warning-light); color: #b45309; }
+
+    .drawer-tab-pane { display: none; flex-direction: column; gap: 20px; }
+    .drawer-tab-pane.active { display: flex; }
+
+    .job-section {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .job-section-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .job-section-title { font-size: 0.82rem; font-weight: 800; color: var(--text-main); }
+    .job-section-sub { font-size: 0.74rem; color: var(--text-muted); line-height: 1.45; }
+    .job-row { display: flex; align-items: center; gap: 10px; }
+    .job-row > select, .job-row > .form-select { flex: 1; min-width: 0; }
+    .job-thumb {
+      width: 44px;
+      height: 56px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      object-position: top;
+      background: var(--bg-muted);
+      flex-shrink: 0;
+      cursor: zoom-in;
+    }
+    .job-warn { font-size: 0.74rem; color: #b45309; font-weight: 600; }
+    [data-theme="dark"] .job-warn { color: #fcd34d; }
+
+    .chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+      padding: 3px 4px 3px 10px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+    .chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chip button {
+      border: none;
+      background: var(--bg-muted);
+      color: var(--text-muted);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.7rem;
+      line-height: 18px;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .chip button:hover { background: var(--danger); color: #fff; }
+
+    .shot-group { display: flex; flex-direction: column; gap: 4px; }
+    .shot-group-title { font-size: 0.74rem; font-weight: 800; color: var(--text-muted); margin-top: 4px; }
+    .shot-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .shot-option:has(input:checked) { border-color: var(--primary); background: var(--primary-light); }
+    .shot-option .lib-code { margin-left: auto; }
+
+    .tracker-box {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 4px 10px;
+    }
+    .tracker-box dt { font-weight: 700; color: var(--text-main); }
+    .tracker-box dd { margin: 0; word-break: break-word; }
+    .tracker-box a { color: var(--primary); }
+
+    .ref-list { display: flex; flex-direction: column; gap: 6px; }
+    .ref-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+    }
+    .ref-num {
+      flex-shrink: 0;
+      min-width: 58px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .ref-thumbs { display: flex; gap: 4px; flex-shrink: 0; }
+    .ref-thumbs img { width: 30px; height: 38px; object-fit: cover; object-position: top; border-radius: 4px; cursor: zoom-in; background: var(--bg-muted); }
+    .ref-label { flex: 1; min-width: 0; }
+    .ref-label strong { display: block; }
+    .ref-label span { color: var(--text-muted); font-size: 0.72rem; }
+    .ref-missing { color: #b45309; font-weight: 700; }
+
+    .shot-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      overflow: hidden;
+    }
+    .shot-card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .shot-card-title { flex: 1; min-width: 0; font-size: 0.82rem; font-weight: 800; }
+    .shot-card-title span { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+    .shot-card-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+    .shot-prompt {
+      width: 100%;
+      min-height: 220px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      line-height: 1.5;
+      resize: vertical;
+    }
+    .shot-edited { font-size: 0.7rem; font-weight: 700; color: #b45309; }
+    .prompt-warnings {
+      background: var(--warning-light);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: #92400e;
+      line-height: 1.5;
+    }
+    .prompt-warnings ul { margin: 4px 0 0 18px; padding: 0; }
+    [data-theme="dark"] .prompt-warnings { color: #fcd34d; }
+
+    /* =====================================================================
        TEAM, IDENTITY & ROLE REQUESTS
        ===================================================================== */
     .team-request-badge {
@@ -2320,7 +2507,14 @@
       </div>
     </div>
 
+    <div class="drawer-tabs" role="tablist">
+      <button class="drawer-tab active" data-drawer-tab="details" role="tab">Details</button>
+      <button class="drawer-tab" data-drawer-tab="job" role="tab">Job setup <span class="drawer-tab-hint" id="drawer-job-hint"></span></button>
+      <button class="drawer-tab" data-drawer-tab="prompts" role="tab">Prompts <span class="drawer-tab-hint" id="drawer-prompts-hint"></span></button>
+    </div>
+
     <div class="drawer-body">
+     <div class="drawer-tab-pane active" id="drawer-tab-details">
       <!-- Title & Basic Info -->
       <div class="form-group">
         <label>Listing Title / Product Name</label>
@@ -2464,6 +2658,13 @@
         </summary>
         <div class="timeline-list" id="drawer-activity-list" style="margin-top:8px;"></div>
       </details>
+     </div>
+
+     <!-- JOB SETUP: model, garment, pairing, background, props, presets, shots -->
+     <div class="drawer-tab-pane" id="drawer-tab-job"></div>
+
+     <!-- PROMPTS: reference order + one prompt per shot -->
+     <div class="drawer-tab-pane" id="drawer-tab-prompts"></div>
 
     </div>
   </div>
@@ -3124,6 +3325,8 @@
       if (settings && settings.length > 0) {
         const teamSetting = settings.find(s => s.key === 'team');
         if (teamSetting && teamSetting.value) state.settings = { ...DEFAULT_TEAM, ...teamSetting.value };
+        const styleSetting = settings.find(s => s.key === 'promptStyle');
+        state.promptStyle = styleSetting ? styleSetting.value : null;
       }
 
       // Restore persisted uploaded images into local session cache
@@ -3504,6 +3707,7 @@
         break;
       case 'settings':
         if (isPut && op.key === 'team' && item.value) state.settings = { ...DEFAULT_TEAM, ...item.value };
+        if (isPut && op.key === 'promptStyle') state.promptStyle = item.value;
         break;
       case 'uploaded_images':
         if (isPut && item.dataUrl) {
@@ -3542,6 +3746,9 @@
       if (touched.has('shapes')) requestWhiteboardRender();
       if (touched.has('settings')) onTeamChanged();
       if (touched.has('libraries')) renderLibrariesView();
+      if ((touched.has('libraries') || touched.has('settings')) && state.activeCardId && state.cards.get(state.activeCardId)) {
+        renderJobAndPrompts(state.cards.get(state.activeCardId));
+      }
     }, 120);
   }
 
@@ -4176,6 +4383,9 @@
     // Render Comments & Activity
     renderCardComments(card.id);
     renderCardActivity(card.id);
+
+    // Job setup & prompts tabs
+    renderJobAndPrompts(card);
   }
 
   // Save specs on change
@@ -7448,8 +7658,10 @@
     const productUrls = new Map();
     const noteCounts = new Map(); // normalized text -> { text, count }
     cards.forEach(card => {
+      // The tracker spells some names in different cases (Zayan / ZAYAN); keep the first spelling seen.
       const name = (card.character || '').trim();
-      if (name) modelCounts.set(name, (modelCounts.get(name) || 0) + 1);
+      const existingSpelling = Array.from(modelCounts.keys()).find(k => k.toLowerCase() === name.toLowerCase());
+      if (name) modelCounts.set(existingSpelling || name, (modelCounts.get(existingSpelling || name) || 0) + 1);
       String(card.pairedWith || '').split(/[\s,]+/).forEach(u => {
         const key = productKeyFromUrl(u);
         if (/^https?:\/\//i.test(u) && key && !productUrls.has(key)) productUrls.set(key, u.split(/[?#]/)[0]);
@@ -7511,6 +7723,550 @@
     e.target.value = '';
   });
   setupDropzoneListeners(libEditorDropzone, addLibraryEditorImages);
+
+  // -------------------------------------------------------------------
+  // JOB SETUP & PROMPT BUILDER
+  // Each card gets a job (model, garment description, pairings, background,
+  // props, note presets, shots). Prompts are assembled from the matching
+  // library blocks in a fixed order, one per shot. Reference images are
+  // numbered in the order they should be added to Flow; the pose reference
+  // always goes last so only that image changes between shots.
+  // -------------------------------------------------------------------
+  const DEFAULT_PROMPT_STYLE = {
+    constants: 'Professional e-commerce fashion photograph. Photorealistic, sharp focus, true-to-life colours, natural skin texture, clean studio lighting, high resolution.',
+    avoid: 'Do not change the garment design, colour, print, logo or fit. Do not add accessories or props that are not listed. No text, watermarks or distorted hands.'
+  };
+  const MAX_PRODUCT_PHOTOS = 3;
+
+  const drawerTabButtons = document.querySelectorAll('.drawer-tab');
+  const drawerJobPane = document.getElementById('drawer-tab-job');
+  const drawerPromptsPane = document.getElementById('drawer-tab-prompts');
+  const drawerJobHint = document.getElementById('drawer-job-hint');
+  const drawerPromptsHint = document.getElementById('drawer-prompts-hint');
+  let activeDrawerTab = 'details';
+
+  function setDrawerTab(tab) {
+    activeDrawerTab = tab;
+    drawerTabButtons.forEach(b => b.classList.toggle('active', b.dataset.drawerTab === tab));
+    document.querySelectorAll('.drawer-tab-pane').forEach(p => p.classList.toggle('active', p.id === 'drawer-tab-' + tab));
+    const card = state.activeCardId && state.cards.get(state.activeCardId);
+    if (card) renderJobAndPrompts(card, true);
+  }
+  drawerTabButtons.forEach(btn => btn.addEventListener('click', () => setDrawerTab(btn.dataset.drawerTab)));
+
+  function getPromptStyle() {
+    return { ...DEFAULT_PROMPT_STYLE, ...(state.promptStyle || {}) };
+  }
+
+  function libItem(id) {
+    return id ? state.libraries.get(id) || null : null;
+  }
+
+  function emptyJob() {
+    return {
+      modelId: '', garmentLock: '', pairedIds: [], backgroundId: '', propIds: [],
+      presetIds: [], extraNotes: '', shotIds: [], shotEdits: {}
+    };
+  }
+
+  // Match the tracker columns (Character, Paired With, Note) to library items.
+  function suggestFromTracker(card) {
+    const out = { modelId: '', pairedIds: [], presetIds: [], extraNotes: '' };
+    const character = (card.character || '').trim().toLowerCase();
+    const model = character && libItemsOfType('model').find(m => (m.name || '').trim().toLowerCase() === character);
+    if (model) out.modelId = model.id;
+
+    const pairedKeys = String(card.pairedWith || '').split(/[\s,]+/).map(productKeyFromUrl).filter(Boolean);
+    out.pairedIds = libItemsOfType('product').filter(p => p.url && pairedKeys.includes(productKeyFromUrl(p.url))).map(p => p.id);
+
+    const noteKey = normalizeNoteText(card.notes);
+    const preset = noteKey && libItemsOfType('preset').find(p => normalizeNoteText(p.snippet) === noteKey);
+    if (preset) out.presetIds = [preset.id];
+    else if (card.notes) out.extraNotes = String(card.notes).trim();
+    return out;
+  }
+
+  function suggestJobFromTracker(card) {
+    const job = { ...emptyJob(), ...suggestFromTracker(card) };
+    // If this product is itself in the Products library (same SKU), reuse its garment lock.
+    const own = libItemsOfType('product').find(p => p.code && card.sku && p.code.trim().toLowerCase() === String(card.sku).trim().toLowerCase());
+    if (own && own.snippet) job.garmentLock = own.snippet;
+    const backgrounds = libItemsOfType('background');
+    if (backgrounds.length === 1) job.backgroundId = backgrounds[0].id;
+    return job;
+  }
+
+  function getJob(card) {
+    if (!card.job) return suggestJobFromTracker(card);
+    const job = { ...emptyJob(), ...card.job };
+    job.shotEdits = { ...(card.job.shotEdits || {}) };
+    return job;
+  }
+
+  // Always write through the card currently in state: the drawer may hold an
+  // older object if the card was reloaded, and saving that would drop newer changes.
+  function liveCard(card) {
+    return state.cards.get(card.id) || card;
+  }
+
+  function saveJob(card, job) {
+    const live = liveCard(card);
+    if (!ensureCanEdit('cards')) {
+      renderJobAndPrompts(live, true);
+      return false;
+    }
+    live.job = job;
+    live.updatedAt = new Date().toISOString();
+    state.cards.set(live.id, live);
+    putToStore('cards', live);
+    return true;
+  }
+
+  function orderedShots(job) {
+    return job.shotIds
+      .map(id => libItem(id))
+      .filter(p => p && p.type === 'pose')
+      .sort((a, b) => {
+        const ga = POSE_GROUPS.indexOf(a.poseGroup), gb = POSE_GROUPS.indexOf(b.poseGroup);
+        if (ga !== gb) return (ga < 0 ? 99 : ga) - (gb < 0 ? 99 : gb);
+        return (a.code || a.name || '').localeCompare(b.code || b.name || '', undefined, { numeric: true });
+      });
+  }
+
+  function firstImageUrl(item) {
+    return item && item.images && item.images.length ? item.images[0].url : null;
+  }
+
+  // Reference images shared by every shot, numbered in upload order.
+  function buildReferences(card, job) {
+    const refs = [];
+    let next = 1;
+    // Only images that actually exist get a number, so the numbering always
+    // matches what gets uploaded to Flow; items without one are described in text.
+    const add = (ref, urls) => {
+      const count = urls.length;
+      ref.urls = urls;
+      if (count > 0) {
+        ref.start = next;
+        ref.end = next + count - 1;
+        ref.range = count > 1 ? `Images ${ref.start}–${ref.end}` : `Image ${ref.start}`;
+        next += count;
+      }
+      refs.push(ref);
+    };
+
+    const model = libItem(job.modelId);
+    if (model) {
+      const url = firstImageUrl(model);
+      add({ kind: 'model', label: model.name, detail: 'Model', missing: !url,
+        promptLine: `${model.name} (model). Use this exact person: face, hair, skin tone and body shape.` }, url ? [url] : []);
+    }
+
+    const productUrls = (card.rawFiles || []).map(rf => resolveImageURL(rf)).filter(Boolean).slice(0, MAX_PRODUCT_PHOTOS);
+    add({ kind: 'product', label: card.name || 'This product', detail: 'This product' + ((card.rawFiles || []).length > MAX_PRODUCT_PHOTOS ? ` (first ${MAX_PRODUCT_PHOTOS} photos)` : ''),
+      missing: productUrls.length === 0,
+      promptLine: `${card.name || 'the product'} (the product being listed). Reproduce this garment exactly: fit, length, colour, fabric texture, closures, stitching and details.` }, productUrls);
+
+    job.pairedIds.map(libItem).filter(Boolean).forEach(p => {
+      const url = firstImageUrl(p);
+      add({ kind: 'paired', label: p.name, detail: `Paired ${(p.category || 'item').toLowerCase()}`, missing: !url,
+        promptLine: `${p.name} (paired ${(p.category || 'item').toLowerCase()}). Style it together with the main product.` }, url ? [url] : []);
+    });
+
+    const bg = libItem(job.backgroundId);
+    if (bg && firstImageUrl(bg)) {
+      add({ kind: 'background', label: bg.name, detail: 'Background',
+        promptLine: `${bg.name} (background reference). Match this backdrop and its lighting.` }, [firstImageUrl(bg)]);
+    }
+
+    job.propIds.map(libItem).filter(Boolean).forEach(pr => {
+      const url = firstImageUrl(pr);
+      if (url) add({ kind: 'prop', label: pr.name, detail: 'Prop', promptLine: `${pr.name} (prop).` }, [url]);
+    });
+
+    return { refs, poseIndex: next };
+  }
+
+  function buildShotPrompt(card, job, pose, refInfo) {
+    const style = getPromptStyle();
+    const model = libItem(job.modelId);
+    const bg = libItem(job.backgroundId);
+    const lines = [];
+
+    lines.push('Reference images:');
+    refInfo.refs.filter(r => r.range).forEach(r => lines.push(`- ${r.range}: ${r.promptLine}`));
+    if (firstImageUrl(pose)) {
+      lines.push(`- Image ${refInfo.poseIndex}: pose reference. Copy only the pose, body angle and framing, not the person or the clothing.`);
+    }
+    lines.push('');
+    if (style.constants) lines.push(style.constants, '');
+
+    // Library text may or may not end with a full stop; normalise to exactly one.
+    const sentence = (t) => String(t).trim().replace(/[\s.]+$/, '') + '.';
+
+    if (model) lines.push(`Model: ${sentence(model.snippet || `the person in the ${model.name} reference`)} Keep the face and body identical to the model reference.`);
+    lines.push(`Outfit: ${sentence(card.name || 'the product')} ${sentence(job.garmentLock || 'Reproduce the garment exactly as in the product photos')}`);
+    job.pairedIds.map(libItem).filter(Boolean).forEach(p => {
+      lines.push(`Paired with: ${sentence(p.name)}${p.snippet ? ' ' + sentence(p.snippet) : ''}`);
+    });
+    lines.push(`Pose (${pose.poseGroup || 'pose'}): ${sentence(pose.snippet || pose.name)}`);
+    if (bg) lines.push(`Background and lighting: ${sentence(bg.snippet || bg.name)}`);
+    job.propIds.map(libItem).filter(Boolean).forEach(pr => {
+      lines.push(`Prop: ${sentence(pr.name + (pr.placement ? ', ' + pr.placement.trim() : ''))}${pr.snippet ? ' ' + sentence(pr.snippet) : ''}`);
+    });
+
+    const instructions = job.presetIds.map(libItem).filter(Boolean).map(p => (p.snippet || p.name).trim());
+    if (job.extraNotes && job.extraNotes.trim()) instructions.push(job.extraNotes.trim());
+    if (instructions.length) {
+      lines.push('', 'Client instructions:');
+      instructions.forEach(t => lines.push(`- ${t}`));
+    }
+    if (style.avoid) lines.push('', `Avoid: ${style.avoid}`);
+    return lines.join('\n');
+  }
+
+  function jobWarnings(card, job, refInfo, shots) {
+    const w = [];
+    const model = libItem(job.modelId);
+    if (!model) w.push('No model chosen.');
+    else {
+      if (!model.snippet) w.push(`${model.name} has no identity lock text in Libraries → Models.`);
+      if (!firstImageUrl(model)) w.push(`${model.name} has no reference image in Libraries → Models.`);
+    }
+    if (!(card.rawFiles || []).length) w.push('No raw product photos on the Details tab.');
+    if (!job.garmentLock) w.push('No garment description for this product (Job setup → This product).');
+    refInfo.refs.filter(r => r.kind === 'paired' && r.missing).forEach(r => w.push(`Paired product "${r.label}" has no image in Libraries → Products.`));
+    shots.filter(p => !p.snippet).forEach(p => w.push(`Pose "${p.name}" has no prompt text in Libraries → Poses.`));
+    return w;
+  }
+
+  function goToLibrary(type) {
+    closeCardDrawer();
+    libUI.activeType = type;
+    document.getElementById('tab-libraries').click();
+  }
+
+  // Re-render the job and prompt panes. Skips a pane the user is typing in,
+  // unless forced, so live updates from teammates don't steal focus.
+  function renderJobAndPrompts(card, force) {
+    const job = getJob(card);
+    const shots = orderedShots(job);
+    drawerJobHint.textContent = !job.modelId ? 'no model' : shots.length ? `${shots.length} shot${shots.length > 1 ? 's' : ''}` : 'no shots';
+    drawerJobHint.classList.toggle('warn', !job.modelId || !shots.length);
+    drawerPromptsHint.textContent = shots.length ? String(shots.length) : '';
+
+    const typingIn = (pane) => !force && pane.contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if (activeDrawerTab === 'job' && !typingIn(drawerJobPane)) renderJobSetup(card);
+    if (activeDrawerTab === 'prompts' && !typingIn(drawerPromptsPane)) renderPrompts(card);
+  }
+
+  function libOptionLabel(item) {
+    return (item.code ? item.code + ' · ' : '') + (item.name || 'Untitled');
+  }
+
+  function renderJobSetup(card) {
+    const job = getJob(card);
+    const editable = canCurrentUserWrite('cards');
+    const dis = editable ? '' : ' disabled';
+    const models = libItemsOfType('model').sort((a, b) => libOptionLabel(a).localeCompare(libOptionLabel(b), undefined, { numeric: true }));
+    const backgrounds = libItemsOfType('background');
+    const model = libItem(job.modelId);
+    const modelImg = firstImageUrl(model);
+    const poses = libItemsOfType('pose');
+
+    const linkList = (text) => String(text || '').split(/[\s,]+/).filter(u => /^https?:\/\//i.test(u))
+      .map(u => `<a href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer">${escapeHtml(u.replace(/^https?:\/\/(www\.)?/, '').split(/[?#]/)[0].slice(0, 60))}</a>`).join('<br>');
+
+    const trackerRows = [
+      ['Character', escapeHtml(card.character ? card.character + (card.characterTag ? ` (${card.characterTag})` : '') : '')],
+      ['Paired with', linkList(card.pairedWith)],
+      ['Pose refs', linkList((card.poseLinks || []).join(' '))],
+      ['Note', escapeHtml(card.notes || '')],
+      ['Ref photos', escapeHtml(card.referenceNote || '')]
+    ].filter(([, v]) => v);
+
+    drawerJobPane.innerHTML = `
+      ${!card.job ? `<div class="team-owner-note">Filled in from the tracker where it matched the libraries. Check it; your first change saves it to this card.</div>` : ''}
+
+      <div class="job-section">
+        <div class="job-section-head"><span class="job-section-title">Model</span>
+          ${models.length ? '' : `<button class="identity-link" data-go-lib="model">Add models in Libraries →</button>`}</div>
+        <div class="job-row">
+          ${modelImg ? `<img class="job-thumb" src="${escapeHtml(modelImg)}" alt="" data-zoom="${escapeHtml(modelImg)}" />` : ''}
+          <select class="form-select" data-field="modelId"${dis}>
+            <option value="">Choose a model…</option>
+            ${models.map(m => `<option value="${escapeHtml(m.id)}"${m.id === job.modelId ? ' selected' : ''}>${escapeHtml(libOptionLabel(m))}</option>`).join('')}
+          </select>
+        </div>
+        ${model && !model.snippet ? `<span class="job-warn">${escapeHtml(model.name)} has no identity lock text yet. <button class="identity-link" data-go-lib="model">Add it in Libraries</button></span>` : ''}
+      </div>
+
+      <div class="job-section">
+        <span class="job-section-title">This product</span>
+        <span class="job-section-sub">${(card.rawFiles || []).length} raw photo${(card.rawFiles || []).length === 1 ? '' : 's'} on the Details tab; the first ${MAX_PRODUCT_PHOTOS} are used as references.</span>
+        <textarea class="form-textarea" rows="3" data-field="garmentLock" placeholder="Garment lock: fit, length, fabric, colour, closures, prints, details. Only what is visible in the photos."${dis}>${escapeHtml(job.garmentLock)}</textarea>
+      </div>
+
+      <div class="job-section">
+        <div class="job-section-head"><span class="job-section-title">Paired with</span></div>
+        <div class="chip-list" data-chips="pairedIds"></div>
+        <select class="form-select" data-add="pairedIds" data-type="product"${dis}></select>
+      </div>
+
+      <div class="job-section">
+        <span class="job-section-title">Background</span>
+        <select class="form-select" data-field="backgroundId"${dis}>
+          <option value="">${backgrounds.length ? 'No background block' : 'No backgrounds in Libraries yet'}</option>
+          ${backgrounds.map(b => `<option value="${escapeHtml(b.id)}"${b.id === job.backgroundId ? ' selected' : ''}>${escapeHtml(libOptionLabel(b))}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="job-section">
+        <span class="job-section-title">Props</span>
+        <div class="chip-list" data-chips="propIds"></div>
+        <select class="form-select" data-add="propIds" data-type="prop"${dis}></select>
+      </div>
+
+      <div class="job-section">
+        <span class="job-section-title">Instructions</span>
+        <div class="chip-list" data-chips="presetIds"></div>
+        <select class="form-select" data-add="presetIds" data-type="preset"${dis}></select>
+        <textarea class="form-textarea" rows="2" data-field="extraNotes" placeholder="Anything else specific to this job"${dis}>${escapeHtml(job.extraNotes)}</textarea>
+      </div>
+
+      <div class="job-section">
+        <div class="job-section-head">
+          <span class="job-section-title">Shots (${orderedShots(job).length})</span>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-secondary btn-sm" data-shots="standard"${dis}>One of each pose</button>
+            <button class="btn btn-secondary btn-sm" data-shots="clear"${dis}>Clear</button>
+          </div>
+        </div>
+        ${poses.length ? '' : `<span class="job-section-sub">No poses yet. <button class="identity-link" data-go-lib="pose">Add poses in Libraries →</button></span>`}
+        <div data-shot-list></div>
+      </div>
+
+      ${trackerRows.length ? `
+      <div class="job-section">
+        <div class="job-section-head"><span class="job-section-title">From the tracker</span>
+          <button class="btn btn-secondary btn-sm" data-rematch${dis}>Match again</button></div>
+        <dl class="tracker-box">${trackerRows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+      </div>` : ''}
+    `;
+
+    const update = (mutator) => {
+      const next = getJob(liveCard(card));
+      mutator(next);
+      if (saveJob(card, next)) renderJobAndPrompts(liveCard(card), true);
+    };
+
+    drawerJobPane.querySelectorAll('[data-field]').forEach(el => {
+      el.addEventListener('change', () => update(j => { j[el.dataset.field] = el.value; }));
+    });
+
+    // Chip pickers (paired products, props, presets)
+    drawerJobPane.querySelectorAll('[data-chips]').forEach(list => {
+      const field = list.dataset.chips;
+      job[field].map(libItem).filter(Boolean).forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = `<span title="${escapeHtml(item.snippet || item.name)}">${escapeHtml(libOptionLabel(item))}</span>${editable ? '<button type="button" aria-label="Remove">✕</button>' : ''}`;
+        const btn = chip.querySelector('button');
+        if (btn) btn.addEventListener('click', () => update(j => { j[field] = j[field].filter(id => id !== item.id); }));
+        list.appendChild(chip);
+      });
+    });
+    drawerJobPane.querySelectorAll('[data-add]').forEach(sel => {
+      const field = sel.dataset.add;
+      const type = sel.dataset.type;
+      const available = libItemsOfType(type).filter(it => !job[field].includes(it.id))
+        .sort((a, b) => libOptionLabel(a).localeCompare(libOptionLabel(b), undefined, { numeric: true }));
+      const emptyLabel = libItemsOfType(type).length
+        ? 'All ' + LIBRARY_TYPES[type].label.toLowerCase() + ' already added'
+        : 'No ' + LIBRARY_TYPES[type].label.toLowerCase() + ' in Libraries yet';
+      sel.innerHTML = `<option value="">${available.length ? '+ Add ' + LIBRARY_TYPES[type].singular + '…' : emptyLabel}</option>` +
+        available.map(it => `<option value="${escapeHtml(it.id)}">${escapeHtml(libOptionLabel(it))}${it.category ? ' (' + escapeHtml(it.category) + ')' : ''}</option>`).join('');
+      sel.addEventListener('change', () => {
+        if (!sel.value) return;
+        const id = sel.value;
+        update(j => { if (!j[field].includes(id)) j[field].push(id); });
+      });
+    });
+
+    // Shot checklist grouped by pose
+    const shotList = drawerJobPane.querySelector('[data-shot-list]');
+    POSE_GROUPS.forEach(group => {
+      const groupPoses = poses.filter(p => (p.poseGroup || 'Other') === group)
+        .sort((a, b) => (a.code || '').localeCompare(b.code || '', undefined, { numeric: true }));
+      if (!groupPoses.length) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'shot-group';
+      wrap.innerHTML = `<div class="shot-group-title">${escapeHtml(group)}</div>` + groupPoses.map(p => `
+        <label class="shot-option">
+          <input type="checkbox" value="${escapeHtml(p.id)}"${job.shotIds.includes(p.id) ? ' checked' : ''}${dis} />
+          <span>${escapeHtml(p.name)}</span>
+          ${p.code ? `<span class="lib-code">${escapeHtml(p.code)}</span>` : ''}
+        </label>`).join('');
+      wrap.querySelectorAll('input').forEach(cb => {
+        cb.addEventListener('change', () => update(j => {
+          j.shotIds = cb.checked ? Array.from(new Set([...j.shotIds, cb.value])) : j.shotIds.filter(id => id !== cb.value);
+        }));
+      });
+      shotList.appendChild(wrap);
+    });
+
+    drawerJobPane.querySelectorAll('[data-shots]').forEach(btn => {
+      btn.addEventListener('click', () => update(j => {
+        if (btn.dataset.shots === 'clear') { j.shotIds = []; return; }
+        const picks = [];
+        POSE_GROUPS.filter(g => g !== 'Other').forEach(group => {
+          const first = poses.filter(p => p.poseGroup === group)
+            .sort((a, b) => (a.code || '').localeCompare(b.code || '', undefined, { numeric: true }))[0];
+          if (first) picks.push(first.id);
+        });
+        j.shotIds = picks;
+      }));
+    });
+
+    const rematch = drawerJobPane.querySelector('[data-rematch]');
+    if (rematch) {
+      rematch.addEventListener('click', () => {
+        const s = suggestFromTracker(liveCard(card));
+        if (!confirm('Replace the model, paired products and instructions with what matches the tracker? Shots, background, props and the garment description stay as they are.')) return;
+        update(j => { Object.assign(j, s); });
+        showToast('Matched again from the tracker', 'success');
+      });
+    }
+
+    drawerJobPane.querySelectorAll('[data-go-lib]').forEach(b => b.addEventListener('click', () => goToLibrary(b.dataset.goLib)));
+    drawerJobPane.querySelectorAll('[data-zoom]').forEach(img => img.addEventListener('click', () => openImageZoomModal(img.dataset.zoom, '')));
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed; opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+  }
+
+  function renderPrompts(card) {
+    const job = getJob(card);
+    const shots = orderedShots(job);
+    if (!shots.length) {
+      drawerPromptsPane.innerHTML = `
+        <div class="lib-empty"><strong>No shots chosen yet</strong>Pick the model and poses on the Job setup tab, and the prompts appear here.
+        <div style="margin-top:12px;"><button class="btn btn-primary btn-sm" data-open-job>Go to Job setup</button></div></div>`;
+      drawerPromptsPane.querySelector('[data-open-job]').addEventListener('click', () => setDrawerTab('job'));
+      return;
+    }
+
+    const refInfo = buildReferences(card, job);
+    const warnings = jobWarnings(card, job, refInfo, shots);
+    const style = getPromptStyle();
+    const canEditStyle = canCurrentUserWrite('settings');
+    const generated = new Map(shots.map(p => [p.id, buildShotPrompt(card, job, p, refInfo)]));
+    const promptFor = (p) => job.shotEdits[p.id] || generated.get(p.id);
+
+    drawerPromptsPane.innerHTML = `
+      ${warnings.length ? `<div class="prompt-warnings"><strong>Fix these for better results:</strong><ul>${warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul></div>` : ''}
+
+      <div class="job-section">
+        <div class="job-section-head">
+          <span class="job-section-title">Add these to Flow in this order</span>
+          <button class="btn btn-primary btn-sm" data-copy-all>Copy all ${shots.length} prompts</button>
+        </div>
+        <div class="ref-list">
+          ${refInfo.refs.filter(r => r.range || r.missing).map(r => `
+            <div class="ref-item">
+              <span class="ref-num">${r.range ? escapeHtml(r.range.replace('Images', 'Img').replace('Image', 'Img')) : '—'}</span>
+              <span class="ref-thumbs">${r.urls.map(u => `<img src="${escapeHtml(u)}" alt="" data-zoom="${escapeHtml(u)}" />`).join('')}</span>
+              <span class="ref-label"><strong>${escapeHtml(r.label)}</strong><span>${escapeHtml(r.detail)}${r.missing ? ' · <span class="ref-missing">no image yet, so not numbered; described in text only</span>' : ''}</span></span>
+            </div>`).join('')}
+          <div class="ref-item">
+            <span class="ref-num">Img ${refInfo.poseIndex}</span>
+            <span class="ref-label"><strong>Pose reference</strong><span>Changes for each shot below; the other images stay the same.</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div data-shot-cards style="display:flex; flex-direction:column; gap:14px;"></div>
+
+      <details class="job-section">
+        <summary class="job-section-title" style="cursor:pointer;">House style (used in every prompt, for every job)</summary>
+        <div class="form-group" style="margin:10px 0 0;"><label>Photo style constants</label>
+          <textarea class="form-textarea" rows="3" data-style="constants"${canEditStyle ? '' : ' disabled'}>${escapeHtml(style.constants)}</textarea></div>
+        <div class="form-group" style="margin:0;"><label>Always avoid</label>
+          <textarea class="form-textarea" rows="3" data-style="avoid"${canEditStyle ? '' : ' disabled'}>${escapeHtml(style.avoid)}</textarea></div>
+        ${canEditStyle ? '<div><button class="btn btn-secondary btn-sm" data-save-style>Save house style</button></div>' : ''}
+      </details>
+    `;
+
+    const cards = drawerPromptsPane.querySelector('[data-shot-cards]');
+    shots.forEach((pose, idx) => {
+      const poseImg = firstImageUrl(pose);
+      const edited = Boolean(job.shotEdits[pose.id]);
+      const el = document.createElement('div');
+      el.className = 'shot-card';
+      el.innerHTML = `
+        <div class="shot-card-head">
+          ${poseImg ? `<img class="job-thumb" src="${escapeHtml(poseImg)}" alt="" data-zoom="${escapeHtml(poseImg)}" style="width:34px; height:44px;" />` : ''}
+          <div class="shot-card-title">Shot ${idx + 1} · ${escapeHtml(pose.poseGroup || 'Pose')}<span>${escapeHtml(pose.name)}${pose.code ? ' (' + escapeHtml(pose.code) + ')' : ''}${poseImg ? ` · pose reference is Image ${refInfo.poseIndex}` : ' · no pose image'}</span></div>
+          <button class="btn btn-primary btn-sm" data-copy>Copy</button>
+        </div>
+        <div class="shot-card-body">
+          <textarea class="form-textarea shot-prompt" spellcheck="false">${escapeHtml(promptFor(pose))}</textarea>
+          <div style="display:flex; align-items:center; gap:10px; min-height:24px;">
+            ${edited ? `<span class="shot-edited">Edited by hand. Library changes won't update this shot.</span><button class="btn btn-secondary btn-sm" data-reset>Reset to generated</button>` : `<span class="job-section-sub">Edit freely; your changes are saved for this card.</span>`}
+          </div>
+        </div>`;
+      const ta = el.querySelector('textarea');
+      el.querySelector('[data-copy]').addEventListener('click', async () => {
+        await copyText(ta.value);
+        showToast(`Copied shot ${idx + 1} prompt`, 'success');
+      });
+      ta.addEventListener('change', () => {
+        const next = getJob(liveCard(card));
+        const value = ta.value;
+        if (value.trim() === generated.get(pose.id).trim() || !value.trim()) delete next.shotEdits[pose.id];
+        else next.shotEdits[pose.id] = value;
+        if (saveJob(card, next)) renderJobAndPrompts(liveCard(card), true);
+      });
+      const reset = el.querySelector('[data-reset]');
+      if (reset) reset.addEventListener('click', () => {
+        const next = getJob(liveCard(card));
+        delete next.shotEdits[pose.id];
+        if (saveJob(card, next)) renderJobAndPrompts(liveCard(card), true);
+      });
+      cards.appendChild(el);
+    });
+
+    drawerPromptsPane.querySelector('[data-copy-all]').addEventListener('click', async () => {
+      const text = shots.map((p, i) => `=== Shot ${i + 1}: ${p.poseGroup || 'Pose'} - ${p.name} ===\n${promptFor(p)}`).join('\n\n');
+      await copyText(text);
+      showToast(`Copied all ${shots.length} prompts`, 'success');
+    });
+
+    const saveStyleBtn = drawerPromptsPane.querySelector('[data-save-style]');
+    if (saveStyleBtn) saveStyleBtn.addEventListener('click', () => {
+      if (!ensureCanEdit('settings')) return;
+      state.promptStyle = {
+        constants: drawerPromptsPane.querySelector('[data-style="constants"]').value.trim(),
+        avoid: drawerPromptsPane.querySelector('[data-style="avoid"]').value.trim()
+      };
+      putToStore('settings', { key: 'promptStyle', value: state.promptStyle });
+      renderJobAndPrompts(card, true);
+      showToast('House style saved for every job', 'success');
+    });
+
+    drawerPromptsPane.querySelectorAll('[data-zoom]').forEach(img => img.addEventListener('click', () => openImageZoomModal(img.dataset.zoom, '')));
+  }
 
   initDatabase().then(() => {
     refreshAssigneeFilter();
