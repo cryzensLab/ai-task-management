@@ -553,10 +553,10 @@
       align-items: stretch;
     }
 
+    /* Columns share the board width equally; below their minimum the board scrolls sideways. */
     .kanban-column {
-      width: 284px;
-      min-width: 284px;
-      max-width: 284px;
+      flex: 1 1 0;
+      min-width: 220px;
       background: transparent;
       border: none;
       border-right: 1px solid var(--border-subtle);
@@ -2144,6 +2144,9 @@
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
+      /* One column fills most of a phone screen, with the next one peeking in. */
+      .kanban-board { scroll-snap-type: x mandatory; }
+      .kanban-column { flex: 0 0 82vw; min-width: 0; scroll-snap-align: start; }
       .topbar-center { display: none; }
       .nav-tabs .nav-tab span { display: none; }
       /* Keep every top-bar control reachable on a phone: icons and status dots only */
