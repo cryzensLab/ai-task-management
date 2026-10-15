@@ -1,7 +1,8 @@
 // Team membership and roles.
-// People identify themselves by picking a name; only the owner (protected by a
-// PIN) can assign roles or accept role requests. The team lives in the shared
+// People sign in by picking their name and entering their own PIN; only the
+// owner can assign roles or accept role requests. The team lives in the shared
 // store as settings/team so every browser sees it, but only this module writes it.
+// Each sign-in gets a session token, and the server checks it on every change.
 
 const crypto = require('crypto');
 const store = require('./store');
@@ -11,6 +12,7 @@ const DEMO_MEMBER_IDS = ['user_alex', 'user_taylor', 'user_jordan'];
 // Muted, print-like avatar colours that read on light and dark backgrounds.
 const COLORS = ['#3f5a4a', '#8a4b2e', '#4a5578', '#7a6a3a', '#6b4060', '#2f6670', '#7d3b3b', '#5a5a52', '#46607e', '#6e5a3e'];
 const MAX_NAME_LENGTH = 40;
+const MAX_SESSIONS_PER_MEMBER = 10;
 
 class TeamError extends Error {
   constructor(status, message) {
@@ -54,7 +56,7 @@ function newMember(team, name, role) {
   return { id, name, role, color, createdAt: new Date().toISOString() };
 }
 
-// ---- Owner PIN and session tokens ------------------------------------------
+// ---- PINs ------------------------------------------------------------------
 function hashPin(pin, salt) {
   return crypto.scryptSync(String(pin), salt, 32).toString('hex');
 }
@@ -65,51 +67,121 @@ function cleanPin(pin) {
   return p;
 }
 
-function setOwnerPin(pin) {
-  const priv = store.getPrivate();
-  priv.ownerPinSalt = crypto.randomBytes(16).toString('hex');
-  priv.ownerPinHash = hashPin(cleanPin(pin), priv.ownerPinSalt);
-  priv.ownerTokens = []; // a new PIN signs out every owner session
-  store.scheduleSave();
+function newPinRecord(pin) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  return { salt, hash: hashPin(cleanPin(pin), salt) };
 }
 
-function issueOwnerToken() {
+function pinMatches(record, pin) {
+  if (!record || !record.hash) return false;
+  return crypto.timingSafeEqual(
+    Buffer.from(hashPin(String(pin || ''), record.salt), 'hex'),
+    Buffer.from(record.hash, 'hex')
+  );
+}
+
+function ownerPinRecord() {
   const priv = store.getPrivate();
+  return { salt: priv.ownerPinSalt, hash: priv.ownerPinHash };
+}
+
+function memberPins() {
+  const priv = store.getPrivate();
+  return priv.memberPins || (priv.memberPins = {});
+}
+
+// Slow down PIN guessing: 5 wrong attempts from one device lock sign-in for that
+// person on that device for 60 seconds. Other devices are not affected, so a
+// stranger guessing cannot lock the real person out.
+const pinAttempts = new Map(); // `${ip}|${memberId}` -> { failures, lockedUntil }
+
+function checkPin(record, pin, lockKey) {
+  const now = Date.now();
+  const entry = pinAttempts.get(lockKey) || { failures: 0, lockedUntil: 0 };
+  if (now < entry.lockedUntil) {
+    throw new TeamError(429, `Too many wrong PINs. Try again in ${Math.ceil((entry.lockedUntil - now) / 1000)} seconds.`);
+  }
+  if (!pinMatches(record, pin)) {
+    entry.failures++;
+    if (entry.failures >= 5) {
+      entry.failures = 0;
+      entry.lockedUntil = now + 60 * 1000;
+    }
+    pinAttempts.set(lockKey, entry);
+    throw new TeamError(403, 'Wrong PIN.');
+  }
+  pinAttempts.delete(lockKey);
+}
+
+// Forget old lock entries so the map cannot grow without limit.
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of pinAttempts) {
+    if (entry.lockedUntil < now - 60 * 1000) pinAttempts.delete(key);
+  }
+}, 10 * 60 * 1000).unref();
+
+// ---- Session tokens ----------------------------------------------------------
+// Stored as sha256 hashes in the private part of the database, never sent to browsers.
+function tokenHash(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+function sessions() {
+  const priv = store.getPrivate();
+  if (!priv.sessions) {
+    priv.sessions = {};
+    // Owner sign-ins from before member sessions existed stay valid.
+    const ownerId = getTeam().ownerId;
+    if (ownerId) (priv.ownerTokens || []).forEach(hash => { priv.sessions[hash] = ownerId; });
+    delete priv.ownerTokens;
+  }
+  return priv.sessions;
+}
+
+function issueToken(memberId) {
+  const all = sessions();
   const token = crypto.randomBytes(32).toString('hex');
-  const hash = crypto.createHash('sha256').update(token).digest('hex');
-  priv.ownerTokens = [hash, ...(priv.ownerTokens || [])].slice(0, 10);
+  all[tokenHash(token)] = memberId;
+  // Keep only the newest sessions for this person (objects keep insertion order).
+  const mine = Object.keys(all).filter(h => all[h] === memberId);
+  mine.slice(0, -MAX_SESSIONS_PER_MEMBER).forEach(h => delete all[h]);
   store.scheduleSave();
   return token;
 }
 
-function isValidOwnerToken(token) {
-  if (!token || typeof token !== 'string') return false;
-  const hash = crypto.createHash('sha256').update(token).digest('hex');
-  return (store.getPrivate().ownerTokens || []).includes(hash);
+function revokeSessions(memberId) {
+  const all = sessions();
+  Object.keys(all).filter(h => all[h] === memberId).forEach(h => delete all[h]);
+  store.scheduleSave();
 }
 
-// Slow down PIN guessing: 5 wrong attempts lock owner sign-in for 60 seconds.
-const pinAttempts = { failures: 0, lockedUntil: 0 };
+// The team member a session token belongs to, or null.
+function memberForToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  const memberId = sessions()[tokenHash(token)];
+  return memberId ? getTeam().members[memberId] || null : null;
+}
 
-function verifyPin(pin) {
-  const now = Date.now();
-  if (now < pinAttempts.lockedUntil) {
-    throw new TeamError(429, `Too many wrong PINs. Try again in ${Math.ceil((pinAttempts.lockedUntil - now) / 1000)} seconds.`);
-  }
+function isValidOwnerToken(token) {
+  const member = memberForToken(token);
+  return Boolean(member && member.id === getTeam().ownerId);
+}
+
+function requireSession(token) {
+  const member = memberForToken(token);
+  if (!member) throw new TeamError(401, 'Please sign in again.');
+  return member;
+}
+
+function setOwnerPin(pin) {
   const priv = store.getPrivate();
-  const ok = priv.ownerPinHash && crypto.timingSafeEqual(
-    Buffer.from(hashPin(String(pin || ''), priv.ownerPinSalt), 'hex'),
-    Buffer.from(priv.ownerPinHash, 'hex')
-  );
-  if (!ok) {
-    pinAttempts.failures++;
-    if (pinAttempts.failures >= 5) {
-      pinAttempts.failures = 0;
-      pinAttempts.lockedUntil = now + 60 * 1000;
-    }
-    throw new TeamError(403, 'Wrong PIN.');
-  }
-  pinAttempts.failures = 0;
+  const record = newPinRecord(pin);
+  priv.ownerPinSalt = record.salt;
+  priv.ownerPinHash = record.hash;
+  const ownerId = getTeam().ownerId;
+  if (ownerId) revokeSessions(ownerId); // a new PIN signs out every owner session
+  store.scheduleSave();
 }
 
 // ---- Actions -----------------------------------------------------------------
@@ -123,38 +195,59 @@ function claimOwner({ name, pin }) {
   DEMO_MEMBER_IDS.forEach(id => delete team.members[id]);
   assertNameFree(team, cleanedName);
   const owner = newMember(team, cleanedName, 'owner');
+  owner.hasPin = true;
   team.members[owner.id] = owner;
   team.ownerId = owner.id;
-  setOwnerPin(pin);
   saveTeam(team);
-  return { member: owner, token: issueOwnerToken() };
+  setOwnerPin(pin);
+  return { member: owner, token: issueToken(owner.id) };
 }
 
-function ownerLogin({ pin }) {
+function ownerLogin({ pin }, ctx) {
   const team = getTeam();
   if (!team.ownerId) throw new TeamError(409, 'No owner has been set up yet.');
-  verifyPin(pin);
-  return { member: team.members[team.ownerId], token: issueOwnerToken() };
+  checkPin(ownerPinRecord(), pin, `${ctx.ip}|${team.ownerId}`);
+  return { member: team.members[team.ownerId], token: issueToken(team.ownerId) };
 }
 
 // New people join as "pending" with the role they asked for; the owner decides.
-function join({ name, requestedRole }) {
+function join({ name, requestedRole, pin }) {
   const team = getTeam();
   if (!team.ownerId) throw new TeamError(409, 'The owner has to set up the team first.');
   const cleanedName = cleanName(name);
   assertNameFree(team, cleanedName);
+  const pinRecord = newPinRecord(pin);
   const member = newMember(team, cleanedName, 'pending');
   member.requestedRole = cleanRole(requestedRole);
   member.requestedAt = new Date().toISOString();
+  member.hasPin = true;
+  memberPins()[member.id] = pinRecord;
   team.members[member.id] = member;
   saveTeam(team);
-  return { member };
+  return { member, token: issueToken(member.id) };
 }
 
-function requestRole({ memberId, role }) {
+// Sign in as an existing (non-owner) member. Someone without a PIN yet (they
+// joined before PINs existed, or the owner reset it) chooses one now.
+function memberLogin({ memberId, pin }, ctx) {
   const team = getTeam();
   const member = team.members[memberId];
   if (!member) throw new TeamError(404, 'Team member not found.');
+  if (member.id === team.ownerId) return ownerLogin({ pin }, ctx);
+  const pins = memberPins();
+  if (!pins[member.id]) {
+    pins[member.id] = newPinRecord(pin);
+    member.hasPin = true;
+    saveTeam(team);
+  } else {
+    checkPin(pins[member.id], pin, `${ctx.ip}|${member.id}`);
+  }
+  return { member, token: issueToken(member.id) };
+}
+
+function requestRole({ token, role }) {
+  const team = getTeam();
+  const member = team.members[requireSession(token).id];
   if (member.role === 'owner') throw new TeamError(400, 'The owner already has full access.');
   const wanted = cleanRole(role);
   if (wanted === member.role) {
@@ -166,6 +259,14 @@ function requestRole({ memberId, role }) {
   }
   saveTeam(team);
   return { member };
+}
+
+function changeMyPin({ token, newPin }) {
+  const me = requireSession(token);
+  if (me.id === getTeam().ownerId) return changeOwnerPin({ token, newPin });
+  memberPins()[me.id] = newPinRecord(newPin);
+  revokeSessions(me.id);
+  return { token: issueToken(me.id) };
 }
 
 function ownerAction({ token, action, memberId, role, value, name }) {
@@ -205,9 +306,18 @@ function ownerAction({ token, action, memberId, role, value, name }) {
       member.name = cleanedName;
       break;
     }
+    case 'reset-pin':
+      // They choose a new PIN the next time they pick their name.
+      if (isOwner) throw new TeamError(400, 'Change the owner PIN from your profile instead.');
+      delete memberPins()[member.id];
+      member.hasPin = false;
+      revokeSessions(member.id);
+      break;
     case 'remove':
       if (isOwner) throw new TeamError(400, "The owner can't be removed.");
       delete team.members[member.id];
+      delete memberPins()[member.id];
+      revokeSessions(member.id);
       break;
     default:
       throw new TeamError(400, 'Unknown action.');
@@ -219,18 +329,23 @@ function ownerAction({ token, action, memberId, role, value, name }) {
 function changeOwnerPin({ token, newPin }) {
   if (!isValidOwnerToken(token)) throw new TeamError(403, 'Only the owner can do this.');
   setOwnerPin(newPin);
-  return { token: issueOwnerToken() };
+  return { token: issueToken(getTeam().ownerId) };
 }
 
-// Routes: POST /api/team/<name>
+// Routes: POST /api/team/<name>, called as handler(body, { ip })
 const ROUTES = {
   'claim-owner': claimOwner,
   'owner-login': ownerLogin,
+  'member-login': memberLogin,
   'join': join,
   'request-role': requestRole,
   'owner-action': ownerAction,
   'change-pin': changeOwnerPin,
-  'check-token': ({ token }) => ({ valid: isValidOwnerToken(token) })
+  'change-my-pin': changeMyPin,
+  'check-token': ({ token }) => {
+    const member = memberForToken(token);
+    return { valid: Boolean(member), memberId: member ? member.id : null };
+  }
 };
 
-module.exports = { ROUTES, TeamError, setOwnerPin, getTeam };
+module.exports = { ROUTES, TeamError, setOwnerPin, getTeam, memberForToken };

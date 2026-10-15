@@ -37,22 +37,69 @@ if (fs.existsSync(DB_FILE)) {
 
 // Writes are coalesced and done atomically (temp file + rename).
 let saveTimer = null;
+function writeDbAtomically() {
+  const tmp = DB_FILE + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(db));
+  fs.renameSync(tmp, DB_FILE);
+}
+
 function scheduleSave() {
   if (saveTimer) return;
   saveTimer = setTimeout(() => {
     saveTimer = null;
-    const tmp = DB_FILE + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(db));
-    fs.renameSync(tmp, DB_FILE);
+    writeDbAtomically();
   }, 300);
 }
 
+function extForType(contentType) {
+  return EXT_BY_TYPE[String(contentType || '').split(';')[0].trim().toLowerCase()] || 'bin';
+}
+
 function saveFileBuffer(buf, contentType) {
-  const ext = EXT_BY_TYPE[(contentType || '').toLowerCase()] || 'bin';
-  const name = crypto.createHash('sha1').update(buf).digest('hex') + '.' + ext;
+  const name = crypto.createHash('sha1').update(buf).digest('hex') + '.' + extForType(contentType);
   const target = path.join(FILES_DIR, name);
   if (!fs.existsSync(target)) fs.writeFileSync(target, buf);
   return '/api/files/' + name;
+}
+
+// Streams an upload to a temp file while hashing it, so big images never sit in memory.
+// Resolves to the file URL, or null for an empty upload.
+function saveFileStream(req, contentType, maxBytes) {
+  return new Promise((resolve, reject) => {
+    const tmp = path.join(FILES_DIR, '.upload-' + crypto.randomBytes(8).toString('hex'));
+    const out = fs.createWriteStream(tmp);
+    const hash = crypto.createHash('sha1');
+    let size = 0;
+    let failed = false;
+    const fail = (err) => {
+      if (failed) return;
+      failed = true;
+      out.destroy();
+      fs.rm(tmp, { force: true }, () => reject(err));
+    };
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > maxBytes) {
+        const err = new Error('File too large');
+        err.status = 413;
+        req.destroy();
+        return fail(err);
+      }
+      hash.update(chunk);
+    });
+    req.on('error', fail);
+    out.on('error', fail);
+    req.pipe(out);
+    out.on('finish', () => {
+      if (failed) return;
+      if (size === 0) return fs.rm(tmp, { force: true }, () => resolve(null));
+      const name = hash.digest('hex') + '.' + extForType(contentType);
+      const target = path.join(FILES_DIR, name);
+      if (fs.existsSync(target)) fs.rmSync(tmp, { force: true });
+      else fs.renameSync(tmp, target);
+      resolve('/api/files/' + name);
+    });
+  });
 }
 
 // Cards from older versions embed whole images as base64 data URLs.
@@ -140,7 +187,32 @@ function flushNow() {
   if (!saveTimer) return;
   clearTimeout(saveTimer);
   saveTimer = null;
-  fs.writeFileSync(DB_FILE, JSON.stringify(db));
+  writeDbAtomically();
+}
+
+// ---- Daily backups ----------------------------------------------------------
+// One copy of db.json per day in data/backups/, keeping the newest BACKUP_DAYS.
+const BACKUP_DIR = path.join(DATA_DIR, 'backups');
+const BACKUP_DAYS = 7;
+
+function backupNow() {
+  if (!fs.existsSync(DB_FILE)) return;
+  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+  const target = path.join(BACKUP_DIR, `db-${new Date().toISOString().slice(0, 10)}.json`);
+  if (!fs.existsSync(target)) fs.copyFileSync(DB_FILE, target);
+  fs.readdirSync(BACKUP_DIR)
+    .filter(f => /^db-\d{4}-\d{2}-\d{2}\.json$/.test(f))
+    .sort()
+    .slice(0, -BACKUP_DAYS)
+    .forEach(f => fs.rmSync(path.join(BACKUP_DIR, f), { force: true }));
+}
+
+function startBackups() {
+  const run = () => {
+    try { backupNow(); } catch (e) { console.error('Backup failed:', e.message); }
+  };
+  run();
+  setInterval(run, 60 * 60 * 1000).unref(); // hourly check; copies once per day
 }
 
 function getItem(storeName, key) {
@@ -161,6 +233,6 @@ function getPrivate() {
 }
 
 module.exports = {
-  applyOps, snapshot, addClient, emit, saveFileBuffer, filePath, fileType, flushNow,
-  getItem, putItemAsServer, getPrivate, scheduleSave
+  applyOps, snapshot, addClient, emit, saveFileBuffer, saveFileStream, filePath, fileType, flushNow,
+  getItem, putItemAsServer, getPrivate, scheduleSave, startBackups
 };

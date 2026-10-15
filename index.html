@@ -3274,6 +3274,7 @@
     try {
       if (localStorage.getItem(MIGRATION_FLAG)) return;
     } catch (e) { return; }
+    if (!sessionToken()) return; // the server needs a signed-in member; try again on a later load
 
     const legacy = await readLegacyBrowserDb();
     let added = 0;
@@ -3302,6 +3303,7 @@
       await fetchServerSnapshot();
       showToast(`Moved ${added} saved items from this browser to the shared server`, 'success');
     }
+    if (pendingOps.size > 0) return; // not everything reached the server; retry next load
     try { localStorage.setItem(MIGRATION_FLAG, new Date().toISOString()); } catch (e) {}
   }
 
@@ -3469,6 +3471,14 @@
   let systemWriteDepth = 0;
   let blockedWriteTimer = null;
 
+  // The server only accepts changes from a signed-in team member. Any member's
+  // sign-in lives under this key (the old owner-only name is kept so existing
+  // owner sign-ins survive the update).
+  const SESSION_TOKEN_KEY = 'listingflow_owner_token';
+  function sessionToken() {
+    try { return localStorage.getItem(SESSION_TOKEN_KEY); } catch (e) { return null; }
+  }
+
   function canCurrentUserWrite(storeName) {
     if (systemWriteDepth > 0) return true;
     const role = state.currentUser && state.currentUser.role;
@@ -3507,6 +3517,7 @@
       onWriteBlocked();
       return;
     }
+    if (systemWriteDepth > 0) op.system = true; // allowed even while waiting for a role
     pendingOps.set(op.store + '\u0000' + op.key, op);
     if (!flushTimer) flushTimer = setTimeout(() => { flushTimer = null; flushPendingOps().catch(() => {}); }, 150);
   }
@@ -3527,14 +3538,23 @@
     const res = await fetch('/api/store/batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: CLIENT_ID, ops })
+      body: JSON.stringify({ clientId: CLIENT_ID, token: sessionToken(), ops })
     });
-    if (!res.ok) throw new Error('Save failed (' + res.status + ')');
+    if (!res.ok) {
+      const err = new Error('Save failed (' + res.status + ')');
+      err.status = res.status;
+      throw err;
+    }
+  }
+
+  // Changes made before anyone signs in on this browser wait here until they do.
+  function scheduleFlushAfterSignIn() {
+    if (pendingOps.size && !flushTimer) flushTimer = setTimeout(() => { flushTimer = null; flushPendingOps().catch(() => {}); }, 50);
   }
 
   async function flushPendingOps() {
     if (flushInFlight) await flushInFlight.catch(() => {});
-    if (pendingOps.size === 0) return;
+    if (pendingOps.size === 0 || !sessionToken()) return;
     const ops = Array.from(pendingOps.values());
     pendingOps.clear();
 
@@ -3563,6 +3583,14 @@
           const k = op.store + '\u0000' + op.key;
           if (!pendingOps.has(k)) pendingOps.set(k, op);
         });
+        if (err.status === 401) {
+          // Signed out on the server (PIN reset, removed, or signed in elsewhere too often).
+          lsSet(SESSION_TOKEN_KEY, null);
+          showToast('Please sign in again to save your changes.', 'warning');
+          if (state.currentUser.id !== 'guest') signInAs(state.currentUser);
+          else openIdentityModal('pick');
+          throw err;
+        }
         flushFailures++;
         if (flushFailures === 1) showToast('Could not save to the server. Retrying...', 'warning');
         const delay = Math.min(30000, 1000 * Math.pow(2, flushFailures));
@@ -3576,8 +3604,8 @@
 
   window.addEventListener('beforeunload', (e) => {
     if (pendingOps.size === 0) return;
-    const body = JSON.stringify({ clientId: CLIENT_ID, ops: Array.from(pendingOps.values()) });
-    const sent = navigator.sendBeacon && navigator.sendBeacon('/api/store/batch', new Blob([body], { type: 'application/json' }));
+    const body = JSON.stringify({ clientId: CLIENT_ID, token: sessionToken(), ops: Array.from(pendingOps.values()) });
+    const sent = sessionToken() && navigator.sendBeacon && navigator.sendBeacon('/api/store/batch', new Blob([body], { type: 'application/json' }));
     if (!sent) {
       e.preventDefault();
       e.returnValue = '';
@@ -3587,7 +3615,7 @@
   async function uploadFileToServer(blob) {
     const res = await fetch('/api/files', {
       method: 'POST',
-      headers: { 'Content-Type': blob.type || 'application/octet-stream' },
+      headers: { 'Content-Type': blob.type || 'application/octet-stream', 'X-Session-Token': sessionToken() || '' },
       body: blob
     });
     if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
@@ -3619,14 +3647,14 @@
   // only presence messages (cursors) are relayed here.
   let lastCursorSentAt = 0;
   function broadcastChange(action, payload) {
-    if (action !== 'cursor') return;
+    if (action !== 'cursor' || !sessionToken()) return;
     const now = Date.now();
     if (now - lastCursorSentAt < 80) return;
     lastCursorSentAt = now;
     fetch('/api/broadcast', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: CLIENT_ID, action, payload })
+      body: JSON.stringify({ clientId: CLIENT_ID, token: sessionToken(), action, payload })
     }).catch(() => {});
   }
 
@@ -5621,7 +5649,6 @@
   // can give roles or accept role requests. See team.js.
   // -------------------------------------------------------------------
   const MEMBER_ID_KEY = 'listingflow_member_id';
-  const OWNER_TOKEN_KEY = 'listingflow_owner_token';
 
   const userSwitcherBtn = document.getElementById('user-switcher-btn');
   const currentUserAvatar = document.getElementById('current-user-avatar');
@@ -5717,6 +5744,27 @@
     lsSet(MEMBER_ID_KEY, member ? member.id : null);
     updateUserSwitcherUI();
     updateTeamBadge();
+    if (member) scheduleFlushAfterSignIn();
+  }
+
+  // True when this browser already holds a valid sign-in for this person.
+  async function hasSessionFor(member) {
+    try {
+      const res = await teamApi('check-token', { token: lsGet(SESSION_TOKEN_KEY) });
+      return res.valid && res.memberId === member.id;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Ask for the PIN this browser needs to sign in as `member`.
+  async function signInAs(member) {
+    if (await hasSessionFor(member)) {
+      setCurrentUser(member);
+      return true;
+    }
+    openIdentityModal(member.role === 'owner' ? 'owner-pin' : 'pin', member);
+    return false;
   }
 
   function updateUserSwitcherUI() {
@@ -5755,7 +5803,7 @@
     const me = state.settings.members[state.currentUser.id];
     if (state.currentUser.id !== 'guest') {
       if (!me) {
-        lsSet(OWNER_TOKEN_KEY, null);
+        lsSet(SESSION_TOKEN_KEY, null);
         setCurrentUser(null);
         showToast('You are no longer on the team list. Pick your name again or ask the owner.', 'warning');
         openIdentityModal('pick');
@@ -5835,7 +5883,7 @@
       `, async (form) => {
         if (form.elements.pin.value !== form.elements.pin2.value) throw new Error('The two PINs do not match.');
         const res = await teamApi('claim-owner', { name: form.elements.name.value, pin: form.elements.pin.value });
-        lsSet(OWNER_TOKEN_KEY, res.token);
+        lsSet(SESSION_TOKEN_KEY, res.token);
         state.settings.members = { [res.member.id]: res.member };
         state.settings.ownerId = res.member.id;
         setCurrentUser(res.member);
@@ -5856,10 +5904,36 @@
         <div class="identity-actions"><button type="button" class="identity-link" data-back>← Not the owner</button><button type="submit" class="btn btn-primary">Sign in</button></div>
       `, async (form) => {
         const res = await teamApi('owner-login', { pin: form.elements.pin.value });
-        lsSet(OWNER_TOKEN_KEY, res.token);
+        lsSet(SESSION_TOKEN_KEY, res.token);
         setCurrentUser(res.member);
         closeIdentityModal();
         showToast(`Signed in as owner: ${res.member.name}`, 'success');
+      });
+      identityBody.querySelector('[data-back]').addEventListener('click', () => renderIdentity('pick'));
+      return;
+    }
+
+    if (mode === 'pin') {
+      const member = target && state.settings.members[target.id];
+      if (!member) return renderIdentity('pick');
+      const firstTime = !member.hasPin;
+      identityTitle.textContent = firstTime ? 'Choose your PIN' : 'Sign in';
+      identityForm(`
+        <p class="identity-intro">${firstTime
+          ? `Choose a PIN for <strong>${escapeHtml(member.name)}</strong> (4 to 12 digits). You will use it to sign in on any computer.`
+          : `Enter your PIN, <strong>${escapeHtml(member.name)}</strong>. Forgot it? Ask ${escapeHtml(ownerName())} (owner) to reset it.`}</p>
+        <div class="form-group"><label for="id-member-pin">PIN</label><input class="form-input" id="id-member-pin" name="pin" type="password" inputmode="numeric" autocomplete="${firstTime ? 'new-password' : 'current-password'}" maxlength="12" /></div>
+        ${firstTime ? '<div class="form-group"><label for="id-member-pin2">Repeat PIN</label><input class="form-input" id="id-member-pin2" name="pin2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" /></div>' : ''}
+        <div class="identity-error"></div>
+        <div class="identity-actions"><button type="button" class="identity-link" data-back>← Not ${escapeHtml(member.name)}</button><button type="submit" class="btn btn-primary">Sign in</button></div>
+      `, async (form) => {
+        if (firstTime && form.elements.pin.value !== form.elements.pin2.value) throw new Error('The two PINs do not match.');
+        const res = await teamApi('member-login', { memberId: member.id, pin: form.elements.pin.value });
+        lsSet(SESSION_TOKEN_KEY, res.token);
+        state.settings.members[res.member.id] = res.member;
+        setCurrentUser(res.member);
+        closeIdentityModal();
+        showToast(`Hi ${res.member.name}!`, 'success');
       });
       identityBody.querySelector('[data-back]').addEventListener('click', () => renderIdentity('pick'));
       return;
@@ -5870,6 +5944,8 @@
       identityForm(`
         <p class="identity-intro">Tell us your name and the role you need. ${escapeHtml(ownerName())} (owner) will approve it. Until then you can view the board and add comments.</p>
         <div class="form-group"><label for="id-join-name">Your name</label><input class="form-input" id="id-join-name" name="name" maxlength="40" /></div>
+        <div class="form-group"><label for="id-join-pin">Choose a PIN (4 to 12 digits)</label><input class="form-input" id="id-join-pin" name="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" /><span class="lib-form-hint">You will need it when you sign in on another computer.</span></div>
+        <div class="form-group"><label for="id-join-pin2">Repeat PIN</label><input class="form-input" id="id-join-pin2" name="pin2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" /></div>
         <div class="form-group"><label for="id-join-role">Role you need</label>
           <select class="form-select" id="id-join-role" name="role">
             ${['creator', 'reviewer', 'admin'].map(r => `<option value="${r}">${escapeHtml(ROLE_DESCRIPTIONS[r])}</option>`).join('')}
@@ -5878,7 +5954,9 @@
         <div class="identity-error"></div>
         <div class="identity-actions"><button type="button" class="identity-link" data-back>← Back to the list</button><button type="submit" class="btn btn-primary">Send request</button></div>
       `, async (form) => {
-        const res = await teamApi('join', { name: form.elements.name.value, requestedRole: form.elements.role.value });
+        if (form.elements.pin.value !== form.elements.pin2.value) throw new Error('The two PINs do not match.');
+        const res = await teamApi('join', { name: form.elements.name.value, requestedRole: form.elements.role.value, pin: form.elements.pin.value });
+        lsSet(SESSION_TOKEN_KEY, res.token);
         state.settings.members[res.member.id] = res.member;
         setCurrentUser(res.member);
         onTeamChanged();
@@ -5906,15 +5984,7 @@
       btn.addEventListener('click', async () => {
         const member = state.settings.members[btn.dataset.member];
         if (!member) return;
-        if (member.role === 'owner') {
-          let valid = false;
-          try { valid = (await teamApi('check-token', { token: lsGet(OWNER_TOKEN_KEY) })).valid; } catch (e) {}
-          if (!valid) {
-            renderIdentity('owner-pin', member);
-            return;
-          }
-        }
-        setCurrentUser(member);
+        if (!(await signInAs(member))) return;
         closeIdentityModal();
         showToast(`Hi ${member.name}!`, 'success');
       });
@@ -5942,11 +6012,9 @@
       html += `<div class="profile-status">You asked to become <strong>${escapeHtml(roleLabel(me.requestedRole))}</strong>. Waiting for ${escapeHtml(ownerName())}.</div>`;
     }
 
-    if (me.role === 'owner') {
-      html += `
-        <p class="identity-intro" style="margin-top:14px;">You're the owner. Give people roles and answer requests from the team button (the gear at the top right).</p>
-        <form id="profile-pin-form" novalidate>
-          <div class="team-section-title">Change owner PIN</div>
+    const pinFormHtml = (title) => `
+        <form id="profile-pin-form" novalidate style="margin-top:14px;">
+          <div class="team-section-title">${title}</div>
           <div style="display:flex; gap:8px;">
             <input class="form-input" name="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" placeholder="New PIN" style="flex:1; min-width:0;" />
             <input class="form-input" name="pin2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="12" placeholder="Repeat" style="flex:1; min-width:0;" />
@@ -5954,6 +6022,11 @@
           </div>
           <div class="identity-error"></div>
         </form>`;
+
+    if (me.role === 'owner') {
+      html += `
+        <p class="identity-intro" style="margin-top:14px;">You're the owner. Give people roles and answer requests from the team button (the gear at the top right).</p>`
+        + pinFormHtml('Change owner PIN');
     } else {
       const options = ['creator', 'reviewer', 'admin'].filter(r => r !== me.role);
       html += `
@@ -5966,7 +6039,7 @@
             <button type="submit" class="btn btn-primary">Send request</button>
           </div>
           <div class="identity-error"></div>
-        </form>`;
+        </form>` + pinFormHtml('Change your PIN');
     }
     profileBody.innerHTML = html;
 
@@ -5977,7 +6050,7 @@
         const errorEl = requestForm.querySelector('.identity-error');
         errorEl.textContent = '';
         try {
-          const res = await teamApi('request-role', { memberId: me.id, role: requestForm.elements.role.value });
+          const res = await teamApi('request-role', { token: lsGet(SESSION_TOKEN_KEY), role: requestForm.elements.role.value });
           state.settings.members[res.member.id] = res.member;
           state.currentUser = res.member;
           onTeamChanged();
@@ -5996,10 +6069,10 @@
         errorEl.textContent = '';
         try {
           if (pinForm.elements.pin.value !== pinForm.elements.pin2.value) throw new Error('The two PINs do not match.');
-          const res = await teamApi('change-pin', { token: lsGet(OWNER_TOKEN_KEY), newPin: pinForm.elements.pin.value });
-          lsSet(OWNER_TOKEN_KEY, res.token);
+          const res = await teamApi('change-my-pin', { token: lsGet(SESSION_TOKEN_KEY), newPin: pinForm.elements.pin.value });
+          lsSet(SESSION_TOKEN_KEY, res.token);
           pinForm.reset();
-          showToast('Owner PIN changed. Other owner sign-ins were signed out.', 'success');
+          showToast('PIN changed. Your other sign-ins were signed out.', 'success');
         } catch (err) {
           errorEl.textContent = err.message;
         }
@@ -6019,7 +6092,7 @@
   document.getElementById('profile-done-btn').addEventListener('click', () => profileModal.classList.remove('active'));
   document.getElementById('profile-switch-btn').addEventListener('click', () => {
     profileModal.classList.remove('active');
-    lsSet(OWNER_TOKEN_KEY, null); // a shared computer should not stay signed in as owner
+    lsSet(SESSION_TOKEN_KEY, null); // a shared computer should not stay signed in as owner
     setCurrentUser(null);
     openIdentityModal('pick');
   });
@@ -6035,12 +6108,12 @@
 
   async function runOwnerAction(body) {
     try {
-      const res = await teamApi('owner-action', { ...body, token: lsGet(OWNER_TOKEN_KEY) });
+      const res = await teamApi('owner-action', { ...body, token: lsGet(SESSION_TOKEN_KEY) });
       applyTeamFromResponse(res.team);
       return true;
     } catch (err) {
       if (err.status === 403) {
-        lsSet(OWNER_TOKEN_KEY, null);
+        lsSet(SESSION_TOKEN_KEY, null);
         teamModalOverlay.classList.remove('active');
         showToast('Please sign in as the owner again.', 'warning');
         openIdentityModal('owner-pin', teamOwner());
@@ -6113,6 +6186,7 @@
             ${m.role === 'pending' ? '<option value="pending" selected disabled>Pending</option>' : ''}
             ${['creator', 'reviewer', 'admin'].map(r => `<option value="${r}"${m.role === r ? ' selected' : ''}>${escapeHtml(roleLabel(r))}</option>`).join('')}
           </select>
+          <button class="btn btn-secondary btn-sm" data-reset-pin title="${m.hasPin ? 'They choose a new PIN next time they sign in' : 'No PIN yet'}"${m.hasPin ? '' : ' disabled'}>Reset PIN</button>
           <button class="btn btn-secondary btn-sm" data-remove title="Remove from team">Remove</button>`;
       }
       row.innerHTML = `
@@ -6127,6 +6201,15 @@
         roleSelect.addEventListener('change', async () => {
           if (await runOwnerAction({ action: 'set-role', memberId: m.id, role: roleSelect.value })) {
             showToast(`${m.name} is now ${roleLabel(roleSelect.value)}`, 'success');
+          }
+        });
+      }
+      const resetPinBtn = row.querySelector('[data-reset-pin]');
+      if (resetPinBtn) {
+        resetPinBtn.addEventListener('click', async () => {
+          if (!confirm(`Reset ${m.name}'s PIN? They will be signed out and choose a new PIN when they next pick their name.`)) return;
+          if (await runOwnerAction({ action: 'reset-pin', memberId: m.id })) {
+            showToast(`${m.name} will choose a new PIN next time`, 'info');
           }
         });
       }
@@ -6162,15 +6245,7 @@
       openIdentityModal('pick');
       return;
     }
-    if (saved.role === 'owner') {
-      let valid = false;
-      try { valid = (await teamApi('check-token', { token: lsGet(OWNER_TOKEN_KEY) })).valid; } catch (e) {}
-      if (!valid) {
-        openIdentityModal('owner-pin', saved);
-        return;
-      }
-    }
-    setCurrentUser(saved);
+    await signInAs(saved);
   }
 
   // -------------------------------------------------------------------
