@@ -3369,7 +3369,7 @@
             delete c.rawImages;
             putToStore('cards', c);
           }
-          if (c.sheetStatus && String(c.sheetStatus).trim().toLowerCase() === 'completed') {
+          if (c.sheetStatus && String(c.sheetStatus).trim().toLowerCase() === 'completed' && (c.stage !== 'Delivered' || !c.deliveredAt)) {
             c.stage = 'Delivered';
             if (!c.deliveredAt) c.deliveredAt = c.deliveryDate || new Date().toISOString();
             putToStore('cards', c);
@@ -6818,6 +6818,8 @@
           }
 
           if (targetCard) {
+            // Only save (and tell every other browser) when the sheet really changed something.
+            const before = JSON.stringify({ ...targetCard, updatedAt: null });
             targetCard.fromSheet = true;
             if (isCompletedInSheet) {
               targetCard.stage = 'Delivered';
@@ -6849,11 +6851,13 @@
             targetCard.rawFiles = targetCard.rawFiles || [];
             targetCard.outputs = targetCard.outputs || [];
             targetCard.sheetStatus = rawStatus;
-            targetCard.updatedAt = new Date().toISOString();
             state.cards.set(targetCard.id, targetCard);
-            putToStore('cards', targetCard);
-            broadcastChange('save_card', targetCard);
-            syncState.cardsUpdated++;
+            if (JSON.stringify({ ...targetCard, updatedAt: null }) !== before) {
+              targetCard.updatedAt = new Date().toISOString();
+              putToStore('cards', targetCard);
+              broadcastChange('save_card', targetCard);
+              syncState.cardsUpdated++;
+            }
             lastImportedCard = targetCard;
 
           } else {
@@ -6916,6 +6920,7 @@
 
           if (hasContContent && lastImportedCard && !lastProductRowSkipped) {
             // Append continuation data to last imported card
+            const contBefore = JSON.stringify(lastImportedCard);
             if (contPoses.length > 0) {
               lastImportedCard.poseLinks = Array.from(new Set([...(lastImportedCard.poseLinks || []), ...contPoses]));
             }
@@ -6925,8 +6930,10 @@
             if (contNote && !lastImportedCard.notes.includes(contNote)) {
               lastImportedCard.notes = (lastImportedCard.notes ? lastImportedCard.notes + '\n' : '') + contNote;
             }
-            putToStore('cards', lastImportedCard);
-            broadcastChange('save_card', lastImportedCard);
+            if (JSON.stringify(lastImportedCard) !== contBefore) {
+              putToStore('cards', lastImportedCard);
+              broadcastChange('save_card', lastImportedCard);
+            }
             syncState.skipped.continuation++;
           } else if (lastProductRowSkipped) {
             syncState.skipped.continuation++;
