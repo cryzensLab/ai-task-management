@@ -234,5 +234,5 @@ function getPrivate() {
 
 module.exports = {
   applyOps, snapshot, addClient, emit, saveFileBuffer, saveFileStream, filePath, fileType, flushNow,
-  getItem, putItemAsServer, getPrivate, scheduleSave, startBackups
+  getItem, putItemAsServer, getPrivate, scheduleSave, startBackups, DATA_DIR
 };

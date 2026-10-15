@@ -164,19 +164,67 @@ function sendIndex(res) {
   });
 }
 
-function sendTracker(res) {
-  const localTracker = path.join(ROOT, 'tracker.xlsx');
-  if (!fs.existsSync(localTracker)) {
+// ---- Production tracker -------------------------------------------------------
+// The live Google Sheet is the source of truth. If Google can't be reached, the
+// last copy we downloaded is used, and failing that the tracker.xlsx shipped
+// with the project.
+const TRACKER_SHEET_ID = process.env.TRACKER_SHEET_ID || '122mw61IDMPNhWXtKduPXndHDmdO9VLVw';
+const TRACKER_LIVE_URL = `https://docs.google.com/spreadsheets/d/${TRACKER_SHEET_ID}/export?format=xlsx`;
+const TRACKER_CACHE_FILE = path.join(store.DATA_DIR, 'tracker-live.xlsx');
+const TRACKER_BUNDLED_FILE = path.join(ROOT, 'tracker.xlsx');
+// Every open tab syncs every few minutes; share one download between them.
+const TRACKER_FRESH_MS = 60 * 1000;
+
+let trackerLive = null; // { buf, at }
+let trackerFetching = null;
+
+function looksLikeXlsx(buf) {
+  // .xlsx files are zip archives ("PK"); Google returns an HTML page when the sheet is private.
+  return buf && buf.length > 2000 && buf[0] === 0x50 && buf[1] === 0x4b;
+}
+
+async function fetchLiveTracker() {
+  const res = await fetch(TRACKER_LIVE_URL, { signal: AbortSignal.timeout(15000), redirect: 'follow' });
+  if (!res.ok) throw new Error('Google returned ' + res.status);
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (!looksLikeXlsx(buf)) throw new Error('Google did not return a spreadsheet (is the sheet shared publicly?)');
+  fs.writeFile(TRACKER_CACHE_FILE, buf, () => {});
+  return buf;
+}
+
+async function getTracker() {
+  if (trackerLive && Date.now() - trackerLive.at < TRACKER_FRESH_MS) return { buf: trackerLive.buf, source: 'live' };
+  try {
+    if (!trackerFetching) trackerFetching = fetchLiveTracker().finally(() => { trackerFetching = null; });
+    const buf = await trackerFetching;
+    trackerLive = { buf, at: Date.now() };
+    return { buf, source: 'live' };
+  } catch (err) {
+    console.warn('Could not download the live tracker sheet:', err.message);
+  }
+  for (const [file, source] of [[TRACKER_CACHE_FILE, 'cached'], [TRACKER_BUNDLED_FILE, 'bundled']]) {
+    try {
+      const buf = fs.readFileSync(file);
+      if (looksLikeXlsx(buf)) return { buf, source };
+    } catch (e) {}
+  }
+  return null;
+}
+
+async function sendTracker(res) {
+  const tracker = await getTracker();
+  if (!tracker) {
     res.writeHead(404, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    return res.end(JSON.stringify({ error: 'tracker.xlsx not found' }));
+    return res.end(JSON.stringify({ error: 'Tracker sheet not available' }));
   }
   res.writeHead(200, {
     'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'Content-Disposition': 'attachment; filename="tracker.xlsx"',
     'Access-Control-Allow-Origin': '*',
-    'Cache-Control': 'no-cache'
+    'Cache-Control': 'no-cache',
+    'X-Tracker-Source': tracker.source // live | cached | bundled
   });
-  fs.createReadStream(localTracker).pipe(res);
+  res.end(tracker.buf);
 }
 
 async function handleRequest(req, res) {
