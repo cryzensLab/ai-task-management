@@ -1897,6 +1897,136 @@
     .lib-history-id { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle); }
     .lib-history ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
     .lib-history li span { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle); }
+    /* =====================================================================
+       MODULE 5: PROMPT STUDIO
+       ===================================================================== */
+    .studio-layout { flex: 1; display: grid; grid-template-columns: 250px minmax(0, 1fr) 340px; min-height: 0; }
+    .studio-aside {
+      border-right: 1px solid var(--border-subtle); background: var(--bg-surface);
+      padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; min-height: 0;
+    }
+    .studio-panel-tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border-strong); }
+    .studio-panel-tab {
+      padding: 7px 4px; border: none; background: var(--bg-surface); color: var(--text-muted);
+      font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    }
+    .studio-panel-tab + .studio-panel-tab { border-left: 1px solid var(--border-strong); }
+    .studio-panel-tab.active { background: var(--primary-light); color: var(--primary); }
+    .studio-aside-tools { display: flex; gap: 6px; }
+    .studio-aside-tools .form-input { height: 30px; padding: 0 8px; min-width: 0; flex: 1; }
+    #studio-fav-toggle.active { color: var(--warning); border-color: var(--warning); }
+    .studio-list-panel { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .studio-list-entry {
+      border: 1px solid var(--border-subtle); padding: 8px 10px; cursor: pointer;
+      display: flex; flex-direction: column; gap: 4px; background: var(--bg-surface);
+    }
+    .studio-list-entry:hover { border-color: var(--primary); }
+    .studio-list-entry.active { border-color: var(--primary); background: var(--primary-light); }
+    .studio-list-entry .lib-fav-btn { position: static; width: 22px; height: 22px; font-size: 0.85rem; flex-shrink: 0; }
+    .studio-entry-top { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; min-width: 0; }
+    .studio-entry-top strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .studio-entry-sub { font-size: 0.7rem; color: var(--text-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .studio-main { overflow-y: auto; padding: 16px 24px 48px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .studio-side { border-left: 1px solid var(--border-subtle); background: var(--bg-surface); overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+    .studio-header { display: flex; flex-direction: column; gap: 8px; }
+    .studio-title-input { font-size: 1.05rem; font-weight: 700; height: 38px; }
+    .studio-section { border: 1px solid var(--border-subtle); background: var(--bg-surface); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .studio-section-head { display: flex; align-items: center; gap: 8px; }
+    .studio-section-head h3 { font-size: 0.92rem; font-weight: 700; }
+    .studio-letter { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--text-subtle); min-width: 12px; }
+    .studio-required { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--warning); }
+    .studio-sub { font-size: 0.76rem; color: var(--text-muted); margin: 0; }
+    .studio-muted { font-size: 0.74rem; color: var(--text-subtle); }
+    .studio-warn { font-size: 0.78rem; color: var(--warning); }
+    .studio-modes { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--border-strong); align-self: flex-start; }
+    .studio-mode {
+      padding: 5px 10px; border: none; background: var(--bg-surface); color: var(--text-muted);
+      font-family: inherit; font-size: 0.76rem; font-weight: 600; cursor: pointer;
+    }
+    .studio-mode + .studio-mode { border-left: 1px solid var(--border-strong); }
+    .studio-mode.active { background: var(--primary); color: #fff; }
+    .studio-mode:disabled { cursor: default; }
+    .studio-pick-btn {
+      border: 1.5px dashed var(--border-strong); background: transparent; padding: 14px; cursor: pointer;
+      font-family: inherit; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-align: center;
+    }
+    .studio-pick-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .studio-asset { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--border-subtle); padding: 8px; }
+    .studio-thumb, .picker-thumb {
+      width: 64px; height: 80px; flex-shrink: 0; background: var(--bg-subtle); overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .studio-thumb img, .picker-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; cursor: zoom-in; }
+    .studio-thumb-initials { font-weight: 700; color: var(--text-subtle); }
+    .studio-asset-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .studio-asset-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .studio-asset-name { font-size: 0.86rem; }
+    .studio-asset-details { font-size: 0.74rem; color: var(--text-muted); }
+    .studio-asset-text { font-size: 0.74rem; color: var(--text-muted); line-height: 1.4; }
+    .studio-asset-actions { display: flex; flex-direction: column; gap: 4px; }
+    .studio-badge {
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      padding: 1px 6px; border: 1px solid var(--border-strong); color: var(--text-muted); background: var(--bg-surface);
+    }
+    .studio-badge.saved { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .studio-badge.new { border-color: var(--warning); color: var(--warning); background: var(--warning-light); }
+    .studio-badge.final { border-color: var(--success); color: var(--success); background: var(--success-light); }
+    .studio-new { display: flex; flex-direction: column; gap: 8px; border: 1px dashed var(--warning); padding: 10px; }
+    .studio-images { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .studio-image { position: relative; width: 64px; height: 80px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .studio-image img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+    .studio-upload-btn {
+      height: 80px; padding: 0 12px; border: 1.5px dashed var(--border-strong); background: transparent;
+      font-family: inherit; font-size: 0.74rem; font-weight: 600; color: var(--text-muted); cursor: pointer;
+    }
+    .studio-upload-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .studio-mini-images { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+    .studio-mini-images img { width: 32px; height: 40px; object-fit: cover; object-position: top; border: 1px solid var(--border-subtle); cursor: zoom-in; }
+    .studio-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .studio-grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+    .studio-field { display: flex; flex-direction: column; gap: 3px; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+    .studio-list { display: flex; flex-direction: column; gap: 8px; }
+    .studio-list-item { display: flex; gap: 8px; align-items: flex-start; }
+    .studio-list-num { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--text-subtle); padding-top: 6px; min-width: 14px; }
+    .studio-list-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+    .studio-order { display: flex; flex-direction: column; gap: 2px; }
+    .studio-side-block { display: flex; flex-direction: column; gap: 8px; }
+    .studio-checklist { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem; }
+    .studio-checklist .ok { color: var(--success); }
+    .studio-checklist .todo { color: var(--warning); font-weight: 600; }
+    .studio-refs { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.76rem; }
+    .studio-ref-range { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; margin-right: 4px; }
+    .studio-prompt {
+      white-space: pre-wrap; word-break: break-word; font-family: var(--font-mono); font-size: 0.72rem; line-height: 1.5;
+      background: var(--bg-subtle); border: 1px solid var(--border-subtle); padding: 10px; max-height: 420px; overflow-y: auto; margin: 0;
+    }
+    .picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; max-height: 60vh; overflow-y: auto; }
+    .picker-item {
+      display: flex; gap: 10px; text-align: left; padding: 8px; border: 1px solid var(--border-subtle);
+      background: var(--bg-surface); cursor: pointer; font-family: inherit; color: inherit;
+    }
+    .picker-item:hover, .picker-item:focus-visible { border-color: var(--primary); }
+    .picker-thumb { width: 52px; height: 64px; }
+    .picker-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .picker-name { font-size: 0.82rem; font-weight: 700; }
+    .picker-details { font-size: 0.72rem; color: var(--text-muted); }
+    @media (max-width: 1200px) {
+      .studio-layout { grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: max-content 1fr; overflow-y: auto; }
+      .studio-aside { grid-row: 1 / span 2; position: sticky; top: 0; max-height: 100%; }
+      .studio-main { overflow: visible; }
+      .studio-side { grid-column: 2; border-left: none; border-top: 1px solid var(--border-subtle); overflow: visible; }
+    }
+    @media (max-width: 768px) {
+      .studio-layout { grid-template-columns: 1fr; }
+      .studio-layout { display: block; overflow-y: auto; }
+      .studio-aside { grid-row: auto; position: static; border-right: none; border-bottom: 1px solid var(--border-subtle); max-height: none; }
+      .studio-list-panel { flex: none; max-height: 30vh; }
+      .studio-side { grid-column: 1; }
+      .studio-main { padding: 12px 16px 32px; overflow: visible; }
+      .studio-asset { flex-wrap: wrap; }
+      .studio-asset-actions { flex-direction: row; }
+    }
+
     @media (max-width: 768px) {
       .lib-list-row { grid-template-columns: 44px 1fr 34px; }
       .lib-list-row > :nth-child(3), .lib-list-row > :nth-child(4), .lib-list-row > :nth-child(5), .lib-list-row > :nth-child(6) { display: none; }
@@ -2269,6 +2399,10 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           <span>Asset Library</span>
         </button>
+        <button class="nav-tab" data-view="studio" id="tab-studio">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Prompt Studio</span>
+        </button>
       </nav>
     </div>
 
@@ -2549,6 +2683,26 @@
           <div class="lib-body" id="lib-body"></div>
         </div>
       </div>
+    </section>
+
+    <section class="app-view" id="view-studio">
+      <div class="studio-layout">
+        <aside class="studio-aside">
+          <div class="studio-panel-tabs" role="tablist">
+            <button type="button" class="studio-panel-tab" data-studio-panel="setups">Setups</button>
+            <button type="button" class="studio-panel-tab" data-studio-panel="presets">Outfit presets</button>
+          </div>
+          <div class="studio-aside-tools">
+            <input type="search" class="form-input" id="studio-search" placeholder="Search…" aria-label="Search setups and presets" />
+            <button type="button" class="btn btn-secondary btn-sm" id="studio-fav-toggle" title="Show favourites only">★</button>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="studio-new-btn">+ New setup</button>
+          <div class="studio-list-panel" id="studio-list"></div>
+        </aside>
+        <div class="studio-main" id="studio-main"></div>
+        <aside class="studio-side" id="studio-side"></aside>
+      </div>
+      <input type="file" id="studio-file-input" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" multiple style="display:none;" />
     </section>
 
   </main>
@@ -2868,6 +3022,24 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" id="profile-switch-btn" style="margin-right:auto;">Not you? Switch person</button>
       <button class="btn btn-primary" id="profile-done-btn">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================================
+     ASSET PICKER (Prompt Studio)
+     ===================================================================== -->
+<div class="modal-overlay" id="asset-picker-modal">
+  <div class="modal-card" style="max-width:820px;">
+    <div class="modal-header">
+      <h3 style="font-size:1rem; font-weight:700;" id="asset-picker-title">Choose an asset</h3>
+      <button class="icon-btn" id="asset-picker-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="search" class="form-input" id="asset-picker-search" placeholder="Search name, alias, SKU or tag…" aria-label="Search assets" style="margin-bottom:12px;" />
+      <div class="picker-grid" id="asset-picker-grid"></div>
     </div>
   </div>
 </div>
@@ -3244,6 +3416,8 @@
     boards: new Map(),
     shapes: new Map(), // shapeId -> shape object
     libraries: new Map(), // assetId -> Asset Library item (see LIBRARY_TYPES)
+    shoots: new Map(), // setupId -> Prompt Studio setup (draft or finalized)
+    outfitPresets: new Map(), // presetId -> outfit preset (asset ids only)
     assetCategories: [], // categories added by admins: [{ key, label, singular }]
     settings: { ...DEFAULT_TEAM },
 
@@ -3319,6 +3493,7 @@
       console.error('Could not load data from the ListingFlow server', err);
       libraryLoadFailed = true;
       if (state.currentView === 'libraries') renderLibrariesView();
+      if (state.currentView === 'studio') renderStudio();
       showToast('Cannot reach the ListingFlow server. Start it with "npm start"; changes are not being saved.', 'warning');
     }
   }
@@ -3539,6 +3714,12 @@
       state.libraries.clear();
       const libraryItems = await getAllFromStore('libraries');
       libraryItems.forEach(item => state.libraries.set(item.id, upgradeLegacyItem(item)));
+
+      // Load Prompt Studio setups and outfit presets
+      state.shoots.clear();
+      (await getAllFromStore('shoots')).forEach(rec => state.shoots.set(rec.id, rec));
+      state.outfitPresets.clear();
+      (await getAllFromStore('outfit_presets')).forEach(rec => state.outfitPresets.set(rec.id, rec));
 
     } catch(err) {
       console.error('Error loading data from DB', err);
@@ -3797,7 +3978,7 @@
     state.boards.clear();
     state.shapes.clear();
     await loadAllDataFromDB();
-    scheduleRemoteRender(new Set(['cards', 'comments', 'activity', 'shapes', 'settings', 'libraries']));
+    scheduleRemoteRender(new Set(['cards', 'comments', 'activity', 'shapes', 'settings', 'libraries', 'shoots', 'outfit_presets']));
   }
 
   function upsertById(map, groupKey, item) {
@@ -3851,6 +4032,12 @@
       case 'libraries':
         applyRemoteLibraryOp(op);
         break;
+      case 'shoots':
+        if (isPut) state.shoots.set(op.key, item); else state.shoots.delete(op.key);
+        break;
+      case 'outfit_presets':
+        if (isPut) state.outfitPresets.set(op.key, item); else state.outfitPresets.delete(op.key);
+        break;
     }
     remoteTouched.add(op.store);
     if (op.store === 'cards' && op.key === state.activeCardId) remoteTouched.add('activeCard');
@@ -3878,6 +4065,7 @@
       if (touched.has('shapes')) requestWhiteboardRender();
       if (touched.has('settings')) onTeamChanged();
       if (touched.has('libraries') || (touched.has('settings') && state.currentView === 'libraries')) renderLibrariesView();
+      if (['shoots', 'outfit_presets', 'libraries', 'cards'].some(k => touched.has(k))) onRemoteStudioChange();
       if ((touched.has('libraries') || touched.has('settings')) && state.activeCardId && state.cards.get(state.activeCardId)) {
         renderJobAndPrompts(state.cards.get(state.activeCardId));
       }
@@ -5851,6 +6039,7 @@
     updateUserSwitcherUI();
     updateTeamBadge();
     if (state.currentView === 'libraries') renderLibrariesView(); // admin-only controls depend on who this is
+    if (state.currentView === 'studio') renderStudio(); // edit rights depend on who this is
     if (member) scheduleFlushAfterSignIn();
   }
 
@@ -6393,6 +6582,8 @@
         updateArchiveStats();
       } else if (view === 'libraries') {
         renderLibrariesView();
+      } else if (view === 'studio') {
+        renderStudio();
       }
     });
   });
@@ -7585,6 +7776,18 @@
         { key: 'camera', label: 'Camera', placeholder: 'e.g. 85mm, f/8, eye level' },
         { key: 'brandRules', label: 'Brand visual rules', type: 'textarea', rows: 2 },
         { key: 'snippet', label: 'Style block (used in prompts)', type: 'textarea', rows: 4, hint: 'Backdrop, floor, lighting setup, shadows, camera.' },
+        constraintsField()
+      ]
+    },
+    expression: {
+      label: 'Expressions', singular: 'expression', codePrefix: 'EX', hasImages: true,
+      imagesLabel: 'Expression reference images',
+      imagesHint: 'Only the facial expression is copied from these, never the person.',
+      desc: 'Reusable facial expressions for Prompt Studio, e.g. a soft smile or a neutral editorial look.',
+      fields: [
+        nameField('Name', 'e.g. Soft closed-mouth smile'),
+        codeField('Code', 'Auto, e.g. EX01'),
+        { key: 'snippet', label: 'Expression description (used in prompts)', type: 'textarea', rows: 3 },
         constraintsField()
       ]
     },
@@ -9010,6 +9213,1047 @@
     });
 
     drawerPromptsPane.querySelectorAll('[data-zoom]').forEach(img => img.addEventListener('click', () => openImageZoomModal(img.dataset.zoom, '')));
+  }
+
+  // -------------------------------------------------------------------
+  // PROMPT STUDIO & OUTFIT PRESETS
+  // A setup configures one AI product shoot. Every section either points at
+  // an Asset Library item by id ("saved asset") or holds references uploaded
+  // just for this shoot ("new reference"). Setups save automatically as
+  // drafts in the 'shoots' store. Finalizing stores a snapshot of every asset
+  // used plus the prepared prompt, so later asset edits never change it; the
+  // server refuses any change to a finalized setup.
+  // Outfit presets ('outfit_presets') keep the same selections by asset id.
+  // -------------------------------------------------------------------
+  const STUDIO_REF_ROLES = ['Model identity', 'Top garment', 'Bottom garment', 'Shoes', 'Sunglasses', 'Pose', 'Styling or composition', 'Other'];
+  // What an outfit preset stores (no expression, extra references or product link).
+  const PRESET_SECTIONS = ['model', 'sunglasses', 'top', 'bottom', 'shoes', 'accessories', 'pose', 'style', 'settings'];
+  const STUDIO_MAX_IMAGES_PER_ITEM = 3; // reference images sent per item
+
+  function emptyStudioConfig() {
+    return {
+      model: { mode: 'saved', assetId: '', name: '', images: [], text: '' },
+      sunglasses: { enabled: false, mode: 'saved', assetId: '', images: [], text: '' },
+      expression: { enabled: false, mode: 'saved', assetId: '', images: [], text: '' },
+      top: { mode: 'saved', assetId: '', name: '', images: [], text: '' },
+      bottom: { mode: 'saved', assetId: '', name: '', images: [], text: '' },
+      shoes: { mode: 'none', assetId: '', name: '', images: [], text: '' },
+      accessories: [], // ordered: [{ uid, kind: 'saved' | 'custom', assetId, text, images }]
+      pose: { mode: 'saved', assetId: '', images: [], text: '', framing: '', orientation: '', hands: '', gaze: '', expression: '' },
+      references: [], // [{ uid, role, instructions, images }]
+      style: { assetId: '' },
+      settings: { instructions: '' }
+    };
+  }
+
+  // Fill in anything missing (older records, presets) and return a deep copy.
+  function normalizeStudioConfig(cfg) {
+    const base = emptyStudioConfig();
+    const src = JSON.parse(JSON.stringify(cfg || {}));
+    Object.keys(base).forEach(key => {
+      base[key] = Array.isArray(base[key])
+        ? (Array.isArray(src[key]) ? src[key] : [])
+        : { ...base[key], ...(src[key] || {}) };
+    });
+    return base;
+  }
+
+  function studioUid() {
+    return Math.random().toString(36).slice(2, 10);
+  }
+
+  const studioUI = {
+    panel: 'setups', // 'setups' | 'presets'
+    search: '',
+    favouritesOnly: false,
+    open: (() => { try { return JSON.parse(localStorage.getItem('listingflow_studio_open') || 'null'); } catch (e) { return null; } })() // { kind, id }
+  };
+
+  const studioList = document.getElementById('studio-list');
+  const studioMain = document.getElementById('studio-main');
+  const studioSide = document.getElementById('studio-side');
+  const studioSearch = document.getElementById('studio-search');
+  const studioFileInput = document.getElementById('studio-file-input');
+  const pickerModal = document.getElementById('asset-picker-modal');
+  const pickerTitle = document.getElementById('asset-picker-title');
+  const pickerSearch = document.getElementById('asset-picker-search');
+  const pickerGrid = document.getElementById('asset-picker-grid');
+
+  function setStudioOpen(kind, id) {
+    studioUI.open = kind && id ? { kind, id } : null;
+    try { localStorage.setItem('listingflow_studio_open', JSON.stringify(studioUI.open)); } catch (e) {}
+  }
+
+  function studioStoreFor(kind) {
+    return kind === 'preset' ? 'outfit_presets' : 'shoots';
+  }
+
+  function studioMapFor(kind) {
+    return kind === 'preset' ? state.outfitPresets : state.shoots;
+  }
+
+  function openStudioRecord() {
+    if (!studioUI.open) return null;
+    return studioMapFor(studioUI.open.kind).get(studioUI.open.id) || null;
+  }
+
+  function studioReadOnly(rec, kind) {
+    if (!rec) return true;
+    if (kind === 'shoot' && rec.status === 'final') return true;
+    return !canCurrentUserWrite(studioStoreFor(kind));
+  }
+
+  // Finalized setups read assets from their snapshot; drafts read the live library.
+  function studioAsset(rec, id) {
+    if (!id) return null;
+    if (rec && rec.status === 'final' && rec.snapshot) return rec.snapshot.assets[id] || null;
+    return state.libraries.get(id) || null;
+  }
+
+  function studioAssetIds(cfg) {
+    const ids = [];
+    const add = (cond, id) => { if (cond && id) ids.push(id); };
+    add(cfg.model.mode === 'saved', cfg.model.assetId);
+    add(cfg.sunglasses.enabled && cfg.sunglasses.mode === 'saved', cfg.sunglasses.assetId);
+    add(cfg.expression.enabled && cfg.expression.mode === 'saved', cfg.expression.assetId);
+    add(cfg.top.mode === 'saved', cfg.top.assetId);
+    add(cfg.bottom.mode === 'saved', cfg.bottom.assetId);
+    add(cfg.shoes.mode === 'saved', cfg.shoes.assetId);
+    cfg.accessories.forEach(a => add(a.kind === 'saved', a.assetId));
+    add(cfg.pose.mode === 'saved', cfg.pose.assetId);
+    add(true, cfg.style.assetId);
+    return Array.from(new Set(ids));
+  }
+
+  // ---- Saving ----------------------------------------------------------------
+  const studioSaveTimers = new Map();
+  let studioSavedAt = null;
+
+  function scheduleStudioSave(kind, rec) {
+    rec.updatedAt = new Date().toISOString();
+    rec.updatedBy = state.currentUser.id;
+    const key = kind + ':' + rec.id;
+    clearTimeout(studioSaveTimers.get(key));
+    studioSaveTimers.set(key, setTimeout(() => {
+      studioSaveTimers.delete(key);
+      putToStore(studioStoreFor(kind), rec);
+      studioSavedAt = Date.now();
+      const status = document.getElementById('studio-save-status');
+      if (status) status.textContent = 'Saved';
+    }, 400));
+    const status = document.getElementById('studio-save-status');
+    if (status) status.textContent = 'Saving…';
+  }
+
+  // Apply a change to the open setup or preset. Text typing skips the full re-render.
+  function studioUpdate(mutator, rerender = true) {
+    const rec = openStudioRecord();
+    const kind = studioUI.open && studioUI.open.kind;
+    if (!rec || studioReadOnly(rec, kind)) return;
+    if (!ensureCanEdit(studioStoreFor(kind))) return;
+    rec.config = normalizeStudioConfig(rec.config);
+    const before = new Set(studioAssetIds(rec.config));
+    mutator(rec.config, rec);
+    if (kind === 'shoot') markAssetsUsed(studioAssetIds(rec.config).filter(id => !before.has(id)));
+    scheduleStudioSave(kind, rec);
+    if (rerender) renderStudioEditor();
+    else renderStudioSide();
+  }
+
+  function pathGet(obj, path) {
+    return path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+  }
+
+  function pathSet(obj, path, value) {
+    const keys = path.split('.');
+    const last = keys.pop();
+    const target = keys.reduce((o, k) => o[k], obj);
+    target[last] = value;
+  }
+
+  // ---- Asset details shown on compact cards and in the picker ------------------
+  const KEY_DETAIL_FIELDS = {
+    model: ['genderPresentation', 'hairstyle', 'facialHair', 'bodyProportions'],
+    top: ['garmentType', 'fit', 'colour', 'fabric'],
+    bottom: ['garmentType', 'fit', 'colour', 'fabric'],
+    shoes: ['shoeType', 'colour', 'material'],
+    accessory: ['accessoryType', 'colour', 'placement'],
+    prop: ['placement'],
+    pose: ['poseGroup', 'framing', 'cameraAngle'],
+    style: ['lighting', 'background', 'camera'],
+    expression: []
+  };
+
+  function assetKeyDetails(asset) {
+    const keys = KEY_DETAIL_FIELDS[asset.type] || [];
+    return keys.map(k => asset[k]).filter(v => v && v !== 'Not specified' && v !== 'Other').join(' · ');
+  }
+
+  function assetThumb(asset) {
+    const img = (asset.images || [])[0];
+    const initials = (asset.name || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    return img
+      ? `<img src="${escapeHtml(img.url)}" alt="" loading="lazy" data-action="zoom" data-url="${escapeHtml(img.url)}" />`
+      : `<span class="studio-thumb-initials">${escapeHtml(initials)}</span>`;
+  }
+
+  // ---- Searchable asset picker ---------------------------------------------------
+  let pickerState = null; // { types, filter, onPick, emptyType }
+
+  function openAssetPicker({ title, types, filter, onPick }) {
+    pickerState = { types, filter, onPick };
+    pickerTitle.textContent = title;
+    pickerSearch.value = '';
+    renderAssetPicker();
+    pickerModal.classList.add('active');
+    setTimeout(() => pickerSearch.focus(), 30);
+  }
+
+  function closeAssetPicker() {
+    pickerModal.classList.remove('active');
+    pickerState = null;
+  }
+
+  function renderAssetPicker() {
+    if (!pickerState) return;
+    const q = normText(pickerSearch.value);
+    const items = pickerState.types.flatMap(t => libItemsOfType(t))
+      .filter(it => (!pickerState.filter || pickerState.filter(it)) && libMatchesSearch(it, q))
+      .sort((a, b) => Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''));
+    if (!items.length) {
+      const label = pickerState.types.map(t => catDef(t).label.toLowerCase()).join(' or ');
+      pickerGrid.innerHTML = `<div class="lib-empty">${q
+        ? `<strong>No matches</strong>Nothing in ${escapeHtml(label)} matches "${escapeHtml(pickerSearch.value)}".`
+        : `<strong>No ${escapeHtml(label)} yet</strong>Add some in the Asset Library first.`}
+        <div style="margin-top:10px;"><button type="button" class="btn btn-secondary btn-sm" data-picker-library="${escapeHtml(pickerState.types[0])}">Open Asset Library</button></div></div>`;
+      pickerGrid.querySelector('[data-picker-library]').addEventListener('click', (e) => {
+        const type = e.target.dataset.pickerLibrary;
+        closeAssetPicker();
+        libUI.activeType = type;
+        document.getElementById('tab-libraries').click();
+      });
+      return;
+    }
+    pickerGrid.innerHTML = items.map(it => `
+      <button type="button" class="picker-item" data-pick="${escapeHtml(it.id)}">
+        <span class="picker-thumb">${assetThumb(it).replace(' data-action="zoom"', '')}</span>
+        <span class="picker-body">
+          <span class="lib-cat-label">${escapeHtml(catDef(it.type).label)}${isFavourite(it) ? ' · ★' : ''}</span>
+          <span class="picker-name">${it.code ? `<span class="lib-code">${escapeHtml(it.code)}</span> ` : ''}${escapeHtml(it.name || 'Untitled')}</span>
+          <span class="picker-details">${escapeHtml(assetKeyDetails(it))}</span>
+        </span>
+      </button>`).join('');
+    pickerGrid.querySelectorAll('[data-pick]').forEach(btn => btn.addEventListener('click', () => {
+      const cb = pickerState.onPick;
+      closeAssetPicker();
+      cb(btn.dataset.pick);
+    }));
+  }
+
+  pickerSearch.addEventListener('input', renderAssetPicker);
+  document.getElementById('asset-picker-close').addEventListener('click', closeAssetPicker);
+
+  // Which picker each section opens.
+  const STUDIO_PICKERS = {
+    model: { title: 'Choose a model', types: ['model'] },
+    sunglasses: { title: 'Choose sunglasses', types: ['accessory'], filter: it => it.accessoryType === 'Sunglasses' },
+    expression: { title: 'Choose an expression', types: ['expression'] },
+    top: { title: 'Choose a top', types: ['top'] },
+    bottom: { title: 'Choose a bottom', types: ['bottom'] },
+    shoes: { title: 'Choose shoes', types: ['shoes'] },
+    accessories: { title: 'Add a saved accessory or prop', types: ['accessory', 'prop'] },
+    pose: { title: 'Choose a pose', types: ['pose'] },
+    style: { title: 'Choose a house style', types: ['style'] }
+  };
+
+  // ---- Section building blocks -----------------------------------------------------
+  function modeTabs(path, current, modes, dis) {
+    return `<div class="studio-modes" role="group">${modes.map(([value, label]) =>
+      `<button type="button" class="studio-mode${value === current ? ' active' : ''}" data-action="mode" data-path="${path}" data-value="${value}"${dis}>${escapeHtml(label)}</button>`).join('')}</div>`;
+  }
+
+  function toggleTabs(path, enabled, dis) {
+    return `<div class="studio-modes" role="group">
+      <button type="button" class="studio-mode${!enabled ? ' active' : ''}" data-action="toggle" data-path="${path}" data-value="false"${dis}>No</button>
+      <button type="button" class="studio-mode${enabled ? ' active' : ''}" data-action="toggle" data-path="${path}" data-value="true"${dis}>Yes</button></div>`;
+  }
+
+  function savedAssetBlock(rec, path, assetId, ctx, opts = {}) {
+    const asset = studioAsset(rec, assetId);
+    if (!assetId) {
+      return ctx.editable
+        ? `<button type="button" class="studio-pick-btn" data-action="pick" data-path="${path}">${escapeHtml(opts.chooseLabel || 'Choose from Asset Library')}</button>`
+        : `<div class="studio-muted">Nothing selected.</div>`;
+    }
+    if (!asset) return `<div class="studio-warn">This asset was deleted from the Asset Library. ${ctx.editable ? `<button type="button" class="identity-link" data-action="pick" data-path="${path}">Choose another</button>` : ''}</div>`;
+    const live = state.libraries.get(asset.id);
+    const changed = rec.status === 'final' && live && live.updatedAt && asset.updatedAt && live.updatedAt > asset.updatedAt;
+    const extraImages = opts.showImages ? (asset.images || []).slice(1, 6) : [];
+    const lines = [];
+    if (opts.showSnippet && asset.snippet) lines.push(`<div class="studio-asset-text">${escapeHtml(asset.snippet)}</div>`);
+    if (asset.constraints) lines.push(`<div class="studio-asset-text"><strong>Kept unchanged:</strong> ${escapeHtml(asset.constraints)}</div>`);
+    return `
+      <div class="studio-asset">
+        <span class="studio-thumb">${assetThumb(asset)}</span>
+        <div class="studio-asset-body">
+          <div class="studio-asset-top"><span class="studio-badge saved">Saved asset</span>${asset.archived ? '<span class="studio-badge">Archived</span>' : ''}${asset.code ? `<span class="lib-code">${escapeHtml(asset.code)}</span>` : ''}</div>
+          <strong class="studio-asset-name">${escapeHtml(asset.name || 'Untitled')}</strong>
+          ${assetKeyDetails(asset) ? `<div class="studio-asset-details">${escapeHtml(assetKeyDetails(asset))}</div>` : ''}
+          ${lines.join('')}
+          ${extraImages.length ? `<div class="studio-mini-images">${extraImages.map(img => `<img src="${escapeHtml(img.url)}" alt="" data-action="zoom" data-url="${escapeHtml(img.url)}" />`).join('')}</div>` : ''}
+          ${changed ? '<div class="studio-muted">Edited in the Asset Library after this setup was finalized. This setup keeps the version shown here.</div>' : ''}
+        </div>
+        ${ctx.editable ? `<div class="studio-asset-actions">
+          <button type="button" class="btn btn-secondary btn-sm" data-action="pick" data-path="${path}">Replace</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-action="clear" data-path="${path}">Remove</button></div>` : ''}
+      </div>`;
+  }
+
+  function imagesBlock(path, images, ctx) {
+    return `<div class="studio-images">
+      ${(images || []).map((img, i) => `<span class="studio-image"><img src="${escapeHtml(img.url)}" alt="${escapeHtml(img.name || '')}" data-action="zoom" data-url="${escapeHtml(img.url)}" />${ctx.editable ? `<button type="button" class="lib-image-remove" data-action="remove-image" data-path="${path}" data-index="${i}" aria-label="Remove image">✕</button>` : ''}</span>`).join('')}
+      ${ctx.uploading[path] ? Array.from({ length: ctx.uploading[path] }, () => '<span class="studio-image uploading"><span class="lib-spinner"></span></span>').join('') : ''}
+      ${ctx.editable ? `<button type="button" class="studio-upload-btn" data-action="upload" data-path="${path}">+ Upload images</button>` : ''}
+    </div>`;
+  }
+
+  // A reference uploaded just for this shoot, not (yet) in the Asset Library.
+  function newReferenceBlock(rec, path, obj, ctx, opts) {
+    const dis = ctx.editable ? '' : ' disabled';
+    const canSave = ctx.editable && opts.saveType && canCurrentUserWrite('libraries');
+    const card = rec.cardId && state.cards.get(rec.cardId);
+    return `
+      <div class="studio-new">
+        <div class="studio-asset-top"><span class="studio-badge new">New reference</span><span class="studio-muted">Only used in this ${ctx.kind === 'preset' ? 'preset' : 'setup'} until saved to the library.</span></div>
+        ${opts.nameLabel ? `<input class="form-input" data-input="${path}.name" value="${escapeHtml(obj.name || '')}" placeholder="${escapeHtml(opts.nameLabel)}"${dis} />` : ''}
+        ${imagesBlock(path + '.images', obj.images, ctx)}
+        <textarea class="form-textarea" rows="2" data-input="${path}.text" placeholder="${escapeHtml(opts.textPlaceholder || 'Description')}"${dis}>${escapeHtml(obj.text || '')}</textarea>
+        ${ctx.editable && (canSave || (opts.cardPhotos && card)) ? `<div class="studio-row">
+          ${opts.cardPhotos && card ? `<button type="button" class="btn btn-secondary btn-sm" data-action="card-photos" data-path="${path}">Use photos from linked product</button>` : ''}
+          ${canSave ? `<button type="button" class="btn btn-secondary btn-sm" data-action="save-to-library" data-path="${path}" data-type="${opts.saveType}">Save to Asset Library</button>` : ''}
+        </div>` : ''}
+      </div>`;
+  }
+
+  function studioSection(letter, title, required, body, sub) {
+    return `<section class="studio-section"><div class="studio-section-head"><span class="studio-letter">${letter}</span><h3>${escapeHtml(title)}</h3>${required ? '<span class="studio-required">Required</span>' : ''}</div>${sub ? `<p class="studio-sub">${sub}</p>` : ''}${body}</section>`;
+  }
+
+  // ---- Sections -------------------------------------------------------------------------
+  function renderStudioSections(rec, ctx) {
+    const cfg = rec.config;
+    const dis = ctx.editable ? '' : ' disabled';
+    const out = [];
+    const want = (key) => ctx.kind !== 'preset' || PRESET_SECTIONS.includes(key);
+
+    out.push(studioSection('A', 'Model', true,
+      modeTabs('model', cfg.model.mode, [['saved', 'Saved model'], ['new', 'New model']], dis) +
+      (cfg.model.mode === 'saved'
+        ? savedAssetBlock(rec, 'model', cfg.model.assetId, ctx, { chooseLabel: 'Choose a model', showImages: true, showSnippet: true })
+        : newReferenceBlock(rec, 'model', cfg.model, ctx, { nameLabel: 'Model name', textPlaceholder: 'Identity description: age range, skin tone, face, hair, build. Write what you see.', saveType: 'model' })),
+      'The identity lock and constraints of a saved model go into the prompt unchanged.'));
+
+    out.push(studioSection('B', 'Sunglasses', false,
+      toggleTabs('sunglasses', cfg.sunglasses.enabled, dis) +
+      (cfg.sunglasses.enabled
+        ? modeTabs('sunglasses', cfg.sunglasses.mode, [['saved', 'Saved sunglasses'], ['upload', 'New reference image']], dis) +
+          (cfg.sunglasses.mode === 'saved'
+            ? savedAssetBlock(rec, 'sunglasses', cfg.sunglasses.assetId, ctx, { chooseLabel: 'Choose sunglasses' })
+            : newReferenceBlock(rec, 'sunglasses', cfg.sunglasses, ctx, { textPlaceholder: 'How they are worn (optional)', saveType: 'accessory' }))
+        : ''),
+      'When on, the exact shape, colour and styling of the reference are kept.'));
+
+    if (want('expression')) {
+      out.push(studioSection('C', 'Facial expression', false,
+        toggleTabs('expression', cfg.expression.enabled, dis) +
+        (cfg.expression.enabled
+          ? modeTabs('expression', cfg.expression.mode, [['saved', 'Saved expression'], ['custom', 'Custom']], dis) +
+            (cfg.expression.mode === 'saved'
+              ? savedAssetBlock(rec, 'expression', cfg.expression.assetId, ctx, { chooseLabel: 'Choose an expression', showSnippet: true })
+              : newReferenceBlock(rec, 'expression', cfg.expression, ctx, { textPlaceholder: 'Describe the expression, e.g. relaxed, slight closed-mouth smile', saveType: 'expression' }))
+          : ''),
+        'Leave off to keep expression instructions out of the prompt.'));
+    }
+
+    ['top', 'bottom'].forEach((key, i) => {
+      const label = key === 'top' ? 'Top garment' : 'Bottom garment';
+      out.push(studioSection(i === 0 ? 'D' : 'E', label, false,
+        modeTabs(key, cfg[key].mode, [['saved', 'Saved product'], ['new', 'New product'], ['none', 'None']], dis) +
+        (cfg[key].mode === 'saved'
+          ? savedAssetBlock(rec, key, cfg[key].assetId, ctx, { chooseLabel: `Choose a ${key}`, showSnippet: true })
+          : cfg[key].mode === 'new'
+            ? newReferenceBlock(rec, key, cfg[key], ctx, { nameLabel: 'Product name', textPlaceholder: 'Garment details: fit, length, fabric, colour, closures, prints. Only what is visible.', saveType: key, cardPhotos: true })
+            : '<div class="studio-muted">No ' + key + ' in this shoot.</div>'),
+        i === 0 ? 'Each garment keeps its own specification. At least one of top or bottom is needed.' : ''));
+    });
+
+    out.push(studioSection('F', 'Shoes', false,
+      modeTabs('shoes', cfg.shoes.mode, [['none', 'None'], ['text', 'Text description'], ['upload', 'Reference image'], ['saved', 'Saved shoes']], dis) +
+      (cfg.shoes.mode === 'saved' ? savedAssetBlock(rec, 'shoes', cfg.shoes.assetId, ctx, { chooseLabel: 'Choose shoes' })
+        : cfg.shoes.mode === 'text' ? `<textarea class="form-textarea" rows="2" data-input="shoes.text" placeholder="e.g. White low-top leather sneakers, clean, no logos"${dis}>${escapeHtml(cfg.shoes.text || '')}</textarea>`
+        : cfg.shoes.mode === 'upload' ? newReferenceBlock(rec, 'shoes', cfg.shoes, ctx, { nameLabel: 'Shoe name (optional)', textPlaceholder: 'Notes (optional)', saveType: 'shoes' })
+        : '<div class="studio-muted">Shoes are left to the model\'s default styling.</div>')));
+
+    out.push(studioSection('G', 'Props and accessories', false,
+      `<div class="studio-list">${cfg.accessories.map((a, i) => {
+        const controls = ctx.editable ? `<div class="studio-order">
+          <button type="button" class="icon-btn" data-action="acc-move" data-index="${i}" data-dir="-1" aria-label="Move up"${i === 0 ? ' disabled' : ''}>↑</button>
+          <button type="button" class="icon-btn" data-action="acc-move" data-index="${i}" data-dir="1" aria-label="Move down"${i === cfg.accessories.length - 1 ? ' disabled' : ''}>↓</button>
+          <button type="button" class="icon-btn" data-action="acc-remove" data-index="${i}" aria-label="Remove">✕</button></div>` : '';
+        const body = a.kind === 'saved'
+          ? savedAssetBlock(rec, 'accessories.' + i, a.assetId, { ...ctx, editable: false }) +
+            `<input class="form-input" data-input="accessories.${i}.text" value="${escapeHtml(a.text || '')}" placeholder="Placement or extra notes for this shoot (optional)"${dis} />`
+          : newReferenceBlock(rec, 'accessories.' + i, a, ctx, { textPlaceholder: 'Describe the item and where it appears', saveType: 'prop' });
+        return `<div class="studio-list-item"><span class="studio-list-num">${i + 1}</span><div class="studio-list-body">${body}</div>${controls}</div>`;
+      }).join('') || '<div class="studio-muted">No props or accessories.</div>'}</div>
+      ${ctx.editable ? `<div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-action="acc-add-saved">+ Saved item</button><button type="button" class="btn btn-secondary btn-sm" data-action="acc-add-custom">+ Custom item</button></div>` : ''}`,
+      'Listed in this order in the prompt. Reorder or remove items without touching anything else.'));
+
+    const p = cfg.pose;
+    out.push(studioSection('H', 'Pose and composition', true,
+      modeTabs('pose', p.mode, [['saved', 'Saved pose'], ['upload', 'Pose reference image'], ['text', 'Text description']], dis) +
+      (p.mode === 'saved' ? savedAssetBlock(rec, 'pose', p.assetId, ctx, { chooseLabel: 'Choose a pose', showSnippet: true })
+        : p.mode === 'upload' ? `<span class="studio-badge new">New reference</span>${imagesBlock('pose.images', p.images, ctx)}<textarea class="form-textarea" rows="2" data-input="pose.text" placeholder="What to copy from the reference (optional)"${dis}>${escapeHtml(p.text || '')}</textarea>`
+        : `<textarea class="form-textarea" rows="2" data-input="pose.text" placeholder="Describe the pose"${dis}>${escapeHtml(p.text || '')}</textarea>`) +
+      `<div class="studio-grid-2">
+        ${[['framing', 'Camera framing', 'e.g. Waist up, centred'], ['orientation', 'Body orientation', 'e.g. 3/4 turn to camera left'], ['hands', 'Hand placement', 'e.g. Left hand in pocket'], ['gaze', 'Gaze', 'e.g. Looking just off camera'], ['expression', 'Expression note', 'e.g. Calm, confident']]
+          .map(([k, label, ph]) => `<label class="studio-field"><span>${label}</span><input class="form-input" data-input="pose.${k}" value="${escapeHtml(p[k] || '')}" placeholder="${ph}"${dis} /></label>`).join('')}
+      </div>`));
+
+    if (want('references')) {
+      out.push(studioSection('I', 'Additional references', false,
+        `<div class="studio-list">${cfg.references.map((r, i) => `
+          <div class="studio-list-item"><span class="studio-list-num">${i + 1}</span><div class="studio-list-body">
+            <div class="studio-row">
+              <select class="form-select" data-input="references.${i}.role"${dis}>${STUDIO_REF_ROLES.map(role => `<option${role === r.role ? ' selected' : ''}>${escapeHtml(role)}</option>`).join('')}</select>
+              ${r.role === 'Other' ? `<input class="form-input" data-input="references.${i}.customRole" value="${escapeHtml(r.customRole || '')}" placeholder="Name this role"${dis} />` : ''}
+            </div>
+            ${imagesBlock('references.' + i + '.images', r.images, ctx)}
+            <textarea class="form-textarea" rows="2" data-input="references.${i}.instructions" placeholder="What to take from these images"${dis}>${escapeHtml(r.instructions || '')}</textarea>
+          </div>${ctx.editable ? `<div class="studio-order"><button type="button" class="icon-btn" data-action="ref-remove" data-index="${i}" aria-label="Remove">✕</button></div>` : ''}</div>`).join('') || '<div class="studio-muted">No extra references.</div>'}</div>
+        ${ctx.editable ? '<button type="button" class="btn btn-secondary btn-sm" data-action="ref-add">+ Add reference</button>' : ''}`,
+        'Optional images for anything else, each with its own role and instructions.'));
+    }
+
+    out.push(studioSection('J', 'House style', true,
+      savedAssetBlock(rec, 'style', cfg.style.assetId, ctx, { chooseLabel: 'Choose a house style', showSnippet: true }),
+      'Lighting, background, lens and realism rules from a saved style.'));
+
+    out.push(studioSection('', 'Prompt settings', false,
+      `<textarea class="form-textarea" rows="2" data-input="settings.instructions" placeholder="Extra instructions added to every prompt for this ${ctx.kind === 'preset' ? 'preset' : 'setup'} (optional)"${dis}>${escapeHtml(cfg.settings.instructions || '')}</textarea>`));
+    return out.join('');
+  }
+
+  // ---- Completeness ---------------------------------------------------------------------
+  function studioChecklist(rec) {
+    const c = normalizeStudioConfig(rec.config);
+    const has = (o) => (o.images || []).length > 0;
+    const savedOk = (id) => Boolean(id && studioAsset(rec, id));
+    const items = [];
+    items.push({ label: 'Model', ok: c.model.mode === 'saved' ? savedOk(c.model.assetId) : (has(c.model) || Boolean(c.model.text.trim())) });
+    if (c.sunglasses.enabled) items.push({ label: 'Sunglasses', ok: c.sunglasses.mode === 'saved' ? savedOk(c.sunglasses.assetId) : has(c.sunglasses) });
+    if (c.expression.enabled) items.push({ label: 'Facial expression', ok: c.expression.mode === 'saved' ? savedOk(c.expression.assetId) : Boolean(c.expression.text.trim() || has(c.expression)) });
+    const garmentOk = (g) => g.mode === 'saved' ? savedOk(g.assetId) : g.mode === 'new' ? Boolean(g.name.trim()) && has(g) : false;
+    items.push({ label: 'Top or bottom garment', ok: garmentOk(c.top) || garmentOk(c.bottom) });
+    ['top', 'bottom'].forEach(k => {
+      if (c[k].mode !== 'none' && !garmentOk(c[k])) items.push({ label: `${k === 'top' ? 'Top' : 'Bottom'}: ${c[k].mode === 'new' ? 'add a name and at least one image' : 'choose a product'}`, ok: false });
+    });
+    if (c.shoes.mode !== 'none') items.push({ label: 'Shoes', ok: c.shoes.mode === 'saved' ? savedOk(c.shoes.assetId) : c.shoes.mode === 'text' ? Boolean(c.shoes.text.trim()) : has(c.shoes) });
+    c.accessories.forEach((a, i) => { if (a.kind === 'custom' && !a.text.trim() && !has(a)) items.push({ label: `Prop or accessory ${i + 1}: add a description or image`, ok: false }); });
+    items.push({ label: 'Pose', ok: c.pose.mode === 'saved' ? savedOk(c.pose.assetId) : c.pose.mode === 'upload' ? has(c.pose) : Boolean(c.pose.text.trim()) });
+    c.references.forEach((r, i) => { if (!has(r)) items.push({ label: `Additional reference ${i + 1}: add an image`, ok: false }); });
+    items.push({ label: 'House style', ok: savedOk(c.style.assetId) });
+    return items;
+  }
+
+  // ---- Prompt preparation ---------------------------------------------------------------------
+  function buildStudioPrompt(rec) {
+    const c = normalizeStudioConfig(rec.config);
+    const style = getPromptStyle();
+    const asset = (id) => studioAsset(rec, id);
+    const sentence = (t) => String(t).trim().replace(/[\s.]+$/, '') + '.';
+    const keep = (a) => a && a.constraints && a.constraints.trim() ? ' Must keep: ' + sentence(a.constraints) : '';
+    const refs = [];
+    let next = 1;
+    const addRef = (label, images, saved, kind) => {
+      const urls = (images || []).map(img => img.url).filter(Boolean).slice(0, STUDIO_MAX_IMAGES_PER_ITEM);
+      if (!urls.length) return '';
+      const range = urls.length > 1 ? `Images ${next}–${next + urls.length - 1}` : `Image ${next}`;
+      refs.push({ label, urls, saved, kind, range, start: next });
+      next += urls.length;
+      return range;
+    };
+    const lines = [];
+    const body = [];
+
+    // Model
+    const model = c.model.mode === 'saved' ? asset(c.model.assetId) : null;
+    if (model) {
+      const r = addRef(`${model.name} (model identity)`, model.images, true, 'model');
+      body.push(`Model: ${sentence(model.snippet || `the person in the ${model.name} reference`)}${r ? ` Use the exact person in ${r}: face, hair, skin tone and body shape.` : ''}${keep(model)}`);
+    } else if (c.model.mode === 'new' && (c.model.images.length || c.model.text.trim())) {
+      const r = addRef(`${c.model.name || 'New model'} (model identity)`, c.model.images, false, 'model');
+      body.push(`Model: ${c.model.text.trim() ? sentence(c.model.text) : 'the person in the reference.'}${r ? ` Use the exact person in ${r}: face, hair, skin tone and body shape.` : ''}`);
+    }
+
+    // Expression only when it is switched on.
+    if (c.expression.enabled) {
+      const ex = c.expression.mode === 'saved' ? asset(c.expression.assetId) : null;
+      if (ex) {
+        const r = addRef(`${ex.name} (expression)`, ex.images, true, 'expression');
+        body.push(`Facial expression: ${sentence(ex.snippet || ex.name)}${r ? ` Copy only the expression from ${r}, not the person.` : ''}${keep(ex)}`);
+      } else if (c.expression.mode === 'custom' && (c.expression.text.trim() || c.expression.images.length)) {
+        const r = addRef('Expression reference', c.expression.images, false, 'expression');
+        body.push(`Facial expression: ${c.expression.text.trim() ? sentence(c.expression.text) : 'as in the reference.'}${r ? ` Copy only the expression from ${r}, not the person.` : ''}`);
+      }
+    }
+
+    // Garments, each with its own specification.
+    const garment = (key, label) => {
+      const g = c[key];
+      if (g.mode === 'saved') {
+        const a = asset(g.assetId);
+        if (!a) return;
+        const r = addRef(`${a.name} (${label.toLowerCase()})`, a.images, true, key);
+        body.push(`${label}: ${sentence(a.name)}${a.snippet ? ' ' + sentence(a.snippet) : ''}${r ? ` Reproduce it exactly as in ${r}.` : ''}${keep(a)}`);
+      } else if (g.mode === 'new' && (g.name.trim() || g.images.length)) {
+        const r = addRef(`${g.name || 'New ' + label.toLowerCase()} (${label.toLowerCase()})`, g.images, false, key);
+        body.push(`${label}: ${sentence(g.name || 'the garment in the reference')}${g.text.trim() ? ' ' + sentence(g.text) : ''}${r ? ` Reproduce it exactly as in ${r}: fit, length, colour, fabric and details.` : ''}`);
+      }
+    };
+    garment('top', 'Top');
+    garment('bottom', 'Bottom');
+
+    if (c.shoes.mode === 'saved') {
+      const a = asset(c.shoes.assetId);
+      if (a) {
+        const r = addRef(`${a.name} (shoes)`, a.images, true, 'shoes');
+        body.push(`Shoes: ${sentence(a.name)}${a.snippet ? ' ' + sentence(a.snippet) : ''}${r ? ` Match ${r}.` : ''}${keep(a)}`);
+      }
+    } else if (c.shoes.mode === 'text' && c.shoes.text.trim()) {
+      body.push(`Shoes: ${sentence(c.shoes.text)}`);
+    } else if (c.shoes.mode === 'upload' && c.shoes.images.length) {
+      const r = addRef(`${c.shoes.name || 'Shoes'} (shoes)`, c.shoes.images, false, 'shoes');
+      body.push(`Shoes: ${c.shoes.name ? sentence(c.shoes.name) + ' ' : ''}${c.shoes.text.trim() ? sentence(c.shoes.text) + ' ' : ''}Match ${r} exactly.`);
+    }
+
+    if (c.sunglasses.enabled) {
+      const a = c.sunglasses.mode === 'saved' ? asset(c.sunglasses.assetId) : null;
+      if (a) {
+        const r = addRef(`${a.name} (sunglasses)`, a.images, true, 'sunglasses');
+        body.push(`Sunglasses: ${sentence(a.name)}${a.snippet ? ' ' + sentence(a.snippet) : ''} Keep the exact shape, colour and styling${r ? ` of ${r}` : ''}.${keep(a)}`);
+      } else if (c.sunglasses.mode === 'upload' && c.sunglasses.images.length) {
+        const r = addRef('Sunglasses reference', c.sunglasses.images, false, 'sunglasses');
+        body.push(`Sunglasses: worn as in ${r}${c.sunglasses.text.trim() ? '; ' + c.sunglasses.text.trim().replace(/[\s.]+$/, '') : ''}. Keep the exact shape, colour and styling.`);
+      }
+    }
+
+    c.accessories.forEach(a => {
+      if (a.kind === 'saved') {
+        const item = asset(a.assetId);
+        if (!item) return;
+        const label = catDef(item.type).singular;
+        const r = addRef(`${item.name} (${label})`, item.images, true, 'accessory');
+        const where = a.text.trim() || item.placement || '';
+        body.push(`${label === 'prop' ? 'Prop' : 'Accessory'}: ${sentence(item.name + (where ? ', ' + where.trim() : ''))}${item.snippet ? ' ' + sentence(item.snippet) : ''}${r ? ` As in ${r}.` : ''}${keep(item)}`);
+      } else if (a.text.trim() || a.images.length) {
+        const r = addRef('Custom prop or accessory', a.images, false, 'accessory');
+        body.push(`Prop or accessory: ${a.text.trim() ? sentence(a.text) : 'as in the reference.'}${r ? ` As in ${r}.` : ''}`);
+      }
+    });
+
+    // Additional references, before the pose so the pose image stays last.
+    const extraRefLines = [];
+    c.references.forEach(r => {
+      const role = r.role === 'Other' ? (r.customRole || 'Other reference') : r.role;
+      const range = addRef(`${role} (additional reference)`, r.images, false, 'reference');
+      if (range) extraRefLines.push(`${range} (${role.toLowerCase()}): ${r.instructions.trim() ? sentence(r.instructions) : 'use as a reference.'}`);
+    });
+
+    // House style reference comes before the pose so the pose image is always last.
+    let styleLine = '';
+    const houseStyle = asset(c.style.assetId);
+    if (houseStyle) {
+      const r = addRef(`${houseStyle.name} (house style)`, houseStyle.images, true, 'style');
+      const parts = [houseStyle.snippet, houseStyle.lighting && 'Lighting: ' + houseStyle.lighting, houseStyle.background && 'Background: ' + houseStyle.background, houseStyle.camera && 'Camera: ' + houseStyle.camera, houseStyle.brandRules]
+        .filter(Boolean).map(sentence).join(' ');
+      styleLine = `House style: ${parts || sentence(houseStyle.name)}${r ? ` Match the look of ${r}.` : ''}${keep(houseStyle)}`;
+    }
+
+    // Pose
+    const p = c.pose;
+    const poseAsset = p.mode === 'saved' ? asset(p.assetId) : null;
+    const poseDetails = [['Framing', p.framing], ['Body orientation', p.orientation], ['Hands', p.hands], ['Gaze', p.gaze], ['Expression', p.expression]]
+      .filter(([, v]) => v && v.trim()).map(([k, v]) => `${k}: ${v.trim().replace(/[\s.]+$/, '')}.`).join(' ');
+    if (poseAsset) {
+      const r = addRef(`${poseAsset.name} (pose)`, poseAsset.images, true, 'pose');
+      body.push(`Pose: ${sentence(poseAsset.snippet || poseAsset.name)}${r ? ` Copy only the pose, body angle and framing from ${r}, not the person or clothing.` : ''}${poseDetails ? ' ' + poseDetails : ''}${keep(poseAsset)}`);
+    } else if (p.mode === 'upload' && p.images.length) {
+      const r = addRef('Pose reference', p.images, false, 'pose');
+      body.push(`Pose: copy only the pose, body angle and framing from ${r}, not the person or clothing.${p.text.trim() ? ' ' + sentence(p.text) : ''}${poseDetails ? ' ' + poseDetails : ''}`);
+    } else if (p.mode === 'text' && p.text.trim()) {
+      body.push(`Pose: ${sentence(p.text)}${poseDetails ? ' ' + poseDetails : ''}`);
+    }
+
+
+    if (styleLine) body.push(styleLine);
+
+    if (refs.length) {
+      lines.push('Reference images:');
+      refs.forEach(r => lines.push(`- ${r.range}: ${r.label}`));
+      lines.push('');
+    }
+    if (style.constants) lines.push(style.constants, '');
+    lines.push(...body);
+    if (extraRefLines.length) lines.push('', 'Additional references:', ...extraRefLines.map(l => '- ' + l));
+    if (c.settings.instructions.trim()) lines.push('', 'Instructions:', '- ' + c.settings.instructions.trim());
+    if (style.avoid) lines.push('', `Avoid: ${style.avoid}`);
+    return { text: lines.join('\n'), refs };
+  }
+
+  // ---- Rendering ------------------------------------------------------------------------------
+  const studioUploading = {}; // path -> number of uploads in flight for the open record
+
+  function renderStudio() {
+    if (!studioMain) return;
+    renderStudioList();
+    renderStudioEditor();
+  }
+
+  function studioTypingInside(el) {
+    return el.contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+  }
+
+  function linkedCardLabel(card) {
+    return (card.sku ? card.sku + ' · ' : '') + (card.name || 'Untitled');
+  }
+
+  function renderStudioList() {
+    document.querySelectorAll('[data-studio-panel]').forEach(b => b.classList.toggle('active', b.dataset.studioPanel === studioUI.panel));
+    const q = normText(studioUI.search);
+    document.getElementById('studio-fav-toggle').style.display = studioUI.panel === 'presets' ? '' : 'none';
+    document.getElementById('studio-fav-toggle').classList.toggle('active', studioUI.favouritesOnly);
+    document.getElementById('studio-new-btn').textContent = studioUI.panel === 'presets' ? '+ New preset' : '+ New setup';
+    if (!dbInstance) {
+      studioList.innerHTML = `<div class="studio-muted" style="padding:12px;">${libraryLoadFailed ? "Can't reach the server." : 'Loading…'}</div>`;
+      return;
+    }
+    if (studioUI.panel === 'setups') {
+      const items = Array.from(state.shoots.values())
+        .filter(s => !q || normText(s.name).includes(q) || (s.cardId && state.cards.get(s.cardId) && normText(linkedCardLabel(state.cards.get(s.cardId))).includes(q)))
+        .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+      studioList.innerHTML = items.length ? items.map(s => {
+        const card = s.cardId && state.cards.get(s.cardId);
+        const isOpen = studioUI.open && studioUI.open.kind === 'shoot' && studioUI.open.id === s.id;
+        return `<div class="studio-list-entry${isOpen ? ' active' : ''}" data-open-shoot="${escapeHtml(s.id)}" tabindex="0" role="button">
+          <div class="studio-entry-top"><span class="studio-badge${s.status === 'final' ? ' final' : ''}">${s.status === 'final' ? 'Final' : 'Draft'}</span><strong>${escapeHtml(s.name || 'Untitled setup')}</strong></div>
+          ${card ? `<div class="studio-entry-sub">${escapeHtml(linkedCardLabel(card))}</div>` : ''}
+          <div class="studio-entry-sub">${escapeHtml(timeAgo(s.updatedAt))} · ${escapeHtml(memberName(s.updatedBy || s.createdBy))}</div>
+        </div>`;
+      }).join('') : `<div class="studio-muted" style="padding:12px;">${q ? 'No setups match.' : 'No setups yet. Start one with "+ New setup" or from an outfit preset.'}</div>`;
+    } else {
+      const items = Array.from(state.outfitPresets.values())
+        .filter(p => !p.archived && (!studioUI.favouritesOnly || isFavourite(p)))
+        .filter(p => !q || normText(p.name).includes(q) || (p.tags || []).some(t => normText(t).includes(q)))
+        .sort((a, b) => Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''));
+      studioList.innerHTML = items.length ? items.map(p => {
+        const isOpen = studioUI.open && studioUI.open.kind === 'preset' && studioUI.open.id === p.id;
+        const thumbs = studioAssetIds(normalizeStudioConfig(p.config)).map(id => state.libraries.get(id)).filter(a => a && (a.images || []).length).slice(0, 5);
+        return `<div class="studio-list-entry${isOpen ? ' active' : ''}" data-open-preset="${escapeHtml(p.id)}" tabindex="0" role="button">
+          <div class="studio-entry-top"><button type="button" class="lib-fav-btn${isFavourite(p) ? ' on' : ''}" data-fav-preset="${escapeHtml(p.id)}" aria-label="Favourite">${isFavourite(p) ? '★' : '☆'}</button><strong>${escapeHtml(p.name || 'Untitled preset')}</strong></div>
+          ${thumbs.length ? `<div class="studio-mini-images">${thumbs.map(a => `<img src="${escapeHtml(a.images[0].url)}" alt="" />`).join('')}</div>` : ''}
+          ${tagsHtml(p, 4)}
+          <div class="studio-row"><button type="button" class="btn btn-primary btn-sm" data-start-preset="${escapeHtml(p.id)}">Start setup</button></div>
+        </div>`;
+      }).join('') : `<div class="studio-muted" style="padding:12px;">${q || studioUI.favouritesOnly ? 'No presets match.' : 'No outfit presets yet. Build a setup and use "Save as preset".'}</div>`;
+    }
+  }
+
+  function renderStudioEditor() {
+    const rec = openStudioRecord();
+    const kind = studioUI.open && studioUI.open.kind;
+    if (!dbInstance) {
+      studioMain.innerHTML = `<div class="lib-empty">${libraryLoadFailed ? "<strong>Can't load Prompt Studio</strong>The ListingFlow server could not be reached." : '<span class="lib-spinner"></span><strong>Loading…</strong>'}</div>`;
+      studioSide.innerHTML = '';
+      return;
+    }
+    if (!rec) {
+      if (studioUI.open) setStudioOpen(null);
+      studioMain.innerHTML = `<div class="lib-empty"><strong>Prompt Studio</strong>Configure a complete product shoot from your Asset Library: model, outfit, pose and house style. Start a new setup, open a draft, or start from an outfit preset.<div style="margin-top:12px;"><button type="button" class="btn btn-primary" data-action="new-setup">+ New setup</button></div></div>`;
+      studioSide.innerHTML = '';
+      return;
+    }
+    rec.config = normalizeStudioConfig(rec.config);
+    const editable = !studioReadOnly(rec, kind);
+    const ctx = { kind, editable, uploading: studioUploading };
+    const dis = editable ? '' : ' disabled';
+    let header;
+    if (kind === 'preset') {
+      header = `
+        <div class="studio-header">
+          <span class="studio-badge">Outfit preset</span>
+          <input class="form-input studio-title-input" data-input="__name" value="${escapeHtml(rec.name || '')}" placeholder="Preset name"${dis} />
+          <input class="form-input" data-input="__tags" value="${escapeHtml((rec.tags || []).join(', '))}" placeholder="Tags, comma separated"${dis} />
+          <div class="studio-row">
+            <button type="button" class="btn btn-primary btn-sm" data-action="start-from-preset">Start setup from this preset</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-action="duplicate-preset">Duplicate</button>
+            ${editable ? '<button type="button" class="btn btn-danger btn-sm" data-action="delete-preset">Delete</button>' : ''}
+            <span class="studio-muted" id="studio-save-status">${editable ? 'Changes save automatically' : 'View only'}</span>
+          </div>
+          <p class="studio-sub">A preset stores asset IDs, not copies, so it always uses the current version of each asset.</p>
+        </div>`;
+    } else {
+      const card = rec.cardId && state.cards.get(rec.cardId);
+      header = `
+        <div class="studio-header">
+          <input class="form-input studio-title-input" data-input="__name" value="${escapeHtml(rec.name || '')}" placeholder="Setup name"${dis} />
+          <label class="studio-field"><span>Linked board product (optional)</span>
+            <input class="form-input" list="studio-card-options" data-input="__card" value="${escapeHtml(card ? linkedCardLabel(card) : '')}" placeholder="Search a product on the board"${dis} /></label>
+          <datalist id="studio-card-options">${Array.from(state.cards.values()).filter(c => !c.archived).map(c => `<option value="${escapeHtml(linkedCardLabel(c))}"></option>`).join('')}</datalist>
+          <div class="studio-row">
+            ${rec.status === 'final'
+              ? `<span class="studio-badge final">Finalized</span><span class="studio-muted">${escapeHtml(new Date(rec.finalizedAt).toLocaleString())} by ${escapeHtml(memberName(rec.finalizedBy))}</span>`
+              : `<span class="studio-badge">Draft</span><span class="studio-muted" id="studio-save-status">${editable ? 'Changes save automatically' : 'View only'}</span>`}
+            <span style="flex:1"></span>
+            ${rec.status !== 'final' && canCurrentUserWrite('outfit_presets') ? '<button type="button" class="btn btn-secondary btn-sm" data-action="save-preset">Save as preset</button>' : ''}
+            <button type="button" class="btn btn-secondary btn-sm" data-action="duplicate-setup">Duplicate setup</button>
+            ${rec.status !== 'final' && editable ? '<button type="button" class="btn btn-danger btn-sm" data-action="delete-setup">Delete</button>' : ''}
+            ${rec.status !== 'final' && editable ? '<button type="button" class="btn btn-primary btn-sm" data-action="finalize">Finalize</button>' : ''}
+          </div>
+          ${rec.status === 'final' ? '<p class="studio-sub">This setup is a snapshot. It keeps the assets and prompt exactly as they were when finalized, even if the Asset Library changes later. Duplicate it to make changes.</p>' : ''}
+          ${rec.presetId && state.outfitPresets.get(rec.presetId) ? `<p class="studio-sub">Started from preset "${escapeHtml(state.outfitPresets.get(rec.presetId).name)}".</p>` : ''}
+        </div>`;
+    }
+    studioMain.innerHTML = header + renderStudioSections(rec, ctx);
+    renderStudioSide();
+  }
+
+  function renderStudioSide() {
+    const rec = openStudioRecord();
+    if (!rec) { studioSide.innerHTML = ''; return; }
+    const kind = studioUI.open.kind;
+    const checklist = studioChecklist(rec);
+    const missing = checklist.filter(i => !i.ok);
+    const built = rec.status === 'final' && rec.snapshot ? { text: rec.snapshot.prompt, refs: rec.snapshot.refs } : buildStudioPrompt(rec);
+    studioSide.innerHTML = `
+      <div class="studio-side-block">
+        <div class="team-section-title">${missing.length ? `${missing.length} thing${missing.length > 1 ? 's' : ''} left` : 'Ready'}</div>
+        <ul class="studio-checklist">${checklist.map(i => `<li class="${i.ok ? 'ok' : 'todo'}">${i.ok ? '✓' : '○'} ${escapeHtml(i.label)}</li>`).join('')}</ul>
+        ${kind === 'preset' ? '<p class="studio-muted">Presets may be incomplete; setups started from them show what is missing.</p>' : ''}
+      </div>
+      <div class="studio-side-block">
+        <div class="team-section-title">Reference images in order (${built.refs.reduce((n, r) => n + r.urls.length, 0)})</div>
+        ${built.refs.length ? `<ol class="studio-refs">${built.refs.map(r => `<li><span class="studio-ref-range">${escapeHtml(r.range)}</span><span class="studio-badge ${r.saved ? 'saved' : 'new'}">${r.saved ? 'Saved' : 'New'}</span> ${escapeHtml(r.label)}<div class="studio-mini-images">${r.urls.map(u => `<img src="${escapeHtml(u)}" alt="" data-zoom-side="${escapeHtml(u)}" />`).join('')}</div></li>`).join('')}</ol>` : '<p class="studio-muted">No reference images yet.</p>'}
+      </div>
+      <div class="studio-side-block">
+        <div class="studio-row"><div class="team-section-title" style="flex:1;">Prepared prompt</div><button type="button" class="btn btn-secondary btn-sm" id="studio-copy-prompt">Copy</button></div>
+        <pre class="studio-prompt">${escapeHtml(built.text)}</pre>
+        <p class="studio-muted">No images are generated here. This prepares the inputs for the image tool.</p>
+      </div>`;
+    document.getElementById('studio-copy-prompt').addEventListener('click', async () => {
+      await copyText(built.text);
+      showToast('Prompt copied', 'success');
+    });
+    studioSide.querySelectorAll('[data-zoom-side]').forEach(img => img.addEventListener('click', () => openImageZoomModal(img.dataset.zoomSide, '')));
+  }
+
+  // ---- Records -----------------------------------------------------------------------------------
+  function newStudioRecordBase() {
+    const now = new Date().toISOString();
+    return { createdAt: now, createdBy: state.currentUser.id, updatedAt: now, updatedBy: state.currentUser.id };
+  }
+
+  function createSetup(fields) {
+    if (!ensureCanEdit('shoots')) return null;
+    const rec = { ...newStudioRecordBase(), id: 'shoot_' + Date.now().toString(36) + studioUid(), status: 'draft', name: 'New setup', config: emptyStudioConfig(), ...fields };
+    rec.config = normalizeStudioConfig(rec.config);
+    state.shoots.set(rec.id, rec);
+    putToStore('shoots', rec);
+    markAssetsUsed(studioAssetIds(rec.config));
+    studioUI.panel = 'setups';
+    setStudioOpen('shoot', rec.id);
+    renderStudio();
+    return rec;
+  }
+
+  function startSetupFromPreset(preset) {
+    const rec = createSetup({ name: `${preset.name} · ${new Date().toLocaleDateString()}`, config: normalizeStudioConfig(preset.config), presetId: preset.id });
+    if (rec) showToast(`Started a setup from "${preset.name}"`, 'success');
+  }
+
+  function presetConfigFrom(cfg) {
+    const src = normalizeStudioConfig(cfg);
+    const out = {};
+    PRESET_SECTIONS.forEach(k => { out[k] = src[k]; });
+    return out;
+  }
+
+  function savePresetFromSetup(rec) {
+    if (!ensureCanEdit('outfit_presets')) return;
+    const name = (prompt('Name for this outfit preset:', rec.name || '') || '').trim();
+    if (!name) return;
+    const tags = (prompt('Tags (optional, comma separated):', '') || '').split(',').map(t => t.trim()).filter(Boolean);
+    const preset = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name, tags, favouredBy: [], config: presetConfigFrom(rec.config), sourceSetupId: rec.id };
+    state.outfitPresets.set(preset.id, preset);
+    putToStore('outfit_presets', preset);
+    renderStudioList();
+    showToast(`Saved outfit preset "${name}"`, 'success');
+  }
+
+  function duplicateSetup(rec) {
+    const cfg = rec.status === 'final' && rec.snapshot ? rec.snapshot.config : rec.config;
+    const copy = createSetup({ name: (rec.name || 'Setup') + ' (copy)', config: normalizeStudioConfig(cfg), cardId: rec.cardId || '', sourceSetupId: rec.id, presetId: rec.presetId || '' });
+    if (copy) showToast('Duplicated as a new draft', 'success');
+  }
+
+  function duplicatePreset(preset) {
+    if (!ensureCanEdit('outfit_presets')) return;
+    const copy = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name: (preset.name || 'Preset') + ' (copy)', tags: [...(preset.tags || [])], favouredBy: [], config: presetConfigFrom(preset.config) };
+    state.outfitPresets.set(copy.id, copy);
+    putToStore('outfit_presets', copy);
+    setStudioOpen('preset', copy.id);
+    renderStudio();
+    showToast('Preset duplicated', 'success');
+  }
+
+  function finalizeSetup(rec) {
+    if (!ensureCanEdit('shoots')) return;
+    const missing = studioChecklist(rec).filter(i => !i.ok);
+    if (missing.length) {
+      showToast(`Finish these first: ${missing.map(i => i.label).join(', ')}`, 'warning');
+      return;
+    }
+    if (!confirm('Finalize this setup? It becomes a read-only snapshot of the assets and prompt as they are now. You can duplicate it later to make changes.')) return;
+    const built = buildStudioPrompt(rec);
+    const assets = {};
+    studioAssetIds(rec.config).forEach(id => { const a = state.libraries.get(id); if (a) assets[id] = JSON.parse(JSON.stringify(a)); });
+    const now = new Date().toISOString();
+    rec.status = 'final';
+    rec.finalizedAt = now;
+    rec.finalizedBy = state.currentUser.id;
+    rec.snapshot = { at: now, config: normalizeStudioConfig(rec.config), assets, prompt: built.text, refs: built.refs };
+    rec.updatedAt = now;
+    rec.updatedBy = state.currentUser.id;
+    clearTimeout(studioSaveTimers.get('shoot:' + rec.id));
+    putToStore('shoots', rec);
+    renderStudio();
+    showToast('Setup finalized', 'success');
+  }
+
+  // Create an Asset Library item from a new reference, then point the section at it.
+  function saveReferenceToLibrary(path, type) {
+    const rec = openStudioRecord();
+    if (!rec || !ensureCanEdit('libraries')) return;
+    const obj = pathGet(rec.config, path);
+    const def = catDef(type);
+    const fallbackName = { sunglasses: 'Sunglasses', expression: 'Expression' }[path] || '';
+    const name = (obj.name || '').trim() || (prompt(`Name for the new ${def.singular}:`, fallbackName) || '').trim();
+    if (!name) return;
+    const asset = {
+      id: newLibraryId(), type, name, code: def.codePrefix ? nextLibraryCode(type) : '',
+      images: JSON.parse(JSON.stringify(obj.images || [])), snippet: (obj.text || '').trim(), tags: [], aliases: [],
+      createdAt: new Date().toISOString(), createdBy: state.currentUser.id
+    };
+    if (type === 'accessory' && path === 'sunglasses') asset.accessoryType = 'Sunglasses';
+    const dups = findLikelyDuplicates(asset);
+    if (dups.length && !confirm(`This looks like an asset that already exists:\n\n${dups.slice(0, 3).map(d => '• ' + d.item.name + ' (' + d.reason + ')').join('\n')}\n\nSave anyway?`)) return;
+    saveLibraryItem(asset, 'created from Prompt Studio');
+    studioUpdate(cfg => {
+      const target = pathGet(cfg, path);
+      if (path.startsWith('accessories.')) { target.kind = 'saved'; target.assetId = asset.id; target.text = ''; target.images = []; }
+      else { target.mode = 'saved'; target.assetId = asset.id; }
+    });
+    showToast(`Saved "${name}" to the Asset Library`, 'success');
+  }
+
+  async function uploadStudioImages(path, fileList) {
+    const rec = openStudioRecord();
+    if (!rec) return;
+    const recId = rec.id;
+    const files = [];
+    Array.from(fileList || []).forEach(f => {
+      const type = f.type || imageTypeFromName(f.name);
+      if (!LIB_IMAGE_TYPES.includes(type)) showToast(`${f.name} is not a supported image (JPG, PNG, WebP, GIF or AVIF)`, 'warning');
+      else if (f.size > LIB_MAX_IMAGE_BYTES) showToast(`${f.name} is larger than 25 MB`, 'warning');
+      else files.push(f);
+    });
+    if (!files.length) return;
+    studioUploading[path] = (studioUploading[path] || 0) + files.length;
+    renderStudioEditor();
+    for (const file of files) {
+      try {
+        const url = await uploadFileToServer(file);
+        const open = openStudioRecord();
+        if (open && open.id === recId) studioUpdate(cfg => { pathGet(cfg, path).push({ url, name: file.name }); }, false);
+      } catch (e) {
+        showToast(`Could not upload ${file.name}: ${e.message}`, 'error');
+      }
+      studioUploading[path]--;
+    }
+    if (!studioUploading[path]) delete studioUploading[path];
+    if (openStudioRecord() && openStudioRecord().id === recId) renderStudioEditor();
+  }
+
+  // ---- Events -------------------------------------------------------------------------------------
+  let studioUploadPath = null;
+  studioFileInput.addEventListener('change', (e) => {
+    if (studioUploadPath) uploadStudioImages(studioUploadPath, e.target.files);
+    e.target.value = '';
+  });
+
+  studioMain.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el || el.disabled) return;
+    const action = el.dataset.action;
+    const path = el.dataset.path;
+    const rec = openStudioRecord();
+    if (action === 'zoom') { openImageZoomModal(el.dataset.url, ''); return; }
+    if (action === 'new-setup') { createSetup({}); return; }
+    if (!rec) return;
+    switch (action) {
+      case 'mode': studioUpdate(cfg => { pathGet(cfg, path).mode = el.dataset.value; }); break;
+      case 'toggle': studioUpdate(cfg => { pathGet(cfg, path).enabled = el.dataset.value === 'true'; }); break;
+      case 'clear': studioUpdate(cfg => { pathGet(cfg, path).assetId = ''; }); break;
+      case 'pick': {
+        const section = path.split('.')[0];
+        openAssetPicker({ ...STUDIO_PICKERS[section], onPick: (id) => studioUpdate(cfg => { pathGet(cfg, path).assetId = id; }) });
+        break;
+      }
+      case 'upload':
+        if (!ensureCanEdit(studioStoreFor(studioUI.open.kind))) return;
+        studioUploadPath = path;
+        studioFileInput.click();
+        break;
+      case 'remove-image': studioUpdate(cfg => { pathGet(cfg, path).splice(Number(el.dataset.index), 1); }); break;
+      case 'acc-add-saved':
+        openAssetPicker({ ...STUDIO_PICKERS.accessories, onPick: (id) => studioUpdate(cfg => { cfg.accessories.push({ uid: studioUid(), kind: 'saved', assetId: id, text: '', images: [] }); }) });
+        break;
+      case 'acc-add-custom': studioUpdate(cfg => { cfg.accessories.push({ uid: studioUid(), kind: 'custom', assetId: '', text: '', images: [] }); }); break;
+      case 'acc-remove': studioUpdate(cfg => { cfg.accessories.splice(Number(el.dataset.index), 1); }); break;
+      case 'acc-move': studioUpdate(cfg => {
+        const i = Number(el.dataset.index), j = i + Number(el.dataset.dir);
+        if (j < 0 || j >= cfg.accessories.length) return;
+        [cfg.accessories[i], cfg.accessories[j]] = [cfg.accessories[j], cfg.accessories[i]];
+      }); break;
+      case 'ref-add': studioUpdate(cfg => { cfg.references.push({ uid: studioUid(), role: 'Styling or composition', customRole: '', instructions: '', images: [] }); }); break;
+      case 'ref-remove': studioUpdate(cfg => { cfg.references.splice(Number(el.dataset.index), 1); }); break;
+      case 'card-photos': {
+        const card = rec.cardId && state.cards.get(rec.cardId);
+        const urls = card ? (card.rawFiles || []).map(rf => resolveImageURL(rf)).filter(u => u && u.startsWith('/api/files/')) : [];
+        if (!urls.length) { showToast('The linked product has no uploaded photos yet', 'warning'); return; }
+        studioUpdate(cfg => {
+          const target = pathGet(cfg, path);
+          urls.forEach((url, i) => { if (!target.images.some(img => img.url === url)) target.images.push({ url, name: (card.rawFiles[i] && card.rawFiles[i].name) || 'product photo' }); });
+          if (!target.name) target.name = card.name || '';
+        });
+        break;
+      }
+      case 'save-to-library': saveReferenceToLibrary(path, el.dataset.type); break;
+      case 'save-preset': savePresetFromSetup(rec); break;
+      case 'duplicate-setup': duplicateSetup(rec); break;
+      case 'finalize': finalizeSetup(rec); break;
+      case 'delete-setup':
+        if (!ensureCanEdit('shoots')) return;
+        if (!confirm(`Delete the draft "${rec.name || 'Untitled setup'}"?`)) return;
+        state.shoots.delete(rec.id);
+        deleteFromStore('shoots', rec.id);
+        setStudioOpen(null);
+        renderStudio();
+        break;
+      case 'start-from-preset': startSetupFromPreset(rec); break;
+      case 'duplicate-preset': duplicatePreset(rec); break;
+      case 'delete-preset':
+        if (!ensureCanEdit('outfit_presets')) return;
+        if (!confirm(`Delete the outfit preset "${rec.name || 'Untitled preset'}"? Setups started from it are not affected.`)) return;
+        state.outfitPresets.delete(rec.id);
+        deleteFromStore('outfit_presets', rec.id);
+        setStudioOpen(null);
+        renderStudio();
+        break;
+    }
+  });
+
+  // Typing saves without re-rendering the form; selects re-render because they change what is shown.
+  function onStudioInput(e) {
+    const el = e.target.closest('[data-input]');
+    if (!el) return;
+    const path = el.dataset.input;
+    const value = el.value;
+    if (path === '__name' || path === '__tags' || path === '__card') {
+      const rec = openStudioRecord();
+      const kind = studioUI.open && studioUI.open.kind;
+      if (!rec || studioReadOnly(rec, kind) || !ensureCanEdit(studioStoreFor(kind))) return;
+      if (path === '__name') rec.name = value;
+      if (path === '__tags') rec.tags = value.split(',').map(t => t.trim()).filter(Boolean);
+      if (path === '__card') {
+        const card = Array.from(state.cards.values()).find(c => linkedCardLabel(c) === value);
+        if (!card && value.trim()) return; // still typing
+        rec.cardId = card ? card.id : '';
+        if (e.type === 'change' || card) renderStudioEditor();
+      }
+      scheduleStudioSave(kind, rec);
+      if (path !== '__tags') renderStudioList();
+      return;
+    }
+    studioUpdate(cfg => { pathSet(cfg, path, value); }, el.tagName === 'SELECT');
+  }
+  studioMain.addEventListener('input', (e) => { if (e.target.tagName !== 'SELECT') onStudioInput(e); });
+  studioMain.addEventListener('change', (e) => { if (e.target.tagName === 'SELECT' || e.target.dataset.input === '__card') onStudioInput(e); });
+
+  studioList.addEventListener('click', (e) => {
+    const fav = e.target.closest('[data-fav-preset]');
+    if (fav) {
+      e.stopPropagation();
+      const p = state.outfitPresets.get(fav.dataset.favPreset);
+      if (!p || !ensureCanEdit('outfit_presets')) return;
+      const me = state.currentUser.id;
+      p.favouredBy = isFavourite(p) ? p.favouredBy.filter(id => id !== me) : [...(p.favouredBy || []), me];
+      putToStore('outfit_presets', p);
+      renderStudioList();
+      return;
+    }
+    const start = e.target.closest('[data-start-preset]');
+    if (start) {
+      e.stopPropagation();
+      const p = state.outfitPresets.get(start.dataset.startPreset);
+      if (p) startSetupFromPreset(p);
+      return;
+    }
+    const shoot = e.target.closest('[data-open-shoot]');
+    const preset = e.target.closest('[data-open-preset]');
+    if (shoot) setStudioOpen('shoot', shoot.dataset.openShoot);
+    else if (preset) setStudioOpen('preset', preset.dataset.openPreset);
+    else return;
+    renderStudio();
+  });
+  studioList.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-open-shoot], [data-open-preset]')) { e.preventDefault(); e.target.click(); }
+  });
+
+  document.querySelectorAll('[data-studio-panel]').forEach(btn => btn.addEventListener('click', () => {
+    studioUI.panel = btn.dataset.studioPanel;
+    renderStudioList();
+  }));
+  studioSearch.addEventListener('input', () => { studioUI.search = studioSearch.value; renderStudioList(); });
+  document.getElementById('studio-fav-toggle').addEventListener('click', () => { studioUI.favouritesOnly = !studioUI.favouritesOnly; renderStudioList(); });
+  document.getElementById('studio-new-btn').addEventListener('click', () => {
+    if (studioUI.panel === 'setups') { createSetup({}); return; }
+    if (!ensureCanEdit('outfit_presets')) return;
+    const name = (prompt('Name for the new outfit preset:') || '').trim();
+    if (!name) return;
+    const preset = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name, tags: [], favouredBy: [], config: presetConfigFrom(emptyStudioConfig()) };
+    state.outfitPresets.set(preset.id, preset);
+    putToStore('outfit_presets', preset);
+    setStudioOpen('preset', preset.id);
+    renderStudio();
+  });
+
+  // Live updates from teammates: keep what the user is typing.
+  function onRemoteStudioChange() {
+    if (state.currentView !== 'studio') return;
+    renderStudioList();
+    if (studioTypingInside(studioMain)) renderStudioSide();
+    else renderStudioEditor();
   }
 
   initDatabase().then(() => {

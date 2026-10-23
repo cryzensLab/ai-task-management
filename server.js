@@ -92,7 +92,16 @@ function requireMember(token) {
 // admins and the owner can delete one for good or change the category list.
 const isAdmin = (member) => member.role === 'admin' || member.role === 'owner';
 
+// Prompt Studio: a finalized setup is a historical record. Nobody can change
+// or delete it; people duplicate it to start a new draft instead.
+function isFinalizedSetup(op) {
+  if (op.store !== 'shoots') return false;
+  const existing = store.getItem('shoots', String(op.key));
+  return Boolean(existing && existing.status === 'final');
+}
+
 function opAllowedFor(member, op) {
+  if (isFinalizedSetup(op)) return false;
   if (op.store === 'libraries' && op.op === 'delete' && !isAdmin(member)) return false;
   if (op.store === 'settings' && String(op.key) === 'assetCategories' && !isAdmin(member)) return false;
   if (member.role !== 'pending') return true;
