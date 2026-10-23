@@ -1,8 +1,19 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+
+// Server-only settings (GEMINI_API_KEY and friends) may live in a .env file
+// next to this one. It is git-ignored and never served to browsers.
+if (fs.existsSync(path.join(__dirname, '.env'))) process.loadEnvFile(path.join(__dirname, '.env'));
+
 const store = require('./store');
 const team = require('./team');
+const { createProvider } = require('./ai/providers');
+const { createLimiter } = require('./ai/limits');
+const assistant = require('./ai/assistant');
+
+const aiProvider = createProvider();
+const aiLimiter = createLimiter();
 
 // Owner forgot the PIN: `npm run set-owner-pin -- 1234` sets a new one and signs out old owner sessions.
 const pinArg = process.argv.indexOf('--set-owner-pin');
@@ -104,8 +115,30 @@ function opAllowedFor(member, op) {
   if (isFinalizedSetup(op)) return false;
   if (op.store === 'libraries' && op.op === 'delete' && !isAdmin(member)) return false;
   if (op.store === 'settings' && String(op.key) === 'assetCategories' && !isAdmin(member)) return false;
+  // Only the owner and admins can switch the AI assistant on or off.
+  if (op.store === 'settings' && String(op.key) === 'aiSettings' && !isAdmin(member)) return false;
   if (member.role !== 'pending') return true;
   return op.store === 'comments' || op.system === true;
+}
+
+// The owner switches the assistant on in Prompt Studio (settings/aiSettings).
+function aiEnabled() {
+  const rec = store.getItem('settings', 'aiSettings');
+  return Boolean(rec && rec.value && rec.value.enabled);
+}
+
+function aiStatus() {
+  return {
+    provider: aiProvider.name,
+    model: aiProvider.model,
+    configured: aiProvider.isConfigured(),
+    enabled: aiEnabled(),
+    limits: aiLimiter.status()
+  };
+}
+
+function libraryItems() {
+  return (store.snapshot().libraries || []);
 }
 
 // Shared team data: snapshot, batched writes, image files and live events.
@@ -158,6 +191,42 @@ async function handleDataApi(req, res, reqPath, query) {
     requireMember(body.token);
     store.emit({ type: 'broadcast', clientId: body.clientId, action: body.action, payload: body.payload }, body.clientId);
     return sendJson(res, 200, { ok: true });
+  }
+
+  // ---- Prompt Studio AI assistant -------------------------------------------
+  if (reqPath === '/api/ai/status' && req.method === 'GET') {
+    return sendJson(res, 200, aiStatus());
+  }
+
+  if (reqPath === '/api/ai/assist' && req.method === 'POST') {
+    const body = await readJson(req);
+    const member = requireMember(body.token);
+    if (member.role === 'pending') throw new HttpError(403, 'You can use the assistant once the owner approves your role.');
+    const message = String(body.message || '').trim().slice(0, 1000);
+    if (!message) throw new HttpError(400, 'Type what you want to set up.');
+    const result = await assistant.assist({
+      message, config: body.config, libraryItems: libraryItems(), provider: aiProvider, limiter: aiLimiter, aiEnabled: aiEnabled()
+    });
+    return sendJson(res, 200, { ...result, status: aiStatus() });
+  }
+
+  if (reqPath === '/api/ai/reword' && req.method === 'POST') {
+    const body = await readJson(req);
+    const member = requireMember(body.token);
+    if (member.role === 'pending') throw new HttpError(403, 'You can use the assistant once the owner approves your role.');
+    const sections = (Array.isArray(body.sections) ? body.sections : []).slice(0, 20).map(s => ({
+      key: String(s.key || '').slice(0, 40), text: String(s.text || '').slice(0, 6000),
+      locked: (Array.isArray(s.locked) ? s.locked : []).map(String).filter(Boolean).slice(0, 80)
+    })).filter(s => s.key && s.text.trim());
+    if (!sections.length) throw new HttpError(400, 'Nothing to reword.');
+    try {
+      const out = await assistant.reword({ sections, provider: aiProvider, limiter: aiLimiter, aiEnabled: aiEnabled() });
+      return sendJson(res, 200, { sections: out, provider: aiProvider.name, model: aiProvider.model, status: aiStatus() });
+    } catch (err) {
+      if (!err.code) throw err;
+      console.warn(`AI reword unavailable: ${err.code}`);
+      return sendJson(res, 503, { error: err.message, code: err.code, retryAfterSeconds: err.retryAfterSeconds || null, status: aiStatus() });
+    }
   }
 
   const teamRoute = /^\/api\/team\/([a-z-]+)$/.exec(reqPath);
@@ -252,7 +321,7 @@ async function handleRequest(req, res) {
     throw new HttpError(400, 'Bad URL');
   }
 
-  if (/^\/api\/(store|files|events|broadcast|team)\b/.test(reqPath)) {
+  if (/^\/api\/(store|files|events|broadcast|team|ai)\b/.test(reqPath)) {
     const handled = await handleDataApi(req, res, reqPath, parsedUrl.searchParams);
     if (handled === false) sendJson(res, 404, { error: 'Unknown endpoint' });
     return;

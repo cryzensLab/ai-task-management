@@ -2010,6 +2010,34 @@
     .picker-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .picker-name { font-size: 0.82rem; font-weight: 700; }
     .picker-details { font-size: 0.72rem; color: var(--text-muted); }
+    /* Prompt engine, assistant and versions */
+    .studio-side-tabs { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border-strong); }
+    .studio-side-tabs .studio-panel-tab + .studio-panel-tab { border-left: 1px solid var(--border-strong); }
+    .studio-assistant { border-color: var(--primary); }
+    .studio-proposal { border-top: 1px solid var(--border-subtle); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .studio-proposal-list { margin: 0; padding-left: 18px; font-size: 0.78rem; display: flex; flex-direction: column; gap: 2px; }
+    .studio-proposal-list.warn { color: var(--warning); }
+    .studio-proposal-list.muted { color: var(--text-subtle); }
+    .studio-clarify { border: 1px dashed var(--warning); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .studio-conflict { border: 1px solid var(--border-subtle); padding: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; }
+    .studio-conflict.open { border-color: var(--warning); background: var(--warning-light); }
+    .studio-conflict-side { border-left: 3px solid var(--border-strong); padding: 4px 8px; display: flex; flex-direction: column; gap: 4px; background: var(--bg-surface); }
+    .studio-conflict-side.winner { border-left-color: var(--success); }
+    .studio-badge.level-system { border-color: var(--text-main); color: var(--text-main); }
+    .studio-badge.level-locked { border-color: var(--primary); color: var(--primary); }
+    .studio-badge.level-job { border-color: var(--text-muted); }
+    .studio-badge.level-optional { border-style: dashed; }
+    .studio-prompt-editor { font-family: var(--font-mono); font-size: 0.72rem; line-height: 1.5; min-height: 280px; }
+    .studio-versions { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    .studio-versions li { border: 1px solid var(--border-subtle); padding: 8px; display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; }
+    .studio-diff span { display: block; }
+    .studio-diff .diff-add { background: var(--success-light); color: var(--success); }
+    .studio-diff .diff-del { background: var(--danger-light); color: var(--danger); text-decoration: line-through; }
+    .studio-diff .diff-same { color: var(--text-subtle); }
+    .studio-template-order { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 2px; font-size: 0.78rem; }
+    .studio-template-order li { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .studio-template-order .icon-btn { width: 22px; height: 22px; }
+
     @media (max-width: 1200px) {
       .studio-layout { grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: max-content 1fr; overflow-y: auto; }
       .studio-aside { grid-row: 1 / span 2; position: sticky; top: 0; max-height: 100%; }
@@ -3418,6 +3446,7 @@
     libraries: new Map(), // assetId -> Asset Library item (see LIBRARY_TYPES)
     shoots: new Map(), // setupId -> Prompt Studio setup (draft or finalized)
     outfitPresets: new Map(), // presetId -> outfit preset (asset ids only)
+    promptTemplates: new Map(), // templateId -> saved prompt template (versioned)
     assetCategories: [], // categories added by admins: [{ key, label, singular }]
     settings: { ...DEFAULT_TEAM },
 
@@ -3720,6 +3749,8 @@
       (await getAllFromStore('shoots')).forEach(rec => state.shoots.set(rec.id, rec));
       state.outfitPresets.clear();
       (await getAllFromStore('outfit_presets')).forEach(rec => state.outfitPresets.set(rec.id, rec));
+      state.promptTemplates.clear();
+      (await getAllFromStore('prompt_templates')).forEach(rec => state.promptTemplates.set(rec.id, rec));
 
     } catch(err) {
       console.error('Error loading data from DB', err);
@@ -3978,7 +4009,7 @@
     state.boards.clear();
     state.shapes.clear();
     await loadAllDataFromDB();
-    scheduleRemoteRender(new Set(['cards', 'comments', 'activity', 'shapes', 'settings', 'libraries', 'shoots', 'outfit_presets']));
+    scheduleRemoteRender(new Set(['cards', 'comments', 'activity', 'shapes', 'settings', 'libraries', 'shoots', 'outfit_presets', 'prompt_templates']));
   }
 
   function upsertById(map, groupKey, item) {
@@ -4038,6 +4069,9 @@
       case 'outfit_presets':
         if (isPut) state.outfitPresets.set(op.key, item); else state.outfitPresets.delete(op.key);
         break;
+      case 'prompt_templates':
+        if (isPut) state.promptTemplates.set(op.key, item); else state.promptTemplates.delete(op.key);
+        break;
     }
     remoteTouched.add(op.store);
     if (op.store === 'cards' && op.key === state.activeCardId) remoteTouched.add('activeCard');
@@ -4065,7 +4099,7 @@
       if (touched.has('shapes')) requestWhiteboardRender();
       if (touched.has('settings')) onTeamChanged();
       if (touched.has('libraries') || (touched.has('settings') && state.currentView === 'libraries')) renderLibrariesView();
-      if (['shoots', 'outfit_presets', 'libraries', 'cards'].some(k => touched.has(k))) onRemoteStudioChange();
+      if (['shoots', 'outfit_presets', 'prompt_templates', 'libraries', 'cards', 'settings'].some(k => touched.has(k))) onRemoteStudioChange();
       if ((touched.has('libraries') || touched.has('settings')) && state.activeCardId && state.cards.get(state.activeCardId)) {
         renderJobAndPrompts(state.cards.get(state.activeCardId));
       }
@@ -9242,7 +9276,8 @@
       pose: { mode: 'saved', assetId: '', images: [], text: '', framing: '', orientation: '', hands: '', gaze: '', expression: '' },
       references: [], // [{ uid, role, instructions, images }]
       style: { assetId: '' },
-      settings: { instructions: '' }
+      settings: { instructions: '', preferences: '' },
+      resolutions: {} // conflictId -> id of the instruction that wins
     };
   }
 
@@ -9640,7 +9675,9 @@
       'Lighting, background, lens and realism rules from a saved style.'));
 
     out.push(studioSection('', 'Prompt settings', false,
-      `<textarea class="form-textarea" rows="2" data-input="settings.instructions" placeholder="Extra instructions added to every prompt for this ${ctx.kind === 'preset' ? 'preset' : 'setup'} (optional)"${dis}>${escapeHtml(cfg.settings.instructions || '')}</textarea>`));
+      `<label class="studio-field"><span>Job instructions</span><textarea class="form-textarea" rows="2" data-input="settings.instructions" placeholder="Instructions for this ${ctx.kind === 'preset' ? 'preset' : 'setup'} (optional)"${dis}>${escapeHtml(cfg.settings.instructions || '')}</textarea></label>
+      <label class="studio-field"><span>Optional style preferences (lowest priority)</span><textarea class="form-textarea" rows="2" data-input="settings.preferences" placeholder="Nice-to-haves that give way to everything else (optional)"${dis}>${escapeHtml(cfg.settings.preferences || '')}</textarea></label>`,
+      'Priority: application rules, then locked model, product and house-style constraints, then job instructions, then optional preferences. Conflicts are flagged for you to decide.'));
     return out.join('');
   }
 
@@ -9663,152 +9700,493 @@
     items.push({ label: 'Pose', ok: c.pose.mode === 'saved' ? savedOk(c.pose.assetId) : c.pose.mode === 'upload' ? has(c.pose) : Boolean(c.pose.text.trim()) });
     c.references.forEach((r, i) => { if (!has(r)) items.push({ label: `Additional reference ${i + 1}: add an image`, ok: false }); });
     items.push({ label: 'House style', ok: savedOk(c.style.assetId) });
+    if (rec.status !== 'final') {
+      const open = buildPromptPlan(rec).unresolved.length;
+      if (open) items.push({ label: `Decide ${open} instruction conflict${open > 1 ? 's' : ''} (see Prompt)`, ok: false });
+    }
     return items;
   }
 
-  // ---- Prompt preparation ---------------------------------------------------------------------
-  function buildStudioPrompt(rec) {
-    const c = normalizeStudioConfig(rec.config);
-    const style = getPromptStyle();
+  // ---- Prompt engine ---------------------------------------------------------------------------
+  // Deterministic: the same setup, template and wording choice always give the
+  // same prompt. It only states what is recorded on the assets or typed by the
+  // user, and only mentions images that are actually supplied. Each reference
+  // image is told what it is for, so a pose or model image never replaces the
+  // garment. Facts (names, recorded details, descriptions, constraints, image
+  // numbers) are marked as locked so rewording can never change them.
+  const PROMPT_ENGINE_VERSION = 1;
+
+  const PROMPT_SECTIONS = [
+    { key: 'task', title: 'Task and output' },
+    { key: 'model', title: 'Model identity' },
+    { key: 'top', title: 'Top garment' },
+    { key: 'bottom', title: 'Bottom garment' },
+    { key: 'shoes', title: 'Shoes' },
+    { key: 'accessories', title: 'Sunglasses and accessories' },
+    { key: 'props', title: 'Props' },
+    { key: 'pose', title: 'Pose and composition' },
+    { key: 'camera', title: 'Camera, lighting and background' },
+    { key: 'style', title: 'House style and realism' },
+    { key: 'negative', title: 'Negative constraints' },
+    { key: 'custom', title: 'Additional instructions' }
+  ];
+
+  // Application rules: always included, never overridden.
+  const SYSTEM_RULES = [
+    'The model must be an adult.',
+    'Produce one photograph of one model: no collage, split frames or extra people.',
+    'Do not add text, captions, watermarks or logos that are not on the products.'
+  ];
+
+  const BUILTIN_TEMPLATE = {
+    id: 'tpl_builtin', name: 'ListingFlow standard', version: 1, builtin: true,
+    order: PROMPT_SECTIONS.map(s => s.key), disabled: [], headings: true,
+    text: {
+      task: 'Create one photorealistic e-commerce fashion photograph for a product listing.',
+      realism: 'Photorealistic, sharp focus, true-to-life colours, natural skin and fabric texture, high resolution.',
+      negative: 'Do not change the design, construction, colour, pattern, print, logo, fabric, silhouette or fit of any garment. Do not add garments, accessories or props that are not listed.'
+    }
+  };
+
+  // Connecting wording. "Regenerate wording" without AI cycles through these;
+  // the facts in between never change.
+  const PHRASES = {
+    modelRef: [
+      r => [`Use `, lk(r), ` only for the model's identity: face, hair, skin tone and body proportions. Ignore any clothing, pose or background in it.`],
+      r => [lk(r), ` shows who the model is. Copy the face, hair, skin tone and body proportions from it, but nothing else.`],
+      r => [`Take only the person's identity from `, lk(r), `: same face, hair, skin tone and build. Its clothing, pose and background do not apply.`]
+    ],
+    garmentRef: [
+      (r, what) => [`Use `, lk(r), ` only for the ${what}'s design. Ignore the person, pose and background in it.`],
+      (r, what) => [lk(r), ` is the ${what} reference: copy the garment itself, not the person, pose or setting.`],
+      (r, what) => [`Reproduce the ${what} from `, lk(r), `. That image says nothing about the model, pose or background.`]
+    ],
+    preserve: [
+      what => [`Preserve the ${what}'s construction, colour, pattern, fabric, silhouette, proportions, stitching, collar, cuffs, buttons, pockets and hems exactly as shown and recorded.`],
+      what => [`Keep every detail of the ${what} the same: construction, colour, pattern, fabric, silhouette, proportions, stitching, collar, cuffs, buttons, pockets and hems.`],
+      what => [`Do not alter the ${what} in any way: construction, colour, pattern, fabric, silhouette, proportions, stitching, collar, cuffs, buttons, pockets and hems stay as recorded.`]
+    ],
+    itemRef: [
+      (r, what) => [`Match the ${what} in `, lk(r), ` exactly: shape, colour and styling. Use that image for nothing else.`],
+      (r, what) => [lk(r), ` shows the ${what}; copy its exact shape, colour and styling only.`],
+      (r, what) => [`The ${what} must look exactly like `, lk(r), ` (shape, colour, styling). Ignore everything else in it.`]
+    ],
+    poseRef: [
+      r => [`Copy only the pose, body angle and framing from `, lk(r), `. Do not copy the person, clothing or background from it.`],
+      r => [lk(r), ` is a pose reference only: match the body position and framing, never its person, clothes or setting.`],
+      r => [`Match the body position and framing of `, lk(r), `; the person, clothes and background in it must not be used.`]
+    ],
+    styleRef: [
+      r => [`Match the lighting, background and colour grading of `, lk(r), `. Ignore any people or clothing in it.`],
+      r => [lk(r), ` sets the look: copy its lighting, backdrop and colour grade, not its people or clothes.`],
+      r => [`Take the lighting, background and colour treatment from `, lk(r), ` only.`]
+    ],
+    noImage: [
+      what => [`No reference image is supplied for the ${what}; follow the written description only.`],
+      what => [`There is no image of the ${what}; rely on the description above.`],
+      what => [`The ${what} has no reference image, so use only the details written here.`]
+    ],
+    priority: [
+      () => ['If instructions ever differ, follow this order: application rules, locked model, product and house-style constraints, job instructions, then optional preferences.'],
+      () => ['Priority when instructions differ: application rules first, then locked model, product and house-style constraints, then job instructions, then optional preferences.'],
+      () => ['Instruction priority: application rules, then locked constraints (model, products, house style), then job instructions, then optional preferences.']
+    ]
+  };
+
+  function lk(text) { return { lock: String(text) }; }
+
+  // A prompt line: wording plus locked facts. Falsy parts are skipped.
+  function pline(...parts) {
+    const locked = [];
+    let text = '';
+    parts.flat().forEach(p => {
+      if (p === null || p === undefined || p === false || p === '') return;
+      if (typeof p === 'object') { text += p.lock; if (p.lock.trim()) locked.push(p.lock); }
+      else text += p;
+    });
+    return { text, locked };
+  }
+
+  const endDot = (t) => String(t).trim().replace(/[\s.]+$/, '') + '.';
+
+  // Recorded attributes worth stating, by asset type (label, field).
+  const RECORDED_FIELDS = {
+    model: [['Gender presentation', 'genderPresentation'], ['Appearance', 'appearance'], ['Body proportions', 'bodyProportions'], ['Hairstyle', 'hairstyle'], ['Facial hair', 'facialHair']],
+    top: [['Type', 'garmentType'], ['Fit', 'fit'], ['Fabric', 'fabric'], ['Colour', 'colour'], ['Construction', 'construction']],
+    bottom: [['Type', 'garmentType'], ['Fit', 'fit'], ['Rise', 'rise'], ['Length', 'length'], ['Fabric', 'fabric'], ['Colour or wash', 'colour'], ['Construction', 'construction']],
+    shoes: [['Type', 'shoeType'], ['Colour', 'colour'], ['Material', 'material']],
+    accessory: [['Type', 'accessoryType'], ['Colour', 'colour'], ['Material', 'material'], ['Placement', 'placement']],
+    prop: [['Placement', 'placement']],
+    pose: [['Pose', 'poseGroup'], ['Body orientation', 'bodyOrientation'], ['Hand placement', 'handPlacement']],
+    style: [],
+    expression: []
+  };
+
+  function recordedLine(asset) {
+    const parts = [];
+    (RECORDED_FIELDS[asset.type] || []).forEach(([label, key]) => {
+      const v = asset[key];
+      if (v && v !== 'Not specified' && v !== 'Other') parts.push(lk(`${label}: ${String(v).trim().replace(/[\s.]+$/, '')}`));
+    });
+    if (!parts.length) return null;
+    const out = ['Recorded details: '];
+    parts.forEach((p, i) => { if (i) out.push('; '); out.push(p); });
+    out.push('.');
+    return pline(out);
+  }
+
+  // ---- Instructions, priorities and conflicts ----------------------------------------------
+  const PRIORITY_LEVELS = { system: 'Application rule', locked: 'Locked constraint', job: 'Job instruction', optional: 'Optional preference' };
+
+  // Opposing instructions. Each rule sorts an instruction into one side (or none).
+  const CONFLICT_RULES = [
+    { id: 'tuck', label: 'Tucked in or untucked', a: 'tucked in', b: 'untucked',
+      bTest: /\buntucked\b|\b(no|not|never|don'?t|do not|without)\s+(be\s+)?tuck/i, aTest: /\btuck(ed)?\b/i },
+    { id: 'belt', label: 'Belt or no belt', a: 'belt', b: 'no belt',
+      bTest: /\b(no|without)\s+(a\s+)?belt\b|\bbeltless\b|\bdo not (add|wear|use) (a )?belt/i, aTest: /\bbelt(ed)?\b/i },
+    { id: 'sunglasses', label: 'Sunglasses or none', a: 'sunglasses', b: 'no sunglasses',
+      bTest: /\b(no|without|remove)\s+sunglasses\b|\bdo not (add|wear|use) sunglasses/i, aTest: /\bsunglasses\b|\baviators?\b|\bshades\b/i },
+    { id: 'hat', label: 'Hat or no hat', a: 'a hat', b: 'no hat',
+      bTest: /\b(no|without)\s+(hats?|caps?|headwear)\b|\bdo not (add|wear) (a )?(hat|cap)/i, aTest: /\b(hats?|caps?|beanie|headwear)\b/i },
+    { id: 'accessories', label: 'Accessories or none', a: 'accessories', b: 'no accessories',
+      bTest: /\b(no|without)\s+(accessories|jewell?ery|props)\b/i, aTest: /\baccessor(y|ies)\b|\bprops?\b|\bjewell?ery\b/i },
+    { id: 'shoes', label: 'Shoes or barefoot', a: 'shoes', b: 'barefoot',
+      bTest: /\bbarefoot\b|\b(no|without)\s+shoes\b/i, aTest: /\b(shoes?|boots?|sneakers?|loafers?|trainers?|sandals?)\b/i },
+    { id: 'smile', label: 'Smiling or not', a: 'smiling', b: 'not smiling',
+      bTest: /\b(no|not|without|never)\s+smil|\bserious\b|\bneutral (face|expression)\b|\bstraight face\b/i, aTest: /\bsmil(e|es|ing)\b|\bgrin/i },
+    { id: 'framing', label: 'Full body or close framing', a: 'full body', b: 'waist up or closer',
+      bTest: /\bwaist[- ]?up\b|\bhalf[- ]?body\b|\bclose[- ]?up\b|\bchest[- ]?up\b/i, aTest: /\bfull[- ]?(body|length)\b|\bhead to toe\b/i },
+    { id: 'sleeves', label: 'Sleeves rolled up or down', a: 'sleeves rolled up', b: 'sleeves down',
+      bTest: /\bsleeves? (down|unrolled)\b|\b(do not|don'?t|never) roll/i, aTest: /\bsleeves? (rolled|pushed) up\b|\b(roll|push)(ed)? up (the )?sleeves?\b/i }
+  ];
+  const BACKGROUND_COLOUR = /\b(white|grey|gray|black|beige|cream|blue|green|pink|red|yellow|brown)\s+(background|backdrop)\b/i;
+
+  // Everything that could steer the image, with its priority level.
+  function collectInstructions(c, asset) {
+    const out = [];
+    const add = (id, level, source, text) => { if (text && String(text).trim()) out.push({ id, level, source, text: String(text).trim() }); };
+    SYSTEM_RULES.forEach((t, i) => add('sys:' + i, 'system', 'ListingFlow', t));
+    const used = [];
+    const useAsset = (id) => { const a = asset(id); if (a) used.push(a); };
+    if (c.model.mode === 'saved') useAsset(c.model.assetId);
+    if (c.expression.enabled && c.expression.mode === 'saved') useAsset(c.expression.assetId);
+    ['top', 'bottom', 'shoes'].forEach(k => { if (c[k].mode === 'saved') useAsset(c[k].assetId); });
+    if (c.sunglasses.enabled && c.sunglasses.mode === 'saved') useAsset(c.sunglasses.assetId);
+    c.accessories.forEach(a => { if (a.kind === 'saved') useAsset(a.assetId); });
+    if (c.pose.mode === 'saved') useAsset(c.pose.assetId);
+    useAsset(c.style.assetId);
+    used.forEach(a => {
+      add('c:' + a.id, 'locked', `${a.name} (fixed constraint)`, a.constraints);
+      add('n:' + a.id, 'locked', `${a.name} (${a.type === 'style' ? 'house style' : 'description'})`, [a.snippet, a.type === 'style' ? a.brandRules : '', a.type === 'style' ? a.background : ''].filter(Boolean).join(' '));
+    });
+    add('job:instructions', 'job', 'Job instructions', c.settings.instructions);
+    add('job:model', 'job', 'New model description', c.model.mode === 'new' ? c.model.text : '');
+    ['top', 'bottom'].forEach(k => add('job:' + k, 'job', `New ${k} description`, c[k].mode === 'new' ? c[k].text : ''));
+    add('job:shoes', 'job', 'Shoes description', c.shoes.mode === 'text' || c.shoes.mode === 'upload' ? c.shoes.text : '');
+    add('job:expression', 'job', 'Expression description', c.expression.enabled && c.expression.mode === 'custom' ? c.expression.text : '');
+    add('job:pose.text', 'job', 'Pose description', c.pose.mode !== 'saved' ? c.pose.text : '');
+    [['framing', 'Camera framing'], ['orientation', 'Body orientation'], ['hands', 'Hand placement'], ['gaze', 'Gaze'], ['expression', 'Expression note']]
+      .forEach(([k, label]) => add('job:pose.' + k, 'job', label, c.pose[k]));
+    c.accessories.forEach((a, i) => add('job:acc.' + (a.uid || i), 'job', `Prop or accessory ${i + 1} note`, a.text));
+    c.references.forEach((r, i) => add('job:ref.' + (r.uid || i), 'job', `Additional reference ${i + 1}`, r.instructions));
+    // What is selected also counts as an instruction (e.g. "sunglasses on").
+    if (c.sunglasses.enabled) add('sel:sunglasses', 'job', 'Sunglasses section', 'Wearing sunglasses' + (c.sunglasses.mode === 'saved' && asset(c.sunglasses.assetId) ? `: ${asset(c.sunglasses.assetId).name}` : ''));
+    const accNames = c.accessories.map(a => a.kind === 'saved' ? (asset(a.assetId) && `${asset(a.assetId).name}${asset(a.assetId).accessoryType ? ' (' + asset(a.assetId).accessoryType + ')' : ''}`) : (a.text || 'custom item')).filter(Boolean);
+    if (accNames.length) add('sel:accessories', 'job', 'Props and accessories section', `Accessories and props: ${accNames.join(', ')}`);
+    if (c.shoes.mode !== 'none') add('sel:shoes', 'job', 'Shoes section', 'Wearing shoes' + (c.shoes.mode === 'saved' && asset(c.shoes.assetId) ? `: ${asset(c.shoes.assetId).name}` : ''));
+    add('opt:preferences', 'optional', 'Optional preferences', c.settings.preferences);
+    return out;
+  }
+
+  // Pairs of instructions that contradict each other. Nothing is chosen silently:
+  // each conflict needs a decision, except that application rules always win.
+  function findConflicts(instructions, resolutions) {
+    const conflicts = [];
+    const seen = new Set();
+    const push = (rule, label, a, b) => {
+      if (a.id === b.id || (a.level === 'system' && b.level === 'system')) return;
+      const id = `${rule}:${[a.id, b.id].sort().join('|')}`;
+      if (seen.has(id)) return;
+      seen.add(id);
+      const system = a.level === 'system' ? a : b.level === 'system' ? b : null;
+      const winner = system ? system.id : (resolutions[id] && [a.id, b.id].includes(resolutions[id]) ? resolutions[id] : null);
+      conflicts.push({ id, rule, label, a, b, winner, automatic: Boolean(system) });
+    };
+    CONFLICT_RULES.forEach(rule => {
+      const sideA = [], sideB = [];
+      instructions.forEach(inst => {
+        if (rule.bTest.test(inst.text)) sideB.push(inst);
+        else if (rule.aTest.test(inst.text)) sideA.push(inst);
+      });
+      sideA.forEach(a => sideB.forEach(b => push(rule.id, rule.label, a, b)));
+    });
+    const colours = instructions.map(inst => ({ inst, m: BACKGROUND_COLOUR.exec(inst.text) })).filter(x => x.m);
+    colours.forEach((x, i) => colours.slice(i + 1).forEach(y => {
+      const cx = x.m[1].toLowerCase().replace('gray', 'grey'), cy = y.m[1].toLowerCase().replace('gray', 'grey');
+      if (cx !== cy) push('background', 'Background colour', x.inst, y.inst);
+    }));
+    return conflicts;
+  }
+
+  // ---- Building the plan ------------------------------------------------------------------
+  function activeTemplate(rec) {
+    if (rec.status === 'final' && rec.snapshot && rec.snapshot.template) return rec.snapshot.template;
+    if (rec.templateOverride) return rec.templateOverride;
+    return (rec.templateId && state.promptTemplates.get(rec.templateId)) || BUILTIN_TEMPLATE;
+  }
+
+  function buildPromptPlan(rec, opts = {}) {
+    const c = normalizeStudioConfig(opts.config || rec.config);
+    const template = opts.template || activeTemplate(rec);
+    const w = Number(opts.wording !== undefined ? opts.wording : ((rec.prompt && rec.prompt.wording) || 0)) % 3;
     const asset = (id) => studioAsset(rec, id);
-    const sentence = (t) => String(t).trim().replace(/[\s.]+$/, '') + '.';
-    const keep = (a) => a && a.constraints && a.constraints.trim() ? ' Must keep: ' + sentence(a.constraints) : '';
+    const phrase = (key, ...args) => PHRASES[key][w](...args);
+    const instructions = collectInstructions(c, asset);
+    const conflicts = findConflicts(instructions, c.resolutions || {});
+    const overridden = new Set();
+    conflicts.forEach(cf => { if (cf.winner) overridden.add(cf.winner === cf.a.id ? cf.b.id : cf.a.id); });
+    const off = (id) => overridden.has(id);
+    const warnings = [];
+    const assetVersions = {};
+    const noteAsset = (a) => { if (a) assetVersions[a.id] = { name: a.name, type: a.type, updatedAt: a.updatedAt || a.createdAt || null }; };
+
+    // Reference images in a fixed order; the pose image is always last.
     const refs = [];
     let next = 1;
-    const addRef = (label, images, saved, kind) => {
+    const addRef = (key, label, images, saved, role) => {
       const urls = (images || []).map(img => img.url).filter(Boolean).slice(0, STUDIO_MAX_IMAGES_PER_ITEM);
       if (!urls.length) return '';
       const range = urls.length > 1 ? `Images ${next}–${next + urls.length - 1}` : `Image ${next}`;
-      refs.push({ label, urls, saved, kind, range, start: next });
+      refs.push({ key, label, urls, saved, role, range, start: next });
       next += urls.length;
       return range;
     };
-    const lines = [];
-    const body = [];
-
-    // Model
+    const range = {};
     const model = c.model.mode === 'saved' ? asset(c.model.assetId) : null;
-    if (model) {
-      const r = addRef(`${model.name} (model identity)`, model.images, true, 'model');
-      body.push(`Model: ${sentence(model.snippet || `the person in the ${model.name} reference`)}${r ? ` Use the exact person in ${r}: face, hair, skin tone and body shape.` : ''}${keep(model)}`);
-    } else if (c.model.mode === 'new' && (c.model.images.length || c.model.text.trim())) {
-      const r = addRef(`${c.model.name || 'New model'} (model identity)`, c.model.images, false, 'model');
-      body.push(`Model: ${c.model.text.trim() ? sentence(c.model.text) : 'the person in the reference.'}${r ? ` Use the exact person in ${r}: face, hair, skin tone and body shape.` : ''}`);
-    }
-
-    // Expression only when it is switched on.
-    if (c.expression.enabled) {
-      const ex = c.expression.mode === 'saved' ? asset(c.expression.assetId) : null;
-      if (ex) {
-        const r = addRef(`${ex.name} (expression)`, ex.images, true, 'expression');
-        body.push(`Facial expression: ${sentence(ex.snippet || ex.name)}${r ? ` Copy only the expression from ${r}, not the person.` : ''}${keep(ex)}`);
-      } else if (c.expression.mode === 'custom' && (c.expression.text.trim() || c.expression.images.length)) {
-        const r = addRef('Expression reference', c.expression.images, false, 'expression');
-        body.push(`Facial expression: ${c.expression.text.trim() ? sentence(c.expression.text) : 'as in the reference.'}${r ? ` Copy only the expression from ${r}, not the person.` : ''}`);
-      }
-    }
-
-    // Garments, each with its own specification.
-    const garment = (key, label) => {
-      const g = c[key];
-      if (g.mode === 'saved') {
-        const a = asset(g.assetId);
-        if (!a) return;
-        const r = addRef(`${a.name} (${label.toLowerCase()})`, a.images, true, key);
-        body.push(`${label}: ${sentence(a.name)}${a.snippet ? ' ' + sentence(a.snippet) : ''}${r ? ` Reproduce it exactly as in ${r}.` : ''}${keep(a)}`);
-      } else if (g.mode === 'new' && (g.name.trim() || g.images.length)) {
-        const r = addRef(`${g.name || 'New ' + label.toLowerCase()} (${label.toLowerCase()})`, g.images, false, key);
-        body.push(`${label}: ${sentence(g.name || 'the garment in the reference')}${g.text.trim() ? ' ' + sentence(g.text) : ''}${r ? ` Reproduce it exactly as in ${r}: fit, length, colour, fabric and details.` : ''}`);
-      }
-    };
-    garment('top', 'Top');
-    garment('bottom', 'Bottom');
-
-    if (c.shoes.mode === 'saved') {
-      const a = asset(c.shoes.assetId);
-      if (a) {
-        const r = addRef(`${a.name} (shoes)`, a.images, true, 'shoes');
-        body.push(`Shoes: ${sentence(a.name)}${a.snippet ? ' ' + sentence(a.snippet) : ''}${r ? ` Match ${r}.` : ''}${keep(a)}`);
-      }
-    } else if (c.shoes.mode === 'text' && c.shoes.text.trim()) {
-      body.push(`Shoes: ${sentence(c.shoes.text)}`);
-    } else if (c.shoes.mode === 'upload' && c.shoes.images.length) {
-      const r = addRef(`${c.shoes.name || 'Shoes'} (shoes)`, c.shoes.images, false, 'shoes');
-      body.push(`Shoes: ${c.shoes.name ? sentence(c.shoes.name) + ' ' : ''}${c.shoes.text.trim() ? sentence(c.shoes.text) + ' ' : ''}Match ${r} exactly.`);
-    }
-
-    if (c.sunglasses.enabled) {
-      const a = c.sunglasses.mode === 'saved' ? asset(c.sunglasses.assetId) : null;
-      if (a) {
-        const r = addRef(`${a.name} (sunglasses)`, a.images, true, 'sunglasses');
-        body.push(`Sunglasses: ${sentence(a.name)}${a.snippet ? ' ' + sentence(a.snippet) : ''} Keep the exact shape, colour and styling${r ? ` of ${r}` : ''}.${keep(a)}`);
-      } else if (c.sunglasses.mode === 'upload' && c.sunglasses.images.length) {
-        const r = addRef('Sunglasses reference', c.sunglasses.images, false, 'sunglasses');
-        body.push(`Sunglasses: worn as in ${r}${c.sunglasses.text.trim() ? '; ' + c.sunglasses.text.trim().replace(/[\s.]+$/, '') : ''}. Keep the exact shape, colour and styling.`);
-      }
-    }
-
-    c.accessories.forEach(a => {
-      if (a.kind === 'saved') {
-        const item = asset(a.assetId);
-        if (!item) return;
-        const label = catDef(item.type).singular;
-        const r = addRef(`${item.name} (${label})`, item.images, true, 'accessory');
-        const where = a.text.trim() || item.placement || '';
-        body.push(`${label === 'prop' ? 'Prop' : 'Accessory'}: ${sentence(item.name + (where ? ', ' + where.trim() : ''))}${item.snippet ? ' ' + sentence(item.snippet) : ''}${r ? ` As in ${r}.` : ''}${keep(item)}`);
-      } else if (a.text.trim() || a.images.length) {
-        const r = addRef('Custom prop or accessory', a.images, false, 'accessory');
-        body.push(`Prop or accessory: ${a.text.trim() ? sentence(a.text) : 'as in the reference.'}${r ? ` As in ${r}.` : ''}`);
-      }
+    if (model) range.model = addRef('model', `${model.name}`, model.images, true, 'model identity');
+    else if (c.model.mode === 'new') range.model = addRef('model', c.model.name || 'New model', c.model.images, false, 'model identity');
+    const expression = c.expression.enabled && !off('sel:expression') ? (c.expression.mode === 'saved' ? asset(c.expression.assetId) : null) : null;
+    if (expression) range.expression = addRef('expression', expression.name, expression.images, true, 'facial expression only');
+    else if (c.expression.enabled && c.expression.mode === 'custom') range.expression = addRef('expression', 'Expression reference', c.expression.images, false, 'facial expression only');
+    const garments = {};
+    ['top', 'bottom'].forEach(k => {
+      const g = c[k];
+      if (g.mode === 'saved') { garments[k] = asset(g.assetId); if (garments[k]) range[k] = addRef(k, garments[k].name, garments[k].images, true, `${k} garment`); }
+      else if (g.mode === 'new') range[k] = addRef(k, g.name || `New ${k}`, g.images, false, `${k} garment`);
     });
-
-    // Additional references, before the pose so the pose image stays last.
-    const extraRefLines = [];
-    c.references.forEach(r => {
+    const shoesOn = c.shoes.mode !== 'none' && !off('sel:shoes');
+    const shoes = shoesOn && c.shoes.mode === 'saved' ? asset(c.shoes.assetId) : null;
+    if (shoes) range.shoes = addRef('shoes', shoes.name, shoes.images, true, 'shoes');
+    else if (shoesOn && c.shoes.mode === 'upload') range.shoes = addRef('shoes', c.shoes.name || 'Shoes', c.shoes.images, false, 'shoes');
+    const sunOn = c.sunglasses.enabled && !off('sel:sunglasses');
+    const sunglasses = sunOn && c.sunglasses.mode === 'saved' ? asset(c.sunglasses.assetId) : null;
+    if (sunglasses) range.sunglasses = addRef('sunglasses', sunglasses.name, sunglasses.images, true, 'sunglasses');
+    else if (sunOn && c.sunglasses.mode === 'upload') range.sunglasses = addRef('sunglasses', 'Sunglasses', c.sunglasses.images, false, 'sunglasses');
+    const accOn = !off('sel:accessories');
+    const items = accOn ? c.accessories.map((a, i) => {
+      const saved = a.kind === 'saved' ? asset(a.assetId) : null;
+      if (a.kind === 'saved' && !saved) return null;
+      const kind = saved && saved.type === 'prop' ? 'props' : 'accessories';
+      const label = saved ? saved.name : (a.text ? a.text.slice(0, 40) : `Item ${i + 1}`);
+      return { a, i, saved, kind, label, range: addRef('acc:' + i, label, saved ? saved.images : a.images, Boolean(saved), saved ? catDef(saved.type).singular : 'prop or accessory') };
+    }).filter(Boolean) : [];
+    const extraRefs = c.references.map((r, i) => {
       const role = r.role === 'Other' ? (r.customRole || 'Other reference') : r.role;
-      const range = addRef(`${role} (additional reference)`, r.images, false, 'reference');
-      if (range) extraRefLines.push(`${range} (${role.toLowerCase()}): ${r.instructions.trim() ? sentence(r.instructions) : 'use as a reference.'}`);
+      return { r, i, role, range: addRef('ref:' + i, role, r.images, false, role.toLowerCase()) };
+    });
+    const style = asset(c.style.assetId);
+    if (style) range.style = addRef('style', style.name, style.images, true, 'house style');
+    const pose = c.pose.mode === 'saved' ? asset(c.pose.assetId) : null;
+    if (pose) range.pose = addRef('pose', pose.name, pose.images, true, 'pose only');
+    else if (c.pose.mode === 'upload') range.pose = addRef('pose', 'Pose reference', c.pose.images, false, 'pose only');
+
+    [model, expression, garments.top, garments.bottom, shoes, sunglasses, pose, style, ...items.map(x => x.saved)].forEach(noteAsset);
+    const missingImage = (what, a) => warnings.push(`${a ? a.name : what} has no reference image, so the prompt describes it in words only.`);
+
+    const S = {};
+    PROMPT_SECTIONS.forEach(s => { S[s.key] = []; });
+
+    // 1. Task
+    S.task.push(pline(template.text.task || ''));
+    if (refs.length) {
+      S.task.push(pline(`Reference images supplied (${refs.reduce((n, r) => n + r.urls.length, 0)}):`));
+      refs.forEach(r => S.task.push(pline('- ', lk(r.range), ': ', lk(r.label), ` (${r.role})`)));
+    } else {
+      S.task.push(pline('No reference images are supplied; rely on the written descriptions.'));
+    }
+    S.task.push(pline(phrase('priority')));
+
+    // 2. Model
+    if (model) {
+      S.model.push(pline('Model: ', lk(model.name), model.code ? [' (', lk(model.code), ')'] : '', '.'));
+      if (model.snippet && !off('n:' + model.id)) S.model.push(pline('Identity: ', lk(endDot(model.snippet))));
+      const rl = recordedLine(model); if (rl) S.model.push(rl);
+      if (model.constraints && !off('c:' + model.id)) S.model.push(pline('Locked: ', lk(endDot(model.constraints))));
+      if (range.model) S.model.push(pline(phrase('modelRef', range.model)));
+      else { S.model.push(pline(phrase('noImage', 'model'))); missingImage('Model', model); }
+      S.model.push(pline('Keep the same face and body proportions; the selected garments always take priority over anything the model wears in a reference.'));
+    } else if (c.model.mode === 'new') {
+      S.model.push(pline('Model: ', c.model.name ? lk(c.model.name) : 'a new model', ' (new reference, not from the library).'));
+      if (c.model.text.trim() && !off('job:model')) S.model.push(pline('Identity: ', lk(endDot(c.model.text))));
+      if (range.model) S.model.push(pline(phrase('modelRef', range.model)));
+      else S.model.push(pline(phrase('noImage', 'model')));
+    }
+
+    // 3–4. Garments, each with its own specification.
+    ['top', 'bottom'].forEach(k => {
+      const g = c[k];
+      const a = garments[k];
+      if (g.mode === 'saved' && a) {
+        S[k].push(pline(`${k === 'top' ? 'Top' : 'Bottom'}: `, lk(a.name), a.code ? [' (', lk(a.code), ')'] : '', '.'));
+        if (a.snippet && !off('n:' + a.id)) S[k].push(pline('Garment description: ', lk(endDot(a.snippet))));
+        const rl = recordedLine(a); if (rl) S[k].push(rl);
+        if (a.constraints && !off('c:' + a.id)) S[k].push(pline('Locked: ', lk(endDot(a.constraints))));
+        if (range[k]) S[k].push(pline(phrase('garmentRef', range[k], k)));
+        else { S[k].push(pline(phrase('noImage', k))); missingImage(k, a); }
+        if (!range[k] && !a.snippet && !rl) warnings.push(`${a.name} has no image and no recorded details; the prompt can only use its name.`);
+        S[k].push(pline(phrase('preserve', k)));
+      } else if (g.mode === 'new') {
+        S[k].push(pline(`${k === 'top' ? 'Top' : 'Bottom'}: `, g.name ? lk(g.name) : `the new ${k}`, ' (new product reference).'));
+        if (g.text.trim() && !off('job:' + k)) S[k].push(pline('Garment description: ', lk(endDot(g.text))));
+        if (range[k]) S[k].push(pline(phrase('garmentRef', range[k], k)));
+        else S[k].push(pline(phrase('noImage', k)));
+        S[k].push(pline(phrase('preserve', k)));
+      }
     });
 
-    // House style reference comes before the pose so the pose image is always last.
-    let styleLine = '';
-    const houseStyle = asset(c.style.assetId);
-    if (houseStyle) {
-      const r = addRef(`${houseStyle.name} (house style)`, houseStyle.images, true, 'style');
-      const parts = [houseStyle.snippet, houseStyle.lighting && 'Lighting: ' + houseStyle.lighting, houseStyle.background && 'Background: ' + houseStyle.background, houseStyle.camera && 'Camera: ' + houseStyle.camera, houseStyle.brandRules]
-        .filter(Boolean).map(sentence).join(' ');
-      styleLine = `House style: ${parts || sentence(houseStyle.name)}${r ? ` Match the look of ${r}.` : ''}${keep(houseStyle)}`;
+    // 5. Shoes
+    if (shoes) {
+      S.shoes.push(pline('Shoes: ', lk(shoes.name), '.'));
+      if (shoes.snippet && !off('n:' + shoes.id)) S.shoes.push(pline(lk(endDot(shoes.snippet))));
+      const rl = recordedLine(shoes); if (rl) S.shoes.push(rl);
+      if (shoes.constraints && !off('c:' + shoes.id)) S.shoes.push(pline('Locked: ', lk(endDot(shoes.constraints))));
+      if (range.shoes) S.shoes.push(pline(phrase('itemRef', range.shoes, 'shoes')));
+      else { S.shoes.push(pline(phrase('noImage', 'shoes'))); missingImage('Shoes', shoes); }
+    } else if (shoesOn && c.shoes.mode === 'text' && c.shoes.text.trim() && !off('job:shoes')) {
+      S.shoes.push(pline('Shoes: ', lk(endDot(c.shoes.text))));
+    } else if (shoesOn && c.shoes.mode === 'upload') {
+      S.shoes.push(pline('Shoes: ', c.shoes.name ? lk(c.shoes.name) : 'as in the reference', '.'));
+      if (c.shoes.text.trim() && !off('job:shoes')) S.shoes.push(pline(lk(endDot(c.shoes.text))));
+      if (range.shoes) S.shoes.push(pline(phrase('itemRef', range.shoes, 'shoes')));
     }
 
-    // Pose
-    const p = c.pose;
-    const poseAsset = p.mode === 'saved' ? asset(p.assetId) : null;
-    const poseDetails = [['Framing', p.framing], ['Body orientation', p.orientation], ['Hands', p.hands], ['Gaze', p.gaze], ['Expression', p.expression]]
-      .filter(([, v]) => v && v.trim()).map(([k, v]) => `${k}: ${v.trim().replace(/[\s.]+$/, '')}.`).join(' ');
-    if (poseAsset) {
-      const r = addRef(`${poseAsset.name} (pose)`, poseAsset.images, true, 'pose');
-      body.push(`Pose: ${sentence(poseAsset.snippet || poseAsset.name)}${r ? ` Copy only the pose, body angle and framing from ${r}, not the person or clothing.` : ''}${poseDetails ? ' ' + poseDetails : ''}${keep(poseAsset)}`);
-    } else if (p.mode === 'upload' && p.images.length) {
-      const r = addRef('Pose reference', p.images, false, 'pose');
-      body.push(`Pose: copy only the pose, body angle and framing from ${r}, not the person or clothing.${p.text.trim() ? ' ' + sentence(p.text) : ''}${poseDetails ? ' ' + poseDetails : ''}`);
-    } else if (p.mode === 'text' && p.text.trim()) {
-      body.push(`Pose: ${sentence(p.text)}${poseDetails ? ' ' + poseDetails : ''}`);
+    // 6. Sunglasses and accessories / 7. Props
+    if (sunglasses) {
+      S.accessories.push(pline('Sunglasses: ', lk(sunglasses.name), '.'));
+      if (sunglasses.snippet && !off('n:' + sunglasses.id)) S.accessories.push(pline(lk(endDot(sunglasses.snippet))));
+      if (sunglasses.constraints && !off('c:' + sunglasses.id)) S.accessories.push(pline('Locked: ', lk(endDot(sunglasses.constraints))));
+      if (range.sunglasses) S.accessories.push(pline(phrase('itemRef', range.sunglasses, 'sunglasses')));
+      else { S.accessories.push(pline(phrase('noImage', 'sunglasses'))); missingImage('Sunglasses', sunglasses); }
+    } else if (sunOn && c.sunglasses.mode === 'upload') {
+      S.accessories.push(pline('Sunglasses: worn by the model', c.sunglasses.text.trim() && !off('job:sunglasses') ? ['; ', lk(c.sunglasses.text.trim().replace(/[\s.]+$/, ''))] : '', '.'));
+      if (range.sunglasses) S.accessories.push(pline(phrase('itemRef', range.sunglasses, 'sunglasses')));
+    }
+    items.forEach(x => {
+      const target = S[x.kind];
+      const note = x.a.text && x.a.text.trim() && !off('job:acc.' + (x.a.uid || x.i)) ? x.a.text.trim() : '';
+      if (x.saved) {
+        const label = x.kind === 'props' ? 'Prop' : 'Accessory';
+        target.push(pline(`${label}: `, lk(x.saved.name), note ? [', ', lk(note.replace(/[\s.]+$/, ''))] : (x.saved.placement ? [', ', lk(x.saved.placement)] : ''), '.'));
+        if (x.saved.snippet && !off('n:' + x.saved.id)) target.push(pline(lk(endDot(x.saved.snippet))));
+        if (x.saved.constraints && !off('c:' + x.saved.id)) target.push(pline('Locked: ', lk(endDot(x.saved.constraints))));
+        if (x.range) target.push(pline(phrase('itemRef', x.range, label.toLowerCase())));
+        else { target.push(pline(phrase('noImage', x.saved.name))); missingImage(label, x.saved); }
+      } else {
+        target.push(pline('Item: ', note ? lk(endDot(note)) : 'as in the reference.'));
+        if (x.range) target.push(pline(phrase('itemRef', x.range, 'item')));
+      }
+    });
+
+    // 8. Pose and composition
+    if (pose) {
+      S.pose.push(pline('Pose: ', lk(pose.name), '.'));
+      if (pose.snippet && !off('n:' + pose.id)) S.pose.push(pline(lk(endDot(pose.snippet))));
+      const rl = recordedLine(pose); if (rl) S.pose.push(rl);
+      if (pose.constraints && !off('c:' + pose.id)) S.pose.push(pline('Locked: ', lk(endDot(pose.constraints))));
+      if (range.pose) S.pose.push(pline(phrase('poseRef', range.pose)));
+    } else if (c.pose.mode === 'upload') {
+      if (range.pose) S.pose.push(pline(phrase('poseRef', range.pose)));
+      if (c.pose.text.trim() && !off('job:pose.text')) S.pose.push(pline(lk(endDot(c.pose.text))));
+    } else if (c.pose.mode === 'text' && c.pose.text.trim() && !off('job:pose.text')) {
+      S.pose.push(pline('Pose: ', lk(endDot(c.pose.text))));
+    }
+    [['orientation', 'Body orientation'], ['hands', 'Hand placement'], ['gaze', 'Gaze'], ['expression', 'Expression note']].forEach(([k, label]) => {
+      if (c.pose[k] && c.pose[k].trim() && !off('job:pose.' + k)) S.pose.push(pline(`${label}: `, lk(endDot(c.pose[k]))));
+    });
+    if (expression) {
+      S.pose.push(pline('Facial expression: ', lk(endDot(expression.snippet || expression.name))));
+      if (expression.constraints && !off('c:' + expression.id)) S.pose.push(pline('Locked: ', lk(endDot(expression.constraints))));
+      if (range.expression) S.pose.push(pline('Copy only the facial expression from ', lk(range.expression), ', not the person.'));
+    } else if (c.expression.enabled && c.expression.mode === 'custom' && !off('job:expression') && (c.expression.text.trim() || range.expression)) {
+      S.pose.push(pline('Facial expression: ', c.expression.text.trim() ? lk(endDot(c.expression.text)) : 'as in the reference.'));
+      if (range.expression) S.pose.push(pline('Copy only the facial expression from ', lk(range.expression), ', not the person.'));
     }
 
-
-    if (styleLine) body.push(styleLine);
-
-    if (refs.length) {
-      lines.push('Reference images:');
-      refs.forEach(r => lines.push(`- ${r.range}: ${r.label}`));
-      lines.push('');
+    // 9. Camera, lighting and background
+    if (c.pose.framing && c.pose.framing.trim() && !off('job:pose.framing')) S.camera.push(pline('Framing: ', lk(endDot(c.pose.framing))));
+    if (pose && pose.framing) S.camera.push(pline('Pose framing: ', lk(endDot(pose.framing))));
+    if (pose && pose.cameraAngle) S.camera.push(pline('Camera angle: ', lk(endDot(pose.cameraAngle))));
+    if (style) {
+      if (style.lighting) S.camera.push(pline('Lighting: ', lk(endDot(style.lighting))));
+      if (style.background && !off('n:' + style.id)) S.camera.push(pline('Background: ', lk(endDot(style.background))));
+      if (style.camera) S.camera.push(pline('Camera: ', lk(endDot(style.camera))));
     }
-    if (style.constants) lines.push(style.constants, '');
-    lines.push(...body);
-    if (extraRefLines.length) lines.push('', 'Additional references:', ...extraRefLines.map(l => '- ' + l));
-    if (c.settings.instructions.trim()) lines.push('', 'Instructions:', '- ' + c.settings.instructions.trim());
-    if (style.avoid) lines.push('', `Avoid: ${style.avoid}`);
-    return { text: lines.join('\n'), refs };
+
+    // 10. House style and realism
+    if (style) {
+      S.style.push(pline('House style: ', lk(style.name), '.'));
+      if (style.snippet && !off('n:' + style.id)) S.style.push(pline(lk(endDot(style.snippet))));
+      if (style.brandRules && !off('n:' + style.id)) S.style.push(pline('Brand rules: ', lk(endDot(style.brandRules))));
+      if (style.constraints && !off('c:' + style.id)) S.style.push(pline('Locked: ', lk(endDot(style.constraints))));
+      if (range.style) S.style.push(pline(phrase('styleRef', range.style)));
+    }
+    if (template.text.realism) S.style.push(pline(template.text.realism));
+
+    // 11. Negative constraints
+    if (template.text.negative) S.negative.push(pline(template.text.negative));
+    SYSTEM_RULES.forEach(t => S.negative.push(pline(t)));
+    if (refs.length > 1) S.negative.push(pline('Never mix reference roles: each image is used only for the role stated for it above.'));
+
+    // 12. Additional instructions: job instructions, then optional preferences.
+    if (c.settings.instructions.trim() && !off('job:instructions')) S.custom.push(pline('Job instructions: ', lk(endDot(c.settings.instructions))));
+    extraRefs.forEach(x => {
+      if (!x.range) return;
+      const note = x.r.instructions && x.r.instructions.trim() && !off('job:ref.' + (x.r.uid || x.i)) ? endDot(x.r.instructions) : 'Use as a reference.';
+      S.custom.push(pline(lk(x.range), ` (${x.role.toLowerCase()}, use only for this role): `, lk(note)));
+    });
+    if (c.settings.preferences && c.settings.preferences.trim() && !off('opt:preferences')) {
+      S.custom.push(pline('Optional preferences (lowest priority): ', lk(endDot(c.settings.preferences))));
+    }
+
+    const disabled = new Set(template.disabled || []);
+    disabled.forEach(k => {
+      if (S[k] && S[k].length && k !== 'negative') warnings.push(`The template hides the "${PROMPT_SECTIONS.find(s => s.key === k).title}" section, so what is selected there is not in the prompt.`);
+    });
+    const order = (template.order || []).filter(k => S[k] && !disabled.has(k));
+    // Sections missing from a custom order still go at the end, so nothing is dropped by accident.
+    PROMPT_SECTIONS.forEach(s => { if (!order.includes(s.key) && !disabled.has(s.key)) order.push(s.key); });
+    const sections = order.filter(k => S[k].length).map(k => {
+      const title = PROMPT_SECTIONS.find(s => s.key === k).title;
+      return { key: k, title, text: S[k].map(l => l.text).join('\n'), locked: Array.from(new Set(S[k].flatMap(l => l.locked))) };
+    });
+    return {
+      sections, refs, instructions, conflicts,
+      unresolved: conflicts.filter(cf => !cf.winner),
+      warnings, template, wording: w, assetVersions, engineVersion: PROMPT_ENGINE_VERSION
+    };
+  }
+
+  function planText(plan, sectionTexts) {
+    return plan.sections.map(s => {
+      const body = (sectionTexts && sectionTexts[s.key]) || s.text;
+      return plan.template.headings ? `${s.title}:\n${body}` : body;
+    }).join('\n\n');
+  }
+
+  // Kept for the rest of Prompt Studio: the prepared prompt and its reference list.
+  function buildStudioPrompt(rec) {
+    const plan = buildPromptPlan(rec);
+    return { text: planText(plan), refs: plan.refs, plan };
   }
 
   // ---- Rendering ------------------------------------------------------------------------------
@@ -9818,6 +10196,8 @@
     if (!studioMain) return;
     renderStudioList();
     renderStudioEditor();
+    const before = JSON.stringify(aiStatusCache);
+    refreshAiStatus().then(() => { if (JSON.stringify(aiStatusCache) !== before && state.currentView === 'studio' && !studioTypingInside(studioMain)) renderStudioEditor(); });
   }
 
   function studioTypingInside(el) {
@@ -9924,38 +10304,526 @@
           ${rec.presetId && state.outfitPresets.get(rec.presetId) ? `<p class="studio-sub">Started from preset "${escapeHtml(state.outfitPresets.get(rec.presetId).name)}".</p>` : ''}
         </div>`;
     }
-    studioMain.innerHTML = header + renderStudioSections(rec, ctx);
+    studioMain.innerHTML = header + assistantPanelHtml(rec, kind, editable) + renderStudioSections(rec, ctx);
     renderStudioSide();
   }
 
+  // ---- Prompt editor, versions and templates (right column) -----------------------------------
+  // rec.prompt = { text, edited, engineText, wording, ai }: while not edited, the
+  // prompt follows the engine live; once edited, the typed text is kept until the
+  // user takes the newly generated one. rec.promptVersions keeps snapshots.
+  const MAX_PROMPT_VERSIONS = 30;
+
+  function currentPrompt(rec) {
+    if (rec.status === 'final' && rec.snapshot) return { text: rec.snapshot.prompt, plan: null, stale: false };
+    const plan = buildPromptPlan(rec);
+    const engineText = planText(plan);
+    const p = rec.prompt || {};
+    if (p.edited && typeof p.text === 'string') return { text: p.text, plan, engineText, stale: p.engineText !== engineText };
+    return { text: engineText, plan, engineText, stale: false };
+  }
+
+  function templateLabel(t) {
+    return `${t.name} v${t.version}${t.builtin ? ' (built in)' : ''}${t === undefined ? '' : ''}`;
+  }
+
+  function pushPromptVersion(rec, text, source, extra = {}) {
+    const plan = (rec.status === 'final') ? null : buildPromptPlan(rec);
+    const template = activeTemplate(rec);
+    const list = rec.promptVersions || [];
+    const n = list.length ? list[list.length - 1].n + 1 : 1;
+    list.push({
+      n, at: new Date().toISOString(), by: state.currentUser.id, source, text,
+      templateId: template.id || null, templateName: template.name, templateVersion: template.version, edited: Boolean(rec.templateOverride),
+      engineVersion: PROMPT_ENGINE_VERSION,
+      assetVersions: plan ? plan.assetVersions : (rec.snapshot && rec.snapshot.assetVersions) || {},
+      provider: extra.provider || null, model: extra.model || null
+    });
+    rec.promptVersions = list.slice(-MAX_PROMPT_VERSIONS);
+  }
+
+  // Line diff (longest common subsequence) for comparing versions.
+  function diffLines(a, b) {
+    const x = a.split('\n'), y = b.split('\n');
+    const m = x.length, n = y.length;
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--) dp[i][j] = x[i] === y[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    const out = [];
+    let i = 0, j = 0;
+    while (i < m && j < n) {
+      if (x[i] === y[j]) { out.push({ t: ' ', s: x[i] }); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) { out.push({ t: '-', s: x[i] }); i++; }
+      else { out.push({ t: '+', s: y[j] }); j++; }
+    }
+    while (i < m) out.push({ t: '-', s: x[i++] });
+    while (j < n) out.push({ t: '+', s: y[j++] });
+    return out;
+  }
+
+  // ---- AI status -----------------------------------------------------------------------------
+  let aiStatusCache = null;
+  let aiStatusAt = 0;
+  async function refreshAiStatus(force) {
+    if (!force && aiStatusCache && Date.now() - aiStatusAt < 30000) return aiStatusCache;
+    try {
+      aiStatusCache = await fetch('/api/ai/status', { cache: 'no-cache' }).then(r => r.json());
+      aiStatusAt = Date.now();
+    } catch (e) {
+      aiStatusCache = null;
+    }
+    return aiStatusCache;
+  }
+
+  function aiReady() {
+    return Boolean(aiStatusCache && aiStatusCache.configured && aiStatusCache.enabled);
+  }
+
+  function aiStatusHtml() {
+    const s = aiStatusCache;
+    const isAdmin = isAdminRole(state.currentUser.role);
+    if (!s) return '<span class="studio-muted">Checking AI status…</span>';
+    if (!s.configured) return `<span class="studio-muted">AI is not set up, so the built-in matcher answers. ${isAdmin ? 'To use Gemini, add GEMINI_API_KEY to the .env file on the server and restart it.' : ''}</span>`;
+    if (!s.enabled) return `<span class="studio-muted">AI is off; the built-in matcher answers.</span>${isAdmin ? ' <button type="button" class="identity-link" data-action="ai-enable">Turn on AI…</button>' : ''}`;
+    const used = s.limits ? ` · ${s.limits.usedToday}/${s.limits.perDay} requests today` : '';
+    const wait = s.limits && s.limits.cooldownUntil ? ' · paused by rate limit' : '';
+    return `<span class="studio-badge saved">AI on</span> <span class="studio-muted">${escapeHtml(s.provider)} · ${escapeHtml(s.model)}${used}${wait}</span>${isAdmin ? ' <button type="button" class="identity-link" data-action="ai-disable">Turn off</button>' : ''}`;
+  }
+
+  function setAiEnabled(enabled) {
+    if (!isAdminRole(state.currentUser.role) || !ensureCanEdit('settings')) return;
+    if (enabled) {
+      const s = aiStatusCache || {};
+      const ok = confirm(
+        `Turn on the AI assistant (${s.provider || 'gemini'} · ${s.model || ''})?\n\n` +
+        'When someone uses it, the request text and your Asset Library\'s names, codes, aliases, tags and key details are sent to Google. Reference images are never sent.\n\n' +
+        'On the free Gemini tier, Google may use this data to improve its products and human reviewers may read it. Do not put personal or confidential information in requests. Teams in the EEA, Switzerland or the UK must use a paid Gemini plan.\n\n' +
+        'Free-tier quotas are limited; the server also caps requests per minute and per day.');
+      if (!ok) return;
+    }
+    putToStore('settings', { key: 'aiSettings', value: { enabled, changedAt: new Date().toISOString(), changedBy: state.currentUser.id } });
+    setTimeout(async () => { await refreshAiStatus(true); renderStudioEditor(); }, 600);
+    showToast(enabled ? 'AI assistant turned on' : 'AI assistant turned off', 'success');
+  }
+
+  // ---- Assistant ------------------------------------------------------------------------------
+  // studioUI.proposal = { recId, data, source, provider, model, fallbackReason, picks: {i: assetId}, preview }
+  function assistantPanelHtml(rec, kind, editable) {
+    const p = studioUI.proposal && studioUI.proposal.recId === rec.id ? studioUI.proposal : null;
+    const label = (ch) => {
+      const a = ch.assetId ? state.libraries.get(ch.assetId) : null;
+      const name = a ? `${a.code ? a.code + ' · ' : ''}${a.name}` : '';
+      const section = { model: 'Model', sunglasses: 'Sunglasses', expression: 'Expression', top: 'Top', bottom: 'Bottom', shoes: 'Shoes', accessories: 'Props and accessories', pose: 'Pose', style: 'House style' }[ch.section] || ch.section;
+      if (ch.action === 'set') return `${section} → ${name}`;
+      if (ch.action === 'add') return `${section} + ${name}`;
+      if (ch.action === 'remove') return `${section} − ${name}`;
+      if (ch.action === 'clear') return `${section} → none`;
+      return `${section} → "${ch.text}" (from your words)`;
+    };
+    let proposalHtml = '';
+    if (p) {
+      const d = p.data;
+      proposalHtml = `
+        <div class="studio-proposal">
+          <div class="studio-row"><span class="studio-badge ${p.source === 'ai' ? 'saved' : ''}">${p.source === 'ai' ? `AI · ${escapeHtml(p.model || '')}` : 'Built-in matcher'}</span>
+            ${p.fallbackReason ? `<span class="studio-muted">${escapeHtml(p.fallbackReason)} Used the built-in matcher instead.</span>` : ''}</div>
+          <p class="studio-asset-text">${escapeHtml(d.reply)}</p>
+          ${d.changes.length ? `<div class="team-section-title">Proposed changes</div><ul class="studio-proposal-list">${d.changes.map(ch => `<li>${escapeHtml(label(ch))}</li>`).join('')}</ul>` : ''}
+          ${d.clarifications.map((cl, i) => `<div class="studio-clarify"><div class="studio-asset-text"><strong>${escapeHtml(cl.question)}</strong></div><div class="studio-row">${cl.options.map(o => `<button type="button" class="btn btn-sm ${p.picks[i] === o.assetId ? 'btn-primary' : 'btn-secondary'}" data-action="assist-pick" data-index="${i}" data-asset="${escapeHtml(o.assetId)}">${escapeHtml(o.label)}</button>`).join('')}</div></div>`).join('')}
+          ${d.missing.length ? `<div class="team-section-title">Missing</div><ul class="studio-proposal-list warn">${d.missing.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>` : ''}
+          ${d.conflicts.length ? `<div class="team-section-title">Possible conflicts (AI)</div><ul class="studio-proposal-list warn">${d.conflicts.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>` : ''}
+          ${d.notes && d.notes.length ? `<ul class="studio-proposal-list muted">${d.notes.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>` : ''}
+          ${p.preview ? `<pre class="studio-prompt">${escapeHtml(proposalPreviewText(rec, p))}</pre>` : ''}
+          <div class="studio-row">
+            ${editable && (d.changes.length || Object.keys(p.picks).length) ? '<button type="button" class="btn btn-primary btn-sm" data-action="assist-accept">Accept changes</button>' : ''}
+            <button type="button" class="btn btn-secondary btn-sm" data-action="assist-reject">${d.changes.length ? 'Reject' : 'Dismiss'}</button>
+            ${d.changes.length || Object.keys(p.picks).length ? `<button type="button" class="btn btn-secondary btn-sm" data-action="assist-preview">${p.preview ? 'Hide preview' : 'Preview prompt'}</button>` : ''}
+          </div>
+        </div>`;
+    }
+    return `
+      <section class="studio-section studio-assistant">
+        <div class="studio-section-head"><h3>Assistant</h3></div>
+        <div class="studio-row">${aiStatusHtml()}</div>
+        ${editable ? `<textarea class="form-textarea" rows="2" id="studio-assist-input" placeholder="e.g. Use the saved navy striped cropped polo, black flared denim, Chelsea boots, sunglasses and our three-quarter pose">${escapeHtml(studioUI.assistText || '')}</textarea>
+        <div class="studio-row"><button type="button" class="btn btn-primary btn-sm" data-action="assist-send"${studioUI.assistBusy ? ' disabled' : ''}>${studioUI.assistBusy ? 'Thinking…' : 'Suggest changes'}</button><span class="studio-muted">Nothing changes until you accept.</span></div>` : '<p class="studio-muted">The assistant is available on drafts you can edit.</p>'}
+        ${proposalHtml}
+      </section>`;
+  }
+
+  function applyAssistChange(cfg, ch) {
+    const sec = cfg[ch.section];
+    switch (ch.action) {
+      case 'set':
+        if (ch.section === 'style') { cfg.style.assetId = ch.assetId; break; }
+        if (ch.section === 'sunglasses' || ch.section === 'expression') sec.enabled = true;
+        sec.mode = 'saved';
+        sec.assetId = ch.assetId;
+        break;
+      case 'add':
+        if (!cfg.accessories.some(a => a.kind === 'saved' && a.assetId === ch.assetId)) cfg.accessories.push({ uid: studioUid(), kind: 'saved', assetId: ch.assetId, text: '', images: [] });
+        break;
+      case 'remove':
+        cfg.accessories = cfg.accessories.filter(a => !(a.kind === 'saved' && a.assetId === ch.assetId));
+        break;
+      case 'clear':
+        if (ch.section === 'accessories') cfg.accessories = [];
+        else if (ch.section === 'sunglasses' || ch.section === 'expression') sec.enabled = false;
+        else if (ch.section === 'top' || ch.section === 'bottom' || ch.section === 'shoes') sec.mode = 'none';
+        else if (ch.section === 'style') cfg.style.assetId = '';
+        else sec.assetId = '';
+        break;
+      case 'text':
+        if (ch.section === 'accessories') cfg.accessories.push({ uid: studioUid(), kind: 'custom', assetId: '', text: ch.text, images: [] });
+        else if (ch.section === 'shoes') { sec.mode = 'text'; sec.text = ch.text; }
+        else if (ch.section === 'pose') { sec.mode = 'text'; sec.text = ch.text; }
+        else if (ch.section === 'expression') { sec.enabled = true; sec.mode = 'custom'; sec.text = ch.text; }
+        break;
+    }
+  }
+
+  function proposalChanges(p) {
+    const picks = Object.entries(p.picks).map(([i, assetId]) => {
+      const cl = p.data.clarifications[i];
+      return { section: cl.section, action: cl.section === 'accessories' ? 'add' : 'set', assetId, text: '' };
+    });
+    return [...p.data.changes, ...picks];
+  }
+
+  function proposalPreviewText(rec, p) {
+    const cfg = normalizeStudioConfig(rec.config);
+    proposalChanges(p).forEach(ch => applyAssistChange(cfg, ch));
+    return planText(buildPromptPlan(rec, { config: cfg }));
+  }
+
+  async function sendAssistRequest(rec) {
+    const message = (studioUI.assistText || '').trim();
+    if (!message) { showToast('Type what you want to set up', 'warning'); return; }
+    studioUI.assistBusy = true;
+    renderStudioEditor();
+    try {
+      const res = await fetch('/api/ai/assist', { method: 'POST', body: JSON.stringify({ token: sessionToken(), message, config: rec.config }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'The assistant failed');
+      if (data.status) { aiStatusCache = data.status; aiStatusAt = Date.now(); }
+      studioUI.proposal = { recId: rec.id, data: data.proposal, source: data.source, provider: data.provider, model: data.model, fallbackReason: data.fallbackReason, picks: {}, preview: false };
+    } catch (e) {
+      showToast(e.message === 'Failed to fetch' ? 'The ListingFlow server could not be reached' : e.message, 'error');
+    }
+    studioUI.assistBusy = false;
+    renderStudioEditor();
+  }
+
+  // ---- Wording ---------------------------------------------------------------------------------
+  async function regenerateWording(rec) {
+    const cur = currentPrompt(rec);
+    if (rec.prompt && rec.prompt.edited && !confirm('Regenerating replaces your manual edits to the prompt. Continue?')) return;
+    const plan = cur.plan;
+    const sections = plan.sections.map(s => ({ key: s.key, text: s.text, locked: s.locked }));
+    if (aiReady()) {
+      try {
+        const res = await fetch('/api/ai/reword', { method: 'POST', body: JSON.stringify({ token: sessionToken(), sections }) });
+        const data = await res.json();
+        if (data.status) { aiStatusCache = data.status; aiStatusAt = Date.now(); }
+        if (!res.ok) throw new Error(data.error || 'AI unavailable');
+        const texts = {};
+        const kept = [];
+        data.sections.forEach(s => { if (s.accepted) texts[s.key] = s.text; else kept.push(`${s.key} (${s.reason})`); });
+        const text = planText(plan, texts);
+        rec.prompt = { text, edited: true, engineText: planText(plan), wording: plan.wording, ai: { provider: data.provider, model: data.model, at: new Date().toISOString() } };
+        pushPromptVersion(rec, text, 'AI reworded', { provider: data.provider, model: data.model });
+        scheduleStudioSave('shoot', rec);
+        renderStudioSide();
+        showToast(kept.length ? `Reworded with AI. Kept original wording for: ${kept.join(', ')}` : 'Reworded with AI; all locked facts kept', kept.length ? 'warning' : 'success');
+        return;
+      } catch (e) {
+        showToast(`AI rewording unavailable: ${String(e.message).replace(/[\s.]+$/, '')}. Used built-in wording instead.`, 'warning');
+      }
+    }
+    const wording = ((rec.prompt && rec.prompt.wording) || 0) + 1;
+    rec.prompt = { edited: false, wording: wording % 3, ai: null };
+    const text = planText(buildPromptPlan(rec));
+    pushPromptVersion(rec, text, `reworded (built-in variant ${(wording % 3) + 1})`);
+    scheduleStudioSave('shoot', rec);
+    renderStudioSide();
+    if (!aiReady()) showToast(`Switched to built-in wording variant ${(wording % 3) + 1}; facts unchanged`, 'success');
+  }
+
+  // ---- Templates --------------------------------------------------------------------------------
+  function templatesList() {
+    return [BUILTIN_TEMPLATE, ...Array.from(state.promptTemplates.values()).filter(t => !t.archived).sort((a, b) => a.name.localeCompare(b.name))];
+  }
+
+  function editableTemplateCopy(rec) {
+    const t = activeTemplate(rec);
+    return JSON.parse(JSON.stringify({ id: t.id, name: t.name, version: t.version, builtin: Boolean(t.builtin), order: t.order, disabled: t.disabled || [], headings: t.headings !== false, text: t.text }));
+  }
+
+  function saveTemplate(rec, asNew) {
+    if (!ensureCanEdit('prompt_templates')) return;
+    const draft = rec.templateOverride || editableTemplateCopy(rec);
+    const now = new Date().toISOString();
+    let saved;
+    if (asNew || draft.builtin || !state.promptTemplates.get(draft.id)) {
+      const name = (prompt('Name for this prompt template:', draft.builtin ? 'My template' : draft.name + ' (copy)') || '').trim();
+      if (!name) return;
+      saved = { id: 'tpl_' + Date.now().toString(36) + studioUid(), name, version: 1, order: draft.order, disabled: draft.disabled, headings: draft.headings, text: draft.text, createdAt: now, createdBy: state.currentUser.id, updatedAt: now, updatedBy: state.currentUser.id, history: [] };
+    } else {
+      const existing = state.promptTemplates.get(draft.id);
+      // The previous version is kept so older prompt versions can still say what they used.
+      saved = { ...existing, order: draft.order, disabled: draft.disabled, headings: draft.headings, text: draft.text, version: existing.version + 1, updatedAt: now, updatedBy: state.currentUser.id,
+        history: [...(existing.history || []), { version: existing.version, order: existing.order, disabled: existing.disabled, headings: existing.headings, text: existing.text, savedAt: existing.updatedAt }].slice(-20) };
+    }
+    state.promptTemplates.set(saved.id, saved);
+    putToStore('prompt_templates', saved);
+    rec.templateId = saved.id;
+    delete rec.templateOverride;
+    scheduleStudioSave('shoot', rec);
+    renderStudioSide();
+    showToast(`Saved template "${saved.name}" v${saved.version}`, 'success');
+  }
+
+  // ---- Right column ------------------------------------------------------------------------------
   function renderStudioSide() {
     const rec = openStudioRecord();
     if (!rec) { studioSide.innerHTML = ''; return; }
     const kind = studioUI.open.kind;
+    const editable = !studioReadOnly(rec, kind);
+    const tab = kind === 'preset' ? 'prompt' : (studioUI.sideTab || 'prompt');
     const checklist = studioChecklist(rec);
     const missing = checklist.filter(i => !i.ok);
-    const built = rec.status === 'final' && rec.snapshot ? { text: rec.snapshot.prompt, refs: rec.snapshot.refs } : buildStudioPrompt(rec);
-    studioSide.innerHTML = `
+    const cur = currentPrompt(rec);
+    const plan = cur.plan;
+    const refs = rec.status === 'final' && rec.snapshot ? rec.snapshot.refs : plan.refs;
+    const tabs = kind === 'preset' ? '' : `<div class="studio-side-tabs">${[['prompt', 'Prompt'], ['structure', 'Structure'], ['versions', `Versions${(rec.promptVersions || []).length ? ' (' + rec.promptVersions.length + ')' : ''}`], ['template', 'Template']]
+      .map(([k, l]) => `<button type="button" class="studio-panel-tab${k === tab ? ' active' : ''}" data-side-tab="${k}">${l}</button>`).join('')}</div>`;
+
+    const checklistHtml = `
       <div class="studio-side-block">
         <div class="team-section-title">${missing.length ? `${missing.length} thing${missing.length > 1 ? 's' : ''} left` : 'Ready'}</div>
         <ul class="studio-checklist">${checklist.map(i => `<li class="${i.ok ? 'ok' : 'todo'}">${i.ok ? '✓' : '○'} ${escapeHtml(i.label)}</li>`).join('')}</ul>
         ${kind === 'preset' ? '<p class="studio-muted">Presets may be incomplete; setups started from them show what is missing.</p>' : ''}
-      </div>
-      <div class="studio-side-block">
-        <div class="team-section-title">Reference images in order (${built.refs.reduce((n, r) => n + r.urls.length, 0)})</div>
-        ${built.refs.length ? `<ol class="studio-refs">${built.refs.map(r => `<li><span class="studio-ref-range">${escapeHtml(r.range)}</span><span class="studio-badge ${r.saved ? 'saved' : 'new'}">${r.saved ? 'Saved' : 'New'}</span> ${escapeHtml(r.label)}<div class="studio-mini-images">${r.urls.map(u => `<img src="${escapeHtml(u)}" alt="" data-zoom-side="${escapeHtml(u)}" />`).join('')}</div></li>`).join('')}</ol>` : '<p class="studio-muted">No reference images yet.</p>'}
-      </div>
-      <div class="studio-side-block">
-        <div class="studio-row"><div class="team-section-title" style="flex:1;">Prepared prompt</div><button type="button" class="btn btn-secondary btn-sm" id="studio-copy-prompt">Copy</button></div>
-        <pre class="studio-prompt">${escapeHtml(built.text)}</pre>
-        <p class="studio-muted">No images are generated here. This prepares the inputs for the image tool.</p>
       </div>`;
-    document.getElementById('studio-copy-prompt').addEventListener('click', async () => {
-      await copyText(built.text);
-      showToast('Prompt copied', 'success');
-    });
+
+    let body = '';
+    if (tab === 'prompt') {
+      const conflicts = plan ? plan.conflicts : [];
+      const levelBadge = (inst) => `<span class="studio-badge level-${inst.level}">${escapeHtml(PRIORITY_LEVELS[inst.level])}</span>`;
+      const conflictHtml = conflicts.length ? `
+        <div class="studio-side-block">
+          <div class="team-section-title">${plan.unresolved.length ? `${plan.unresolved.length} conflict${plan.unresolved.length > 1 ? 's' : ''} to decide` : 'Conflicts decided'}</div>
+          ${conflicts.map(cf => `
+            <div class="studio-conflict${cf.winner ? '' : ' open'}">
+              <strong>${escapeHtml(cf.label)}</strong>
+              ${[cf.a, cf.b].map(inst => `
+                <div class="studio-conflict-side${cf.winner === inst.id ? ' winner' : ''}">
+                  <div class="studio-row">${levelBadge(inst)}<span class="studio-muted">${escapeHtml(inst.source)}</span></div>
+                  <div class="studio-asset-text">"${escapeHtml(inst.text.length > 160 ? inst.text.slice(0, 160) + '…' : inst.text)}"</div>
+                  ${cf.automatic ? (cf.winner === inst.id ? '<span class="studio-muted">Application rules always apply.</span>' : '')
+                    : editable ? `<button type="button" class="btn btn-sm ${cf.winner === inst.id ? 'btn-primary' : 'btn-secondary'}" data-conflict="${escapeHtml(cf.id)}" data-winner="${escapeHtml(inst.id)}">${cf.winner === inst.id ? 'Prioritized' : 'Prioritize this'}</button>` : ''}
+                </div>`).join('')}
+            </div>`).join('')}
+        </div>` : '';
+      const warningsHtml = plan && plan.warnings.length ? `<div class="studio-side-block"><div class="team-section-title">Check before using</div><ul class="studio-proposal-list warn">${plan.warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul></div>` : '';
+      const t = rec.status === 'final' && rec.snapshot ? (rec.snapshot.template || BUILTIN_TEMPLATE) : activeTemplate(rec);
+      const ai = rec.prompt && rec.prompt.ai;
+      body = `
+        ${conflictHtml}
+        ${warningsHtml}
+        <div class="studio-side-block">
+          <div class="studio-row"><div class="team-section-title" style="flex:1;">Prompt</div><button type="button" class="btn btn-secondary btn-sm" data-side-action="copy">Copy</button></div>
+          <div class="studio-muted">Template: ${escapeHtml(t.name)} v${t.version}${rec.templateOverride ? ' (edited, not saved)' : ''} · engine v${PROMPT_ENGINE_VERSION}${ai ? ` · reworded by ${escapeHtml(ai.model)}` : rec.prompt && rec.prompt.wording ? ` · wording variant ${rec.prompt.wording + 1}` : ''}${rec.prompt && rec.prompt.edited && !ai ? ' · edited by hand' : ''}</div>
+          ${cur.stale ? `<div class="studio-warn">The setup changed after this prompt was edited. <button type="button" class="identity-link" data-side-action="use-generated">Use the new generated prompt</button></div>` : ''}
+          ${kind === 'shoot' && editable
+            ? `<textarea class="form-textarea studio-prompt-editor" id="studio-prompt-text" rows="16" spellcheck="false">${escapeHtml(cur.text)}</textarea>`
+            : `<pre class="studio-prompt">${escapeHtml(cur.text)}</pre>`}
+          ${kind === 'shoot' && editable ? `<div class="studio-row">
+            <button type="button" class="btn btn-secondary btn-sm" data-side-action="reword" title="${aiReady() ? 'Rewords with AI; locked facts are checked and kept' : 'Cycles built-in wording; facts unchanged'}">Regenerate wording</button>
+            ${rec.prompt && rec.prompt.edited ? '<button type="button" class="btn btn-secondary btn-sm" data-side-action="use-generated">Reset to generated</button>' : ''}
+            <button type="button" class="btn btn-secondary btn-sm" data-side-action="save-version">Save version</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-side-action="save-template">Save as template</button>
+          </div>` : ''}
+          <p class="studio-muted">No images are generated here. This prepares the prompt and the reference images for the image tool.</p>
+        </div>
+        <div class="studio-side-block">
+          <div class="team-section-title">Reference images in order (${refs.reduce((n, r) => n + r.urls.length, 0)})</div>
+          ${refs.length ? `<ol class="studio-refs">${refs.map(r => `<li><span class="studio-ref-range">${escapeHtml(r.range)}</span><span class="studio-badge ${r.saved ? 'saved' : 'new'}">${r.saved ? 'Saved' : 'New'}</span> ${escapeHtml(r.label)}${r.role ? ` <span class="studio-muted">(${escapeHtml(r.role)})</span>` : ''}<div class="studio-mini-images">${r.urls.map(u => `<img src="${escapeHtml(u)}" alt="" data-zoom-side="${escapeHtml(u)}" />`).join('')}</div></li>`).join('')}</ol>` : '<p class="studio-muted">No reference images yet.</p>'}
+        </div>`;
+    } else if (tab === 'structure') {
+      const source = rec.status === 'final' && rec.snapshot ? rec.snapshot : null;
+      const cfg = source ? source.config : normalizeStudioConfig(rec.config);
+      const t = source ? (source.template || BUILTIN_TEMPLATE) : activeTemplate(rec);
+      const structure = {
+        setupId: rec.id, status: rec.status || 'draft',
+        template: { id: t.id || null, name: t.name, version: t.version, order: t.order, disabled: t.disabled || [] },
+        engineVersion: source ? (source.engineVersion || 1) : PROMPT_ENGINE_VERSION,
+        assets: source ? (source.assetVersions || Object.fromEntries(Object.values(source.assets || {}).map(a => [a.id, { name: a.name, type: a.type, updatedAt: a.updatedAt || null }]))) : plan.assetVersions,
+        conflicts: (source ? (source.conflicts || []) : plan.conflicts).map(cf => ({ id: cf.id, rule: cf.label || cf.rule, winner: cf.winner || null })),
+        promptSource: source ? (source.promptSource || null) : (rec.prompt && rec.prompt.ai ? { provider: rec.prompt.ai.provider, model: rec.prompt.ai.model } : rec.prompt && rec.prompt.edited ? 'edited by hand' : 'engine'),
+        config: cfg
+      };
+      body = `<div class="studio-side-block"><div class="studio-row"><div class="team-section-title" style="flex:1;">Structured configuration</div><button type="button" class="btn btn-secondary btn-sm" data-side-action="copy-structure">Copy JSON</button></div>
+        <pre class="studio-prompt" id="studio-structure">${escapeHtml(JSON.stringify(structure, null, 2))}</pre></div>`;
+    } else if (tab === 'versions') {
+      const versions = (rec.promptVersions || []).slice().reverse();
+      const compare = studioUI.compare && studioUI.compare.recId === rec.id ? studioUI.compare : null;
+      let compareHtml = '';
+      if (compare) {
+        const v = (rec.promptVersions || []).find(x => x.n === compare.n);
+        if (v) {
+          const diff = diffLines(v.text, cur.text);
+          compareHtml = `<div class="studio-side-block"><div class="studio-row"><div class="team-section-title" style="flex:1;">v${v.n} → current</div><button type="button" class="btn btn-secondary btn-sm" data-side-action="close-compare">Close</button></div>
+            <pre class="studio-prompt studio-diff">${diff.map(d => `<span class="diff-${d.t === '+' ? 'add' : d.t === '-' ? 'del' : 'same'}">${d.t} ${escapeHtml(d.s)}</span>`).join('\n')}</pre></div>`;
+        }
+      }
+      body = compareHtml + `<div class="studio-side-block"><div class="team-section-title">Prompt versions</div>
+        ${versions.length ? `<ul class="studio-versions">${versions.map(v => `<li>
+          <div class="studio-row"><strong>v${v.n}</strong><span class="studio-muted">${escapeHtml(timeAgo(v.at))} · ${escapeHtml(memberName(v.by))}</span></div>
+          <div class="studio-muted">${escapeHtml(v.source)} · template ${escapeHtml(v.templateName || '')} v${v.templateVersion}${v.edited ? ' (edited)' : ''}${v.model ? ' · ' + escapeHtml(v.model) : ''} · ${Object.keys(v.assetVersions || {}).length} assets</div>
+          <div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-side-action="compare" data-n="${v.n}">Compare with current</button>
+          ${editable ? `<button type="button" class="btn btn-secondary btn-sm" data-side-action="restore" data-n="${v.n}">Restore</button>` : ''}</div></li>`).join('')}</ul>`
+          : '<p class="studio-muted">No saved versions yet. "Save version", rewording and finalizing add one.</p>'}</div>`;
+    } else if (tab === 'template') {
+      const t = rec.templateOverride || editableTemplateCopy(rec);
+      const dis = editable ? '' : ' disabled';
+      const order = [...t.order];
+      PROMPT_SECTIONS.forEach(s => { if (!order.includes(s.key)) order.push(s.key); });
+      body = `<div class="studio-side-block">
+        <label class="studio-field"><span>Template</span><select class="form-select" data-side-input="template-select"${dis}>${templatesList().map(x => `<option value="${escapeHtml(x.id)}"${x.id === (rec.templateId || 'tpl_builtin') ? ' selected' : ''}>${escapeHtml(x.name)} v${x.version}</option>`).join('')}</select></label>
+        ${rec.templateOverride ? '<div class="studio-warn">Edited for this setup and not saved as a template yet.</div>' : ''}
+        <div class="team-section-title">Section order</div>
+        <ol class="studio-template-order">${order.map((k, i) => `<li><label><input type="checkbox" data-side-input="tpl-enable" data-key="${k}"${(t.disabled || []).includes(k) ? '' : ' checked'}${dis} /> ${escapeHtml(PROMPT_SECTIONS.find(s => s.key === k).title)}</label>
+          ${editable ? `<span><button type="button" class="icon-btn" data-side-action="tpl-move" data-key="${k}" data-dir="-1"${i === 0 ? ' disabled' : ''} aria-label="Move up">↑</button><button type="button" class="icon-btn" data-side-action="tpl-move" data-key="${k}" data-dir="1"${i === order.length - 1 ? ' disabled' : ''} aria-label="Move down">↓</button></span>` : ''}</li>`).join('')}</ol>
+        <label class="studio-field"><span><input type="checkbox" data-side-input="tpl-headings"${t.headings !== false ? ' checked' : ''}${dis} /> Show section headings in the prompt</span></label>
+        <label class="studio-field"><span>Task and output requirements</span><textarea class="form-textarea" rows="2" data-side-input="tpl-text" data-key="task"${dis}>${escapeHtml(t.text.task || '')}</textarea></label>
+        <label class="studio-field"><span>Realism requirements</span><textarea class="form-textarea" rows="2" data-side-input="tpl-text" data-key="realism"${dis}>${escapeHtml(t.text.realism || '')}</textarea></label>
+        <label class="studio-field"><span>Negative constraints</span><textarea class="form-textarea" rows="3" data-side-input="tpl-text" data-key="negative"${dis}>${escapeHtml(t.text.negative || '')}</textarea></label>
+        <p class="studio-muted">Application rules (adult model, one image, no added text) are always included and can't be removed.</p>
+        ${editable ? `<div class="studio-row">
+          ${!t.builtin && state.promptTemplates.get(t.id) && rec.templateOverride ? `<button type="button" class="btn btn-primary btn-sm" data-side-action="tpl-save">Save as v${state.promptTemplates.get(t.id).version + 1}</button>` : ''}
+          <button type="button" class="btn btn-secondary btn-sm" data-side-action="tpl-save-new">Save as new template</button>
+          ${rec.templateOverride ? '<button type="button" class="btn btn-secondary btn-sm" data-side-action="tpl-discard">Discard changes</button>' : ''}
+        </div>` : ''}
+      </div>`;
+    }
+
+    studioSide.innerHTML = tabs + checklistHtml + body;
     studioSide.querySelectorAll('[data-zoom-side]').forEach(img => img.addEventListener('click', () => openImageZoomModal(img.dataset.zoomSide, '')));
   }
+
+  function studioSideRecord() {
+    const rec = openStudioRecord();
+    const kind = studioUI.open && studioUI.open.kind;
+    return rec && kind ? { rec, kind, editable: !studioReadOnly(rec, kind) } : null;
+  }
+
+  studioSide.addEventListener('click', async (e) => {
+    const ctx = studioSideRecord();
+    if (!ctx) return;
+    const { rec, editable } = ctx;
+    const tabBtn = e.target.closest('[data-side-tab]');
+    if (tabBtn) { studioUI.sideTab = tabBtn.dataset.sideTab; renderStudioSide(); return; }
+    const conflictBtn = e.target.closest('[data-conflict]');
+    if (conflictBtn && editable) {
+      studioUpdate(cfg => { cfg.resolutions = { ...(cfg.resolutions || {}), [conflictBtn.dataset.conflict]: conflictBtn.dataset.winner }; });
+      return;
+    }
+    const el = e.target.closest('[data-side-action]');
+    if (!el || el.disabled) return;
+    const action = el.dataset.sideAction;
+    const cur = currentPrompt(rec);
+    switch (action) {
+      case 'copy': await copyText(cur.text); showToast('Prompt copied', 'success'); return;
+      case 'copy-structure': await copyText(document.getElementById('studio-structure').textContent); showToast('Configuration copied', 'success'); return;
+      case 'compare': studioUI.compare = { recId: rec.id, n: Number(el.dataset.n) }; renderStudioSide(); return;
+      case 'close-compare': studioUI.compare = null; renderStudioSide(); return;
+    }
+    if (!editable || !ensureCanEdit('shoots')) return;
+    switch (action) {
+      case 'use-generated':
+        rec.prompt = { edited: false, wording: (rec.prompt && rec.prompt.wording) || 0, ai: null };
+        scheduleStudioSave('shoot', rec);
+        renderStudioSide();
+        break;
+      case 'reword': regenerateWording(rec); break;
+      case 'save-version':
+        pushPromptVersion(rec, cur.text, rec.prompt && rec.prompt.edited ? 'saved (edited)' : 'saved');
+        scheduleStudioSave('shoot', rec);
+        renderStudioSide();
+        showToast(`Saved prompt version v${rec.promptVersions[rec.promptVersions.length - 1].n}`, 'success');
+        break;
+      case 'save-template': studioUI.sideTab = 'template'; renderStudioSide(); break;
+      case 'restore': {
+        const v = (rec.promptVersions || []).find(x => x.n === Number(el.dataset.n));
+        if (!v || !confirm(`Restore prompt v${v.n}? Your current prompt is saved as a version first.`)) return;
+        pushPromptVersion(rec, cur.text, 'before restore');
+        rec.prompt = { text: v.text, edited: true, engineText: cur.engineText, wording: (rec.prompt && rec.prompt.wording) || 0, ai: null };
+        pushPromptVersion(rec, v.text, `restored v${v.n}`);
+        scheduleStudioSave('shoot', rec);
+        studioUI.sideTab = 'prompt';
+        renderStudioSide();
+        showToast(`Restored v${v.n}`, 'success');
+        break;
+      }
+      case 'tpl-move': {
+        const t = rec.templateOverride || editableTemplateCopy(rec);
+        const order = [...t.order];
+        PROMPT_SECTIONS.forEach(s => { if (!order.includes(s.key)) order.push(s.key); });
+        const i = order.indexOf(el.dataset.key), j = i + Number(el.dataset.dir);
+        if (j < 0 || j >= order.length) return;
+        [order[i], order[j]] = [order[j], order[i]];
+        rec.templateOverride = { ...t, order };
+        scheduleStudioSave('shoot', rec);
+        renderStudioSide();
+        break;
+      }
+      case 'tpl-save': saveTemplate(rec, false); break;
+      case 'tpl-save-new': saveTemplate(rec, true); break;
+      case 'tpl-discard': delete rec.templateOverride; scheduleStudioSave('shoot', rec); renderStudioSide(); break;
+    }
+  });
+
+  studioSide.addEventListener('input', (e) => {
+    const ctx = studioSideRecord();
+    if (!ctx || !ctx.editable) return;
+    const { rec } = ctx;
+    if (e.target.id === 'studio-prompt-text') {
+      if (!canCurrentUserWrite('shoots')) return;
+      const cur = currentPrompt(rec);
+      rec.prompt = { ...(rec.prompt || {}), text: e.target.value, edited: true, engineText: (rec.prompt && rec.prompt.edited && rec.prompt.engineText) || cur.engineText, ai: rec.prompt && rec.prompt.ai };
+      scheduleStudioSave('shoot', rec);
+      return;
+    }
+    if (e.target.dataset.sideInput === 'tpl-text') {
+      const t = rec.templateOverride || editableTemplateCopy(rec);
+      rec.templateOverride = { ...t, text: { ...t.text, [e.target.dataset.key]: e.target.value } };
+      scheduleStudioSave('shoot', rec);
+    }
+  });
+
+  studioSide.addEventListener('change', (e) => {
+    const ctx = studioSideRecord();
+    if (!ctx || !ctx.editable) return;
+    const { rec } = ctx;
+    const input = e.target.dataset.sideInput;
+    if (!input || !ensureCanEdit('shoots')) return;
+    if (input === 'template-select') {
+      if (rec.templateOverride && !confirm('Switching template discards the unsaved template changes. Continue?')) { renderStudioSide(); return; }
+      rec.templateId = e.target.value;
+      delete rec.templateOverride;
+    } else if (input === 'tpl-enable') {
+      const t = rec.templateOverride || editableTemplateCopy(rec);
+      const disabled = new Set(t.disabled || []);
+      if (e.target.checked) disabled.delete(e.target.dataset.key); else disabled.add(e.target.dataset.key);
+      rec.templateOverride = { ...t, disabled: Array.from(disabled) };
+    } else if (input === 'tpl-headings') {
+      const t = rec.templateOverride || editableTemplateCopy(rec);
+      rec.templateOverride = { ...t, headings: e.target.checked };
+    } else if (input === 'tpl-text') {
+      return renderStudioSide();
+    }
+    scheduleStudioSave('shoot', rec);
+    renderStudioSide();
+  });
 
   // ---- Records -----------------------------------------------------------------------------------
   function newStudioRecordBase() {
@@ -10002,7 +10870,8 @@
 
   function duplicateSetup(rec) {
     const cfg = rec.status === 'final' && rec.snapshot ? rec.snapshot.config : rec.config;
-    const copy = createSetup({ name: (rec.name || 'Setup') + ' (copy)', config: normalizeStudioConfig(cfg), cardId: rec.cardId || '', sourceSetupId: rec.id, presetId: rec.presetId || '' });
+    const templateId = rec.status === 'final' && rec.snapshot && rec.snapshot.template ? (rec.snapshot.template.builtin ? 'tpl_builtin' : rec.snapshot.template.id) : rec.templateId;
+    const copy = createSetup({ name: (rec.name || 'Setup') + ' (copy)', config: normalizeStudioConfig(cfg), cardId: rec.cardId || '', sourceSetupId: rec.id, presetId: rec.presetId || '', templateId: templateId || 'tpl_builtin', ...(rec.templateOverride ? { templateOverride: JSON.parse(JSON.stringify(rec.templateOverride)) } : {}) });
     if (copy) showToast('Duplicated as a new draft', 'success');
   }
 
@@ -10024,14 +10893,22 @@
       return;
     }
     if (!confirm('Finalize this setup? It becomes a read-only snapshot of the assets and prompt as they are now. You can duplicate it later to make changes.')) return;
-    const built = buildStudioPrompt(rec);
+    const cur = currentPrompt(rec);
+    const plan = cur.plan;
     const assets = {};
     studioAssetIds(rec.config).forEach(id => { const a = state.libraries.get(id); if (a) assets[id] = JSON.parse(JSON.stringify(a)); });
     const now = new Date().toISOString();
+    const template = JSON.parse(JSON.stringify(activeTemplate(rec)));
+    pushPromptVersion(rec, cur.text, 'finalized', rec.prompt && rec.prompt.ai ? rec.prompt.ai : {});
     rec.status = 'final';
     rec.finalizedAt = now;
     rec.finalizedBy = state.currentUser.id;
-    rec.snapshot = { at: now, config: normalizeStudioConfig(rec.config), assets, prompt: built.text, refs: built.refs };
+    rec.snapshot = {
+      at: now, config: normalizeStudioConfig(rec.config), assets, prompt: cur.text, refs: plan.refs,
+      template, engineVersion: PROMPT_ENGINE_VERSION, assetVersions: plan.assetVersions,
+      conflicts: plan.conflicts.map(cf => ({ id: cf.id, label: cf.label, winner: cf.winner })),
+      promptSource: rec.prompt && rec.prompt.ai ? { provider: rec.prompt.ai.provider, model: rec.prompt.ai.model } : rec.prompt && rec.prompt.edited ? 'edited by hand' : 'engine'
+    };
     rec.updatedAt = now;
     rec.updatedBy = state.currentUser.id;
     clearTimeout(studioSaveTimers.get('shoot:' + rec.id));
@@ -10109,7 +10986,34 @@
     const rec = openStudioRecord();
     if (action === 'zoom') { openImageZoomModal(el.dataset.url, ''); return; }
     if (action === 'new-setup') { createSetup({}); return; }
+    if (action === 'ai-enable') { setAiEnabled(true); return; }
+    if (action === 'ai-disable') { setAiEnabled(false); return; }
     if (!rec) return;
+    const proposal = studioUI.proposal && studioUI.proposal.recId === rec.id ? studioUI.proposal : null;
+    switch (action) {
+      case 'assist-send': sendAssistRequest(rec); return;
+      case 'assist-pick':
+        if (!proposal) return;
+        proposal.picks[el.dataset.index] = el.dataset.asset;
+        renderStudioEditor();
+        return;
+      case 'assist-preview':
+        if (proposal) { proposal.preview = !proposal.preview; renderStudioEditor(); }
+        return;
+      case 'assist-reject':
+        studioUI.proposal = null;
+        renderStudioEditor();
+        return;
+      case 'assist-accept': {
+        if (!proposal) return;
+        const changes = proposalChanges(proposal);
+        studioUI.proposal = null;
+        studioUI.assistText = '';
+        studioUpdate(cfg => { changes.forEach(ch => applyAssistChange(cfg, ch)); });
+        showToast(`Applied ${changes.length} change${changes.length === 1 ? '' : 's'}`, 'success');
+        return;
+      }
+    }
     switch (action) {
       case 'mode': studioUpdate(cfg => { pathGet(cfg, path).mode = el.dataset.value; }); break;
       case 'toggle': studioUpdate(cfg => { pathGet(cfg, path).enabled = el.dataset.value === 'true'; }); break;
@@ -10197,7 +11101,10 @@
     }
     studioUpdate(cfg => { pathSet(cfg, path, value); }, el.tagName === 'SELECT');
   }
-  studioMain.addEventListener('input', (e) => { if (e.target.tagName !== 'SELECT') onStudioInput(e); });
+  studioMain.addEventListener('input', (e) => {
+    if (e.target.id === 'studio-assist-input') { studioUI.assistText = e.target.value; return; }
+    if (e.target.tagName !== 'SELECT') onStudioInput(e);
+  });
   studioMain.addEventListener('change', (e) => { if (e.target.tagName === 'SELECT' || e.target.dataset.input === '__card') onStudioInput(e); });
 
   studioList.addEventListener('click', (e) => {
@@ -10252,8 +11159,9 @@
   function onRemoteStudioChange() {
     if (state.currentView !== 'studio') return;
     renderStudioList();
-    if (studioTypingInside(studioMain)) renderStudioSide();
-    else renderStudioEditor();
+    const typingSide = studioTypingInside(studioSide);
+    if (studioTypingInside(studioMain)) { if (!typingSide) renderStudioSide(); }
+    else if (!typingSide) renderStudioEditor();
   }
 
   initDatabase().then(() => {
