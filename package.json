@@ -2,9 +2,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "set-owner-pin": "node server.js --set-owner-pin"
-  },
-  "dependencies": {
-    "xlsx": "^0.18.5"
+    "set-owner-pin": "node server.js --set-owner-pin",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js"
   }
 }

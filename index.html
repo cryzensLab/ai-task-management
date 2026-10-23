@@ -2038,6 +2038,40 @@
     .studio-template-order li { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .studio-template-order .icon-btn { width: 22px; height: 22px; }
 
+    /* Insights, suggestions and bulk tools */
+    .insight-toolbar { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
+    .insight-toolbar .studio-field { min-width: 200px; }
+    .insight-toolbar p { flex: 1; min-width: 240px; margin: 0; }
+    .insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .insight-block { border: 1px solid var(--border-subtle); background: var(--bg-surface); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .insight-block h3 { font-size: 0.86rem; font-weight: 700; }
+    .insight-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; }
+    .insight-list li { display: list-item; }
+    .insight-list li > * { vertical-align: middle; }
+    .insight-asset { display: inline-flex; align-items: center; gap: 6px; border: none; background: transparent; padding: 0; font: inherit; color: var(--text-main); cursor: pointer; text-align: left; max-width: 100%; }
+    .insight-asset:hover span, .insight-asset:focus-visible span { text-decoration: underline; }
+    .insight-asset img, .insight-noimg { width: 24px; height: 30px; object-fit: cover; object-position: top; background: var(--bg-subtle); flex-shrink: 0; }
+    .insight-count { margin-left: 6px; font-size: 0.72rem; color: var(--text-subtle); font-family: var(--font-mono); }
+    .insight-pair { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .studio-suggest { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+    .studio-suggest-chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 3px; border: 1px dashed var(--primary);
+      background: var(--bg-surface); color: var(--text-main); font: inherit; font-size: 0.76rem; cursor: pointer;
+    }
+    .studio-suggest-chip:hover, .studio-suggest-chip:focus-visible { background: var(--primary-light); }
+    .studio-suggest-chip img { width: 22px; height: 28px; object-fit: cover; object-position: top; }
+    .lib-bulk-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 8px 10px; margin-bottom: 12px; border: 1px solid var(--primary); background: var(--primary-light); font-size: 0.8rem; }
+    .lib-select-box {
+      position: absolute; top: 6px; left: 6px; z-index: 1; width: 22px; height: 22px; border: 1.5px solid var(--border-strong);
+      background: var(--bg-surface); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary);
+    }
+    .lib-list-row .lib-select-box { position: static; }
+    .lib-item.selected, .lib-list-row.selected { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+    #lib-select-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .card-studio-reuse { display: flex; flex-direction: column; gap: 6px; }
+    .card-studio-reuse-item { display: flex; gap: 8px; align-items: center; justify-content: space-between; border: 1px solid var(--border-subtle); padding: 6px 8px; font-size: 0.8rem; }
+    .card-studio-reuse-item > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
     /* Board integration */
     .card-studio-badge {
       font-size: 0.62rem; font-weight: 700; padding: 1px 6px; border-radius: 2px;
@@ -2708,6 +2742,10 @@
           <div class="lib-sidebar-footer">
             <button class="btn btn-secondary btn-sm" id="lib-add-category-btn" style="display:none;" title="Add a new asset category (admins and owner only)">+ Add category</button>
             <button class="btn btn-secondary btn-sm" id="lib-seed-btn" title="Create entries for models, paired products and repeated notes found in the tracker">Fill from tracker</button>
+            <button class="btn btn-secondary btn-sm" id="lib-import-btn" title="Add many assets at once from a CSV file">Import CSV…</button>
+            <button class="btn btn-secondary btn-sm" id="lib-template-btn" title="Download an example CSV with the expected columns">CSV template</button>
+            <button class="btn btn-secondary btn-sm" id="lib-export-btn" title="Download all Asset Library and Prompt Studio metadata as JSON">Export metadata</button>
+            <input type="file" id="lib-import-input" accept=".csv,text/csv" style="display:none;" />
             <p>Shared with the whole team. Jobs use these assets by ID, and their prompt text feeds the prompt builder.</p>
           </div>
         </aside>
@@ -2718,6 +2756,7 @@
               <p id="lib-desc"></p>
             </div>
             <input type="search" class="form-input lib-search" id="lib-search" placeholder="Search name, alias, SKU or tag…" aria-label="Search assets" />
+            <button type="button" class="btn btn-secondary btn-sm" id="lib-select-btn" title="Select several assets to tag, archive or export">Select</button>
             <div class="lib-layout-toggle" role="group" aria-label="Layout">
               <button type="button" class="lib-layout-btn" data-lib-layout="grid" title="Grid view" aria-label="Grid view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
               <button type="button" class="lib-layout-btn" data-lib-layout="list" title="List view" aria-label="List view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
@@ -3116,6 +3155,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-danger" id="lib-editor-delete" title="Delete for good (admins and owner only)">Delete</button>
+      <button class="btn btn-secondary" id="lib-editor-preferred" title="Preferred assets are suggested first in Prompt Studio">Mark preferred</button>
       <button class="btn btn-secondary" id="lib-editor-archive">Archive</button>
       <button class="btn btn-secondary" id="lib-editor-duplicate" style="margin-right:auto;">Duplicate</button>
       <button class="btn btn-secondary" id="lib-editor-cancel">Cancel</button>
@@ -6765,7 +6805,7 @@
 
   // Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
-    if (e.target.matches('input, textarea')) return;
+    if (!(e.target instanceof Element) || e.target.matches('input, textarea, select, [contenteditable]')) return;
 
     if (e.key === 'v' || e.key === 'V') setWbTool('select');
     else if (e.key === 'r' || e.key === 'R') setWbTool('rect');
@@ -7981,7 +8021,9 @@
     all: { label: 'All assets', desc: 'Everything in the library. Search by name, alias, SKU or tag.' },
     favourites: { label: 'Favourites', desc: 'Assets you starred. Favourites are personal to you.' },
     recent: { label: 'Recently used', desc: 'Assets most recently picked in a job.' },
-    archived: { label: 'Archived', desc: 'Archived assets are hidden from job pickers. Restore them at any time.' }
+    archived: { label: 'Archived', desc: 'Archived assets are hidden from job pickers. Restore them at any time.' },
+    attention: { label: 'Needs attention', desc: 'Assets with no reference image, no prompt text, or a likely duplicate. Fixing these makes prompts more reliable.' },
+    insights: { label: 'Insights', desc: 'What the team actually reuses, from Prompt Studio setups and QC history.' }
   };
 
   const libUI = {
@@ -8106,22 +8148,61 @@
 
   const normText = (t) => String(t || '').trim().toLowerCase().replace(/\s+/g, ' ');
 
+  // ---- Search ---------------------------------------------------------------
+  // Matches names, aliases, SKUs and tags, forgiving common variations:
+  // word forms ("striped" finds "Stripe"), word order, prefixes ("chel" finds
+  // "Chelsea") and one-letter typos in longer words ("wayfarer" / "wayfrer").
+  // Each asset's search words are cached until the asset changes.
+  const searchStem = (w) => w.replace(/(ing|ed|es|s)$/, '').replace(/e$/, '');
+  const searchWords = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
+  const searchIndex = new Map(); // assetId -> { stamp, text, stems }
+
+  function searchEntry(item) {
+    const stamp = `${item.updatedAt || ''}|${item.name}|${item.code}|${(item.tags || []).join(',')}|${(item.aliases || []).join(',')}`;
+    const cached = searchIndex.get(item.id);
+    if (cached && cached.stamp === stamp) return cached;
+    const fields = [item.name, item.code, ...(item.tags || []), ...(item.aliases || [])].filter(Boolean);
+    const entry = { stamp, text: fields.map(f => searchWords(f).join(' ')).join(' | '), stems: Array.from(new Set(fields.flatMap(f => searchWords(f).map(searchStem)))) };
+    searchIndex.set(item.id, entry);
+    return entry;
+  }
+
+  // True when a and b differ by at most one inserted, removed, changed or swapped letter.
+  function withinOneEdit(a, b) {
+    if (a === b) return true;
+    if (Math.abs(a.length - b.length) > 1) return false;
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    if (a.length === b.length) {
+      return a.slice(i + 1) === b.slice(i + 1) || (a[i] === b[i + 1] && a[i + 1] === b[i] && a.slice(i + 2) === b.slice(i + 2));
+    }
+    const [longer, shorter] = a.length > b.length ? [a, b] : [b, a];
+    return longer.slice(i + 1) === shorter.slice(i);
+  }
+
   function libMatchesSearch(item, q) {
     if (!q) return true;
-    return [item.name, item.code, ...(item.tags || []), ...(item.aliases || [])].some(v => v && normText(v).includes(q));
+    const entry = searchEntry(item);
+    const phrase = searchWords(q).join(' ');
+    if (!phrase || entry.text.includes(phrase)) return true;
+    return searchWords(q).map(searchStem).every(t => entry.stems.some(w =>
+      w === t || (t.length >= 3 && w.startsWith(t)) || (t.length >= 5 && w.length >= 5 && withinOneEdit(t, w))));
   }
 
   // Likely duplicates of `item`: same SKU/code, same name or alias in its category, or a shared image.
   function findLikelyDuplicates(item) {
+    // Names are compared by word stems, so "Pant" / "Pants" or "Striped" / "Stripe" count as the same.
+    const dupKey = (t) => searchWords(t).map(searchStem).join(' ');
+    const normText = dupKey;
     const name = normText(item.name);
-    const code = normText(item.code);
+    const code = String(item.code || '').trim().toLowerCase();
     const aliases = (item.aliases || []).map(normText).filter(Boolean);
     const urls = new Set((item.images || []).map(img => img.url));
     const out = [];
     state.libraries.forEach(other => {
       if (other.id === item.id || other.archived) return;
       let reason = '';
-      if (code && normText(other.code) === code) reason = 'same SKU / code';
+      if (code && String(other.code || '').trim().toLowerCase() === code) reason = 'same SKU / code';
       else if (other.type === item.type) {
         const otherNames = [normText(other.name), ...(other.aliases || []).map(normText)].filter(Boolean);
         if (name && otherNames.includes(name)) reason = normText(other.name) === name ? 'same name' : 'matches one of its aliases';
@@ -8162,6 +8243,8 @@
     if (view === 'favourites') return all.filter(it => !it.archived && isFavourite(it));
     if (view === 'recent') return all.filter(it => !it.archived && it.lastUsedAt);
     if (view === 'archived') return all.filter(it => it.archived);
+    if (view === 'attention') return all.filter(it => !it.archived && assetIssues(it).length);
+    if (view === 'insights') return [];
     return libItemsOfType(view);
   }
 
@@ -8208,8 +8291,12 @@
     libTitle.textContent = def.label;
     libDesc.textContent = def.desc;
     libAddBtn.textContent = '+ Add ' + (isCategory ? def.singular : 'asset');
-    libAddBtn.style.display = view === 'archived' ? 'none' : '';
+    libAddBtn.style.display = view === 'archived' || view === 'insights' ? 'none' : '';
     libLayoutBtns.forEach(b => b.classList.toggle('active', b.dataset.libLayout === libUI.layout));
+    libSelectBtn.style.display = view === 'insights' ? 'none' : '';
+    libSearchInput.style.display = view === 'insights' ? 'none' : '';
+    document.querySelector('.lib-layout-toggle').style.display = view === 'insights' ? 'none' : '';
+    libSelectBtn.classList.toggle('active', Boolean(libUI.selecting));
 
     if (!dbInstance) {
       libBody.innerHTML = libraryLoadFailed
@@ -8220,8 +8307,11 @@
       return;
     }
 
+    if (view === 'insights') { renderInsights(); return; }
+
     const q = normText(libUI.search);
     const items = libSortForView(view, libItemsForView(view).filter(it => libMatchesSearch(it, q)));
+    if (!libUI.selected) libUI.selected = new Set();
 
     if (items.length === 0) {
       let msg;
@@ -8229,6 +8319,7 @@
       else if (view === 'favourites') msg = '<strong>No favourites yet</strong>Click the star on any asset to keep it here.';
       else if (view === 'recent') msg = '<strong>Nothing used yet</strong>Assets appear here once someone picks them in a job.';
       else if (view === 'archived') msg = '<strong>Nothing archived</strong>Archived assets are kept here and can be restored.';
+      else if (view === 'attention') msg = '<strong>All good</strong>Every asset has a reference image and prompt text, and no likely duplicates were found.';
       else if (view === 'all') msg = '<strong>The library is empty</strong>Click "+ Add asset" to add your first one, or use "Fill from tracker" to start from the tracker.';
       else msg = `<strong>No ${escapeHtml(def.label.toLowerCase())} yet</strong>Add your first ${escapeHtml(def.singular)} with the button above.`;
       libBody.innerHTML = `<div class="lib-empty">${msg}</div>`;
@@ -8236,6 +8327,13 @@
     }
 
     libBody.innerHTML = '';
+    if (libUI.selecting) {
+      const bar = document.createElement('div');
+      bar.innerHTML = bulkBarHtml();
+      const shownIds = items.map(it => it.id);
+      bar.querySelectorAll('[data-bulk]').forEach(b => b.addEventListener('click', () => handleBulk(b.dataset.bulk, shownIds)));
+      libBody.appendChild(bar.firstElementChild);
+    }
     if (libUI.layout === 'list') {
       const list = document.createElement('div');
       list.className = 'lib-list';
@@ -8284,12 +8382,27 @@
   }
 
   function wireLibraryItemElement(el, item) {
+    const activate = () => {
+      if (libUI.selecting) {
+        if (libUI.selected.has(item.id)) libUI.selected.delete(item.id); else libUI.selected.add(item.id);
+        renderLibrariesView();
+        const again = libBody.querySelector(`[data-asset-id="${item.id}"]`);
+        if (again) again.focus();
+        return;
+      }
+      openLibraryEditor(item);
+    };
+    if (libUI.selecting) {
+      el.classList.toggle('selected', libUI.selected.has(item.id));
+      el.setAttribute('aria-pressed', String(libUI.selected.has(item.id)));
+      el.insertAdjacentHTML('afterbegin', `<span class="lib-select-box" aria-hidden="true">${libUI.selected.has(item.id) ? '✓' : ''}</span>`);
+    }
     el.addEventListener('click', (e) => {
       if (e.target.closest('[data-fav]')) return;
-      openLibraryEditor(item);
+      activate();
     });
     el.addEventListener('keydown', (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') && e.target === el) { e.preventDefault(); openLibraryEditor(item); }
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === el) { e.preventDefault(); activate(); }
     });
     el.querySelector('[data-fav]').addEventListener('click', (e) => { e.stopPropagation(); toggleFavourite(item); });
   }
@@ -8305,7 +8418,7 @@
     const initials = (item.name || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const metaParts = [escapeHtml(usageText(item))];
     if (item.placement) metaParts.push(escapeHtml(item.placement));
-    if (!item.snippet) metaParts.push(`<span class="lib-item-missing">No prompt text yet</span>`);
+    assetIssues(item).forEach(issue => metaParts.push(`<span class="lib-item-missing">${escapeHtml(issue)}</span>`));
 
     el.innerHTML = `
       ${favButtonHtml(item)}
@@ -8320,6 +8433,7 @@
         <div class="lib-item-top">
           ${item.code ? `<span class="lib-code">${escapeHtml(item.code)}</span>` : ''}
           <span class="lib-item-name" title="${escapeHtml(item.name || '')}">${escapeHtml(item.name || 'Untitled')}</span>
+          ${item.preferred ? '<span class="studio-badge saved" title="Preferred by the team">Preferred</span>' : ''}
         </div>
         ${item.snippet ? `<div class="lib-item-snippet">${escapeHtml(item.snippet)}</div>` : ''}
         ${tagsHtml(item, 3)}
@@ -8401,6 +8515,10 @@
     libEditorDelete.style.display = !isNew && item.archived && isAdminRole(state.currentUser.role) ? '' : 'none';
     libEditorArchive.style.display = isNew ? 'none' : '';
     libEditorArchive.textContent = item.archived ? 'Restore' : 'Archive';
+    const prefBtn = document.getElementById('lib-editor-preferred');
+    prefBtn.style.display = isNew || item.archived || !canEditAsset(item) ? 'none' : '';
+    prefBtn.textContent = item.preferred ? 'Preferred ✓' : 'Mark preferred';
+    prefBtn.setAttribute('aria-pressed', String(Boolean(item.preferred)));
     libEditorDuplicate.style.display = isNew || !canEditAsset({ _isNew: true }) ? 'none' : '';
     renderLibraryEditorImages();
     renderLibraryEditorHistory();
@@ -8776,12 +8894,39 @@
   libAddBtn.addEventListener('click', () => openLibraryEditor(null));
   libSeedBtn.addEventListener('click', fillLibrariesFromTracker);
   libAddCategoryBtn.addEventListener('click', addAssetCategory);
+  const libSelectBtn = document.getElementById('lib-select-btn');
+  libSelectBtn.addEventListener('click', () => { libUI.selecting = !libUI.selecting; libUI.selected = new Set(); renderLibrariesView(); });
+  document.getElementById('lib-export-btn').addEventListener('click', () => exportLibraryMetadata());
+  document.getElementById('lib-template-btn').addEventListener('click', () => {
+    const url = URL.createObjectURL(new Blob([CSV_TEMPLATE], { type: 'text/csv' }));
+    const a = document.createElement('a'); a.href = url; a.download = 'listingflow-assets-template.csv'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  const libImportInput = document.getElementById('lib-import-input');
+  document.getElementById('lib-import-btn').addEventListener('click', () => { if (ensureCanEdit('libraries')) libImportInput.click(); });
+  libImportInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('That CSV is larger than 5 MB', 'warning'); return; }
+    importAssetsCsv(await file.text());
+  });
   document.getElementById('lib-editor-close').addEventListener('click', closeLibraryEditor);
   document.getElementById('lib-editor-cancel').addEventListener('click', closeLibraryEditor);
   libEditorSave.addEventListener('click', saveLibraryEditor);
   libEditorDelete.addEventListener('click', deleteLibraryEditorItem);
   libEditorArchive.addEventListener('click', archiveLibraryEditorItem);
   libEditorDuplicate.addEventListener('click', duplicateLibraryEditorItem);
+  document.getElementById('lib-editor-preferred').addEventListener('click', () => {
+    const item = libUI.editing && state.libraries.get(libUI.editing.id);
+    if (!item || !canEditAsset(item) || !ensureCanEdit('libraries')) return;
+    item.preferred = !item.preferred;
+    libUI.editing.preferred = item.preferred;
+    saveLibraryItem(item, item.preferred ? 'marked preferred' : 'unmarked preferred');
+    renderLibraryEditorForm();
+    renderLibrariesView();
+    showToast(item.preferred ? `${item.name} is now suggested first` : `${item.name} is no longer preferred`, 'success');
+  });
   libEditorForm.addEventListener('submit', (e) => { e.preventDefault(); saveLibraryEditor(); });
   libEditorDropzone.addEventListener('click', () => libEditorFileInput.click());
   libEditorFileInput.addEventListener('change', (e) => {
@@ -9565,7 +9710,7 @@
     const q = normText(pickerSearch.value);
     const items = pickerState.types.flatMap(t => libItemsOfType(t))
       .filter(it => (!pickerState.filter || pickerState.filter(it)) && libMatchesSearch(it, q))
-      .sort((a, b) => Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''));
+      .sort((a, b) => Number(Boolean(b.preferred)) - Number(Boolean(a.preferred)) || Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''));
     if (!items.length) {
       const label = pickerState.types.map(t => catDef(t).label.toLowerCase()).join(' or ');
       pickerGrid.innerHTML = `<div class="lib-empty">${q
@@ -9584,7 +9729,7 @@
       <button type="button" class="picker-item" data-pick="${escapeHtml(it.id)}">
         <span class="picker-thumb">${assetThumb(it).replace(' data-action="zoom"', '')}</span>
         <span class="picker-body">
-          <span class="lib-cat-label">${escapeHtml(catDef(it.type).label)}${isFavourite(it) ? ' · ★' : ''}</span>
+          <span class="lib-cat-label">${escapeHtml(catDef(it.type).label)}${it.preferred ? ' · Preferred' : ''}${isFavourite(it) ? ' · ★' : ''}</span>
           <span class="picker-name">${it.code ? `<span class="lib-code">${escapeHtml(it.code)}</span> ` : ''}${escapeHtml(it.name || 'Untitled')}</span>
           <span class="picker-details">${escapeHtml(assetKeyDetails(it))}</span>
         </span>
@@ -9628,7 +9773,7 @@
     const asset = studioAsset(rec, assetId);
     if (!assetId) {
       return ctx.editable
-        ? `<button type="button" class="studio-pick-btn" data-action="pick" data-path="${path}">${escapeHtml(opts.chooseLabel || 'Choose from Asset Library')}</button>`
+        ? `<button type="button" class="studio-pick-btn" data-action="pick" data-path="${path}">${escapeHtml(opts.chooseLabel || 'Choose from Asset Library')}</button>${STUDIO_PICKERS[path] ? suggestionChipsHtml(rec, path, path) : ''}`
         : `<div class="studio-muted">Nothing selected.</div>`;
     }
     if (!asset) return `<div class="studio-warn">This asset was deleted from the Asset Library. ${ctx.editable ? `<button type="button" class="identity-link" data-action="pick" data-path="${path}">Choose another</button>` : ''}</div>`;
@@ -9752,7 +9897,8 @@
           : newReferenceBlock(rec, 'accessories.' + i, a, ctx, { textPlaceholder: 'Describe the item and where it appears', saveType: 'prop' });
         return `<div class="studio-list-item"><span class="studio-list-num">${i + 1}</span><div class="studio-list-body">${body}</div>${controls}</div>`;
       }).join('') || '<div class="studio-muted">No props or accessories.</div>'}</div>
-      ${ctx.editable ? `<div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-action="acc-add-saved">+ Saved item</button><button type="button" class="btn btn-secondary btn-sm" data-action="acc-add-custom">+ Custom item</button></div>` : ''}`,
+      ${ctx.editable ? `<div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-action="acc-add-saved">+ Saved item</button><button type="button" class="btn btn-secondary btn-sm" data-action="acc-add-custom">+ Custom item</button></div>
+        ${(() => { const s = suggestedAssets('accessories', setupCategory(rec), cfg.accessories.map(a => a.assetId)); return s.length ? `<div class="studio-suggest"><span class="studio-muted">Suggested:</span>${s.map(x => `<button type="button" class="studio-suggest-chip" data-action="suggest-acc" data-asset="${escapeHtml(x.asset.id)}" title="${escapeHtml(x.reason)}">${(x.asset.images || [])[0] ? `<img src="${escapeHtml(x.asset.images[0].url)}" alt="" />` : ''}<span>+ ${escapeHtml(x.asset.name)}</span></button>`).join('')}</div>` : ''; })()}` : ''}`,
       'Listed in this order in the prompt. Reorder or remove items without touching anything else.'));
 
     const p = cfg.pose;
@@ -10340,6 +10486,7 @@
           <div class="studio-entry-top"><span class="studio-badge${s.status === 'final' ? ' final' : ''}">${s.status === 'final' ? 'Final' : 'Draft'}</span><strong>${escapeHtml(s.name || 'Untitled setup')}</strong></div>
           ${card ? `<div class="studio-entry-sub">${escapeHtml(linkedCardLabel(card))}</div>` : ''}
           <div class="studio-entry-sub">${escapeHtml(timeAgo(s.updatedAt))} · ${escapeHtml(memberName(s.updatedBy || s.createdBy))}</div>
+          ${canCurrentUserWrite('shoots') ? `<div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-dup-setup="${escapeHtml(s.id)}" title="Make a new draft with the same configuration">Duplicate</button></div>` : ''}
         </div>`;
       }).join('') : `<div class="studio-muted" style="padding:12px;">${q ? 'No setups match.' : 'No setups yet. Start one with "+ New setup" or from an outfit preset.'}</div>`;
     } else {
@@ -10349,7 +10496,7 @@
         .filter(p => !p.archived && (!studioUI.favouritesOnly || isFavourite(p)))
         .filter(p => presetStatus(p) === 'approved' || admin || p.createdBy === state.currentUser.id)
         .filter(p => !q || normText(p.name).includes(q) || (p.tags || []).some(t => normText(t).includes(q)))
-        .sort((a, b) => Number(presetStatus(a) === 'candidate') - Number(presetStatus(b) === 'candidate') || Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''));
+        .sort((a, b) => Number(presetStatus(a) === 'candidate') - Number(presetStatus(b) === 'candidate') || Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''));
       studioList.innerHTML = items.length ? items.map(p => {
         const candidate = presetStatus(p) === 'candidate';
         const isOpen = studioUI.open && studioUI.open.kind === 'preset' && studioUI.open.id === p.id;
@@ -10357,6 +10504,7 @@
         return `<div class="studio-list-entry${isOpen ? ' active' : ''}" data-open-preset="${escapeHtml(p.id)}" tabindex="0" role="button">
           <div class="studio-entry-top"><button type="button" class="lib-fav-btn${isFavourite(p) ? ' on' : ''}" data-fav-preset="${escapeHtml(p.id)}" aria-label="Favourite">${isFavourite(p) ? '★' : '☆'}</button><strong>${escapeHtml(p.name || 'Untitled preset')}</strong></div>
           ${candidate ? `<div class="studio-entry-sub"><span class="studio-badge new">Waiting for approval</span> proposed by ${escapeHtml(memberName(p.createdBy))}</div>` : ''}
+          ${p.pinned ? '<div class="studio-entry-sub"><span class="studio-badge saved">Pinned</span></div>' : ''}
           ${thumbs.length ? `<div class="studio-mini-images">${thumbs.map(a => `<img src="${escapeHtml(a.images[0].url)}" alt="" />`).join('')}</div>` : ''}
           ${tagsHtml(p, 4)}
           ${!candidate ? `<div class="studio-row"><button type="button" class="btn btn-primary btn-sm" data-start-preset="${escapeHtml(p.id)}">Start setup</button></div>` : ''}
@@ -10389,6 +10537,7 @@
         <div class="studio-header">
           <div class="studio-row"><span class="studio-badge">Outfit preset</span>${presetStatus(rec) === 'candidate' ? `<span class="studio-badge new">Candidate</span><span class="studio-muted">Proposed by ${escapeHtml(memberName(rec.createdBy))}${rec.sourceCardId && state.cards.get(rec.sourceCardId) ? ' from ' + escapeHtml(linkedCardLabel(state.cards.get(rec.sourceCardId))) : ''}. An admin must approve it before the team can use it.</span>` : ''}</div>
           ${presetStatus(rec) === 'candidate' && isAdminRole(state.currentUser.role) ? `<div class="studio-row"><button type="button" class="btn btn-primary btn-sm" data-action="approve-preset">Approve preset</button><button type="button" class="btn btn-secondary btn-sm" data-action="reject-preset">Reject</button></div>` : ''}
+          ${presetStatus(rec) === 'approved' && isAdminRole(state.currentUser.role) ? `<div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-action="pin-preset" aria-pressed="${Boolean(rec.pinned)}">${rec.pinned ? 'Pinned for the team ✓' : 'Pin for the team'}</button><span class="studio-muted">Pinned presets are suggested first on job cards.</span></div>` : rec.pinned ? '<div class="studio-row"><span class="studio-badge saved">Pinned</span></div>' : ''}
           <input class="form-input studio-title-input" data-input="__name" value="${escapeHtml(rec.name || '')}" placeholder="Preset name"${dis} />
           <input class="form-input" data-input="__tags" value="${escapeHtml((rec.tags || []).join(', '))}" placeholder="Tags, comma separated"${dis} />
           <div class="studio-row">
@@ -11142,6 +11291,18 @@
       case 'mode': studioUpdate(cfg => { pathGet(cfg, path).mode = el.dataset.value; }); break;
       case 'toggle': studioUpdate(cfg => { pathGet(cfg, path).enabled = el.dataset.value === 'true'; }); break;
       case 'clear': studioUpdate(cfg => { pathGet(cfg, path).assetId = ''; }); break;
+      case 'suggest':
+        // A suggestion only fills an empty section; it never replaces a choice.
+        studioUpdate(cfg => {
+          const target = pathGet(cfg, path);
+          if (target.assetId) return;
+          target.assetId = el.dataset.asset;
+          if ('mode' in target) target.mode = 'saved';
+        });
+        break;
+      case 'suggest-acc':
+        studioUpdate(cfg => { if (!cfg.accessories.some(a => a.assetId === el.dataset.asset)) cfg.accessories.push({ uid: studioUid(), kind: 'saved', assetId: el.dataset.asset, text: '', images: [] }); });
+        break;
       case 'pick': {
         const section = path.split('.')[0];
         openAssetPicker({ ...STUDIO_PICKERS[section], onPick: (id) => studioUpdate(cfg => { pathGet(cfg, path).assetId = id; }) });
@@ -11189,6 +11350,13 @@
         renderStudio();
         break;
       case 'start-from-preset': startSetupFromPreset(rec); break;
+      case 'pin-preset':
+        if (!isAdminRole(state.currentUser.role)) return;
+        rec.pinned = !rec.pinned;
+        scheduleStudioSave('preset', rec);
+        renderStudio();
+        showToast(rec.pinned ? `Pinned "${rec.name}"` : `Unpinned "${rec.name}"`, 'success');
+        break;
       case 'approve-preset':
       case 'reject-preset': {
         if (!isAdminRole(state.currentUser.role)) return;
@@ -11261,6 +11429,13 @@
       p.favouredBy = isFavourite(p) ? p.favouredBy.filter(id => id !== me) : [...(p.favouredBy || []), me];
       putToStore('outfit_presets', p);
       renderStudioList();
+      return;
+    }
+    const dup = e.target.closest('[data-dup-setup]');
+    if (dup) {
+      e.stopPropagation();
+      const src = state.shoots.get(dup.dataset.dupSetup);
+      if (src) duplicateSetup(src);
       return;
     }
     const start = e.target.closest('[data-start-preset]');
@@ -11450,8 +11625,8 @@
 
   function pickPreset(onPick) {
     const items = Array.from(state.outfitPresets.values()).filter(p => !p.archived && presetStatus(p) === 'approved')
-      .sort((a, b) => Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''))
-      .map(p => ({ id: p.id, kind: 'Outfit preset' + (isFavourite(p) ? ' · ★' : ''), label: p.name || 'Untitled preset', details: configSummary(p.config), thumb: configThumb(p.config), search: `${p.name} ${(p.tags || []).join(' ')}` }));
+      .sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''))
+      .map(p => ({ id: p.id, kind: 'Outfit preset' + (p.pinned ? ' · Pinned' : '') + (isFavourite(p) ? ' · ★' : ''), label: p.name || 'Untitled preset', details: configSummary(p.config), thumb: configThumb(p.config), search: `${p.name} ${(p.tags || []).join(' ')}` }));
     openListPicker('Apply an outfit preset', items, onPick, 'No approved outfit presets yet. Save one from a setup in Prompt Studio.');
   }
 
@@ -11467,7 +11642,7 @@
   }
 
   // Copy a configuration into this card's setup, keeping this card's own product.
-  function applyConfigToCard(card, sourceCfg, sourceLabel, sectionsToCopy) {
+  function applyConfigToCard(card, sourceCfg, sourceLabel, sectionsToCopy, presetId) {
     const keep = productSectionFor(card);
     const src = normalizeStudioConfig(sourceCfg);
     const keys = (sectionsToCopy || PRESET_SECTIONS).filter(k => k !== keep);
@@ -11475,7 +11650,7 @@
     if (!rec || rec.status === 'final') {
       const base = emptyStudioConfig();
       keys.forEach(k => { base[k] = JSON.parse(JSON.stringify(src[k])); });
-      const created = createCardSetup(card, base, { sourceLabel });
+      const created = createCardSetup(card, base, { sourceLabel, ...(presetId ? { presetIds: [presetId] } : {}) });
       if (created) showToast(`Created a setup from ${sourceLabel}`, 'success');
       return;
     }
@@ -11484,7 +11659,10 @@
     if (!changing.length) { showToast('Nothing to change: the setup already matches', 'info'); return; }
     const labels = { model: 'Model', sunglasses: 'Sunglasses', top: 'Top', bottom: 'Bottom', shoes: 'Shoes', accessories: 'Props and accessories', pose: 'Pose', style: 'House style', settings: 'Prompt settings' };
     if (!confirm(`Apply ${sourceLabel}?\n\nThese sections of the current setup will be replaced:\n• ${changing.map(k => labels[k] || k).join('\n• ')}\n\nThis product (${labels[keep] || keep}) and everything else stay as they are.${rec.prompt && rec.prompt.edited ? '\n\nYour hand-edited prompt is kept; you can switch to the new generated prompt afterwards.' : ''}`)) return;
-    updateSetupRecord(rec, c => { changing.forEach(k => { c[k] = JSON.parse(JSON.stringify(src[k])); }); });
+    updateSetupRecord(rec, (c, r) => {
+      changing.forEach(k => { c[k] = JSON.parse(JSON.stringify(src[k])); });
+      if (presetId) r.presetIds = Array.from(new Set([...(r.presetIds || []), presetId]));
+    });
     showToast(`Applied ${sourceLabel}`, 'success');
   }
 
@@ -11585,7 +11763,26 @@
           ${refs.length ? `<ol class="studio-refs">${refs.map(r => `<li><span class="studio-ref-range">${escapeHtml(r.range)}</span><span class="studio-badge ${r.saved ? 'saved' : 'new'}">${r.saved ? 'Saved' : 'New'}</span> ${escapeHtml(r.label)}${r.role ? ` <span class="studio-muted">(${escapeHtml(r.role)})</span>` : ''}<div class="studio-mini-images">${r.urls.map(u => `<img src="${escapeHtml(u)}" alt="" data-card-zoom="${escapeHtml(u)}" />`).join('')}</div></li>`).join('')}</ol>` : '<span class="job-section-sub">No reference images yet.</span>'}
         </div>`;
     }
-    drawerStudioPane.innerHTML = linkHtml + setupHtml;
+    drawerStudioPane.innerHTML = linkHtml + setupHtml + (canConfigureHere && (!rec || rec.status !== 'final') ? cardReuseHtml(card) : '');
+  }
+
+  // Optional shortcuts: pinned or often-used presets for this job category, and
+  // the most recent finalized setups from other products. Applying one always
+  // asks first and keeps this card's product.
+  function cardReuseHtml(card) {
+    const presets = suggestedPresets(card.category || '');
+    const recentFinal = Array.from(state.shoots.values())
+      .filter(s => s.status === 'final' && s.cardId !== card.id)
+      .sort((a, b) => String(b.finalizedAt || '').localeCompare(String(a.finalizedAt || '')))
+      .slice(0, 3);
+    if (!presets.length && !recentFinal.length) return '';
+    return `<div class="job-section">
+      <span class="job-section-title">Reuse</span>
+      ${presets.length ? `<span class="job-section-sub">Suggested presets${card.category ? ` for ${escapeHtml(card.category)}` : ''}</span>
+        <div class="card-studio-reuse">${presets.map(x => `<div class="card-studio-reuse-item"><span><strong>${escapeHtml(x.preset.name)}</strong><span class="studio-muted">${escapeHtml(x.reason)} · ${escapeHtml(configSummary(x.preset.config))}</span></span><button type="button" class="btn btn-secondary btn-sm" data-cs="apply-preset" data-id="${escapeHtml(x.preset.id)}">Apply</button></div>`).join('')}</div>` : ''}
+      ${recentFinal.length ? `<span class="job-section-sub">Recent successful setups</span>
+        <div class="card-studio-reuse">${recentFinal.map(sh => { const other = sh.cardId && state.cards.get(sh.cardId); return `<div class="card-studio-reuse-item"><span><strong>${escapeHtml(sh.name || 'Setup')}</strong><span class="studio-muted">${other ? escapeHtml(other.stage) + ' · ' : ''}finalized ${escapeHtml(timeAgo(sh.finalizedAt))} · ${escapeHtml(configSummary(sh.snapshot ? sh.snapshot.config : sh.config))}</span></span><button type="button" class="btn btn-secondary btn-sm" data-cs="reuse-setup" data-id="${escapeHtml(sh.id)}">Use</button></div>`; }).join('')}</div>` : ''}
+    </div>`;
   }
 
   drawerStudioPane.addEventListener('click', (e) => {
@@ -11610,8 +11807,18 @@
         break;
       }
       case 'create': createCardSetup(card); break;
+      case 'apply-preset': {
+        const p = state.outfitPresets.get(el.dataset.id);
+        if (p) applyConfigToCard(card, p.config, `the preset "${p.name}"`, null, p.id);
+        break;
+      }
+      case 'reuse-setup': {
+        const sh = state.shoots.get(el.dataset.id);
+        if (sh) applyConfigToCard(card, sh.snapshot ? sh.snapshot.config : sh.config, `the setup "${sh.name}"`, [...PRESET_SECTIONS, 'expression', 'references']);
+        break;
+      }
       case 'preset':
-        pickPreset((id) => { const p = state.outfitPresets.get(id); if (p) applyConfigToCard(card, p.config, `the preset "${p.name}"`); });
+        pickPreset((id) => { const p = state.outfitPresets.get(id); if (p) applyConfigToCard(card, p.config, `the preset "${p.name}"`, null, p.id); });
         break;
       case 'duplicate':
         pickPreviousSetup(card, (id) => {
@@ -11700,6 +11907,420 @@
     if (!rec) return '';
     return `<span class="card-studio-badge${rec.status === 'final' ? ' final' : ''}" title="Prompt Studio setup: ${rec.status === 'final' ? 'finalized' : 'draft'}">${rec.status === 'final' ? 'Prompt ✓' : 'Setup'}</span>`;
   }
+
+  // -------------------------------------------------------------------
+  // USAGE INSIGHTS, SUGGESTIONS AND LIBRARY TOOLS
+  // Everything here is computed from real records: Prompt Studio setups
+  // (drafts and finalized), the presets they started from, asset usage dates
+  // and the board's QC activity. Nothing is estimated or invented.
+  // -------------------------------------------------------------------
+  const SECTION_LABELS = { model: 'Models', top: 'Tops', bottom: 'Bottoms', shoes: 'Shoes', sunglasses: 'Sunglasses', accessories: 'Accessories', props: 'Props', pose: 'Poses', style: 'House styles', expression: 'Expressions' };
+
+  function setupConfig(s) {
+    return normalizeStudioConfig(s.status === 'final' && s.snapshot ? s.snapshot.config : s.config);
+  }
+
+  // Asset ids used by a setup, by section (saved assets only).
+  function setupSelections(s) {
+    const c = setupConfig(s);
+    const out = {};
+    const add = (k, id) => { if (id) (out[k] = out[k] || []).push(id); };
+    if (c.model.mode === 'saved') add('model', c.model.assetId);
+    if (c.top.mode === 'saved') add('top', c.top.assetId);
+    if (c.bottom.mode === 'saved') add('bottom', c.bottom.assetId);
+    if (c.shoes.mode === 'saved') add('shoes', c.shoes.assetId);
+    if (c.sunglasses.enabled && c.sunglasses.mode === 'saved') add('sunglasses', c.sunglasses.assetId);
+    if (c.expression.enabled && c.expression.mode === 'saved') add('expression', c.expression.assetId);
+    c.accessories.forEach(a => {
+      if (a.kind !== 'saved' || !a.assetId) return;
+      const asset = state.libraries.get(a.assetId);
+      add(asset && asset.type === 'prop' ? 'props' : 'accessories', a.assetId);
+    });
+    if (c.pose.mode === 'saved') add('pose', c.pose.assetId);
+    add('style', c.style.assetId);
+    return out;
+  }
+
+  // QC outcome of the card a setup belongs to, from the board's activity log.
+  function setupQcOutcome(s) {
+    if (!s.cardId) return null;
+    const acts = (state.activity.get(s.cardId) || []).slice().sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
+    const passed = acts.find(a => a.to === 'Passed QC');
+    const changes = acts.filter(a => a.to === 'Changes requested');
+    if (!passed && !changes.length) return null;
+    return { passed: Boolean(passed), firstPass: Boolean(passed) && !changes.some(a => String(a.ts) < String(passed.ts)) };
+  }
+
+  // Insights are recomputed only when setups, presets, assets or QC activity change.
+  const insightsCache = new Map();
+  function computeUsageInsights(filterCategory) {
+    let latest = '';
+    state.shoots.forEach(sh => { if (String(sh.updatedAt || '') > latest) latest = String(sh.updatedAt || ''); });
+    let acts = 0;
+    state.activity.forEach(list => { acts += list.length; });
+    const stamp = [filterCategory || '', state.shoots.size, latest, state.outfitPresets.size, state.libraries.size, acts].join('|');
+    const hit = insightsCache.get(filterCategory || '');
+    if (hit && hit.stamp === stamp) return hit.value;
+    const value = computeUsageInsightsUncached(filterCategory);
+    insightsCache.set(filterCategory || '', { stamp, value });
+    return value;
+  }
+
+  function computeUsageInsightsUncached(filterCategory) {
+    const setups = Array.from(state.shoots.values()).filter(s => {
+      if (!filterCategory) return true;
+      const card = s.cardId && state.cards.get(s.cardId);
+      return card && card.category === filterCategory;
+    });
+    const bySection = {};
+    const combos = new Map();
+    setups.forEach(s => {
+      const sel = setupSelections(s);
+      Object.entries(sel).forEach(([k, ids]) => {
+        const m = bySection[k] = bySection[k] || new Map();
+        new Set(ids).forEach(id => m.set(id, (m.get(id) || 0) + 1));
+      });
+      if (sel.top && sel.bottom) {
+        const key = sel.top[0] + '|' + sel.bottom[0];
+        combos.set(key, (combos.get(key) || 0) + 1);
+      }
+    });
+    const rank = (m) => Array.from((m || new Map()).entries()).filter(([id]) => state.libraries.get(id)).sort((a, b) => b[1] - a[1]);
+    const products = new Map();
+    ['top', 'bottom'].forEach(k => rank(bySection[k]).forEach(([id, n]) => products.set(id, (products.get(id) || 0) + n)));
+    const presetUse = new Map();
+    const presetQc = new Map();
+    setups.forEach(s => {
+      new Set([...(s.presetIds || []), s.presetId].filter(Boolean)).forEach(pid => {
+        if (!state.outfitPresets.get(pid)) return;
+        presetUse.set(pid, (presetUse.get(pid) || 0) + 1);
+        const qc = setupQcOutcome(s);
+        if (qc) {
+          const r = presetQc.get(pid) || { decided: 0, firstPass: 0 };
+          r.decided++;
+          if (qc.firstPass) r.firstPass++;
+          presetQc.set(pid, r);
+        }
+      });
+    });
+    return {
+      setupCount: setups.length,
+      finalCount: setups.filter(s => s.status === 'final').length,
+      bySection: Object.fromEntries(Object.entries(bySection).map(([k, m]) => [k, rank(m)])),
+      products: Array.from(products.entries()).sort((a, b) => b[1] - a[1]),
+      combos: Array.from(combos.entries()).sort((a, b) => b[1] - a[1]).map(([k, n]) => [...k.split('|'), n]).filter(([t, b]) => state.libraries.get(t) && state.libraries.get(b)),
+      presets: Array.from(presetUse.entries()).sort((a, b) => b[1] - a[1]),
+      presetQc,
+      recent: Array.from(state.libraries.values()).filter(a => a.lastUsedAt && !a.archived).sort((a, b) => String(b.lastUsedAt).localeCompare(String(a.lastUsedAt))).slice(0, 8)
+    };
+  }
+
+  const MIN_QC_DECISIONS = 3; // approval rates are shown only with at least this many QC decisions
+
+  function renderInsights() {
+    const categories = Array.from(new Set(Array.from(state.cards.values()).map(c => c.category).filter(Boolean))).sort();
+    const cat = libUI.insightsCategory || '';
+    const ins = computeUsageInsights(cat);
+    const assetLink = (id) => {
+      const a = state.libraries.get(id);
+      const img = a && (a.images || [])[0];
+      return `<button type="button" class="insight-asset" data-insight-asset="${escapeHtml(id)}">${img ? `<img src="${escapeHtml(img.url)}" alt="" />` : '<span class="insight-noimg"></span>'}<span>${escapeHtml(a ? a.name : 'Deleted asset')}</span></button>`;
+    };
+    const list = (rows, fmt, empty) => rows.length ? `<ol class="insight-list">${rows.slice(0, 5).map(fmt).join('')}</ol>` : `<p class="studio-muted">${empty}</p>`;
+    const countOf = (n) => `<span class="insight-count">${n} setup${n === 1 ? '' : 's'}</span>`;
+    const block = (title, body) => `<section class="insight-block"><h3>${escapeHtml(title)}</h3>${body}</section>`;
+    const sectionBlock = (key) => block(`Most used ${SECTION_LABELS[key].toLowerCase()}`, list(ins.bySection[key] || [], ([id, n]) => `<li>${assetLink(id)}${countOf(n)}</li>`, 'Not used in any setup yet.'));
+    const presetRows = list(ins.presets, ([pid, n]) => {
+      const p = state.outfitPresets.get(pid);
+      return `<li><button type="button" class="insight-asset" data-insight-preset="${escapeHtml(pid)}"><span>${escapeHtml(p.name)}</span></button>${countOf(n)}</li>`;
+    }, 'No setup has started from a preset yet.');
+    const qcRows = Array.from(ins.presetQc.entries()).filter(([, r]) => r.decided >= MIN_QC_DECISIONS).sort((a, b) => b[1].firstPass / b[1].decided - a[1].firstPass / a[1].decided);
+    const qcPending = Array.from(ins.presetQc.entries()).filter(([, r]) => r.decided < MIN_QC_DECISIONS);
+    const qcBody = qcRows.length
+      ? `<ol class="insight-list">${qcRows.slice(0, 5).map(([pid, r]) => `<li><span>${escapeHtml(state.outfitPresets.get(pid).name)}</span><span class="insight-count">${Math.round(100 * r.firstPass / r.decided)}% passed QC first time (${r.firstPass} of ${r.decided})</span></li>`).join('')}</ol>`
+      : `<p class="studio-muted">Not enough data yet. A rate is shown once a preset has at least ${MIN_QC_DECISIONS} QC decisions${qcPending.length ? ` (${qcPending.map(([pid, r]) => `${escapeHtml(state.outfitPresets.get(pid).name)}: ${r.decided}`).join(', ')})` : ''}.</p>`;
+    libBody.innerHTML = `
+      <div class="insight-toolbar">
+        <label class="studio-field"><span>Job category</span><select class="form-select" id="insights-category"><option value="">All categories</option>${categories.map(c => `<option${c === cat ? ' selected' : ''}>${escapeHtml(c)}</option>`).join('')}</select></label>
+        <p class="studio-muted">Based on ${ins.setupCount} Prompt Studio setup${ins.setupCount === 1 ? '' : 's'} (${ins.finalCount} finalized)${cat ? ` for ${escapeHtml(cat)} jobs` : ''}. Counts are setups that use each item; QC rates come from the board's QC history.</p>
+      </div>
+      <div class="insight-grid">
+        ${block('Most used products', list(ins.products, ([id, n]) => `<li>${assetLink(id)}${countOf(n)}</li>`, 'No saved products used yet.'))}
+        ${sectionBlock('model')}
+        ${block('Most combined top and bottom', list(ins.combos, ([t, b, n]) => `<li><span class="insight-pair">${assetLink(t)}<span>+</span>${assetLink(b)}</span>${countOf(n)}</li>`, 'No setup uses a saved top and bottom together yet.'))}
+        ${sectionBlock('shoes')}
+        ${sectionBlock('accessories')}
+        ${sectionBlock('props')}
+        ${sectionBlock('pose')}
+        ${sectionBlock('style')}
+        ${block('Most reused outfit presets', presetRows)}
+        ${block('Presets with the best first-time QC pass rate', qcBody)}
+        ${block('Recently used assets', ins.recent.length ? `<ol class="insight-list">${ins.recent.map(a => `<li>${assetLink(a.id)}<span class="insight-count">${escapeHtml(timeAgo(a.lastUsedAt))}</span></li>`).join('')}</ol>` : '<p class="studio-muted">Nothing used yet.</p>')}
+      </div>`;
+    document.getElementById('insights-category').addEventListener('change', (e) => { libUI.insightsCategory = e.target.value; renderLibrariesView(); });
+    libBody.querySelectorAll('[data-insight-asset]').forEach(b => b.addEventListener('click', () => { const a = state.libraries.get(b.dataset.insightAsset); if (a) openLibraryEditor(a); }));
+    libBody.querySelectorAll('[data-insight-preset]').forEach(b => b.addEventListener('click', () => {
+      setStudioOpen('preset', b.dataset.insightPreset);
+      studioUI.panel = 'presets';
+      document.getElementById('tab-studio').click();
+    }));
+  }
+
+  // ---- Suggestions ---------------------------------------------------------------------------
+  // Optional hints only: preferred assets first, then what is used most for
+  // the same job category, then overall. They never replace a selection.
+  function suggestedAssets(section, category, excludeIds = []) {
+    const picker = STUDIO_PICKERS[section];
+    if (!picker) return [];
+    const statSection = section === 'accessories' ? null : section;
+    const overall = computeUsageInsights('');
+    const inCat = category ? computeUsageInsights(category) : null;
+    const count = (ins, id) => {
+      if (!ins) return 0;
+      const keys = statSection ? [statSection] : ['accessories', 'props'];
+      return keys.reduce((n, k) => n + ((ins.bySection[k] || []).find(([x]) => x === id) || [0, 0])[1], 0);
+    };
+    return picker.types.flatMap(t => libItemsOfType(t))
+      .filter(a => (!picker.filter || picker.filter(a)) && !excludeIds.includes(a.id))
+      .map(a => {
+        const c = count(inCat, a.id), o = count(overall, a.id);
+        const reason = a.preferred ? 'Preferred by the team' : c ? `Used in ${c} ${category} setup${c > 1 ? 's' : ''}` : o ? `Used in ${o} setup${o > 1 ? 's' : ''}` : '';
+        return { asset: a, score: (a.preferred ? 1000 : 0) + c * 10 + o, reason };
+      })
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score || (a.asset.name || '').localeCompare(b.asset.name || ''))
+      .slice(0, 3);
+  }
+
+  function setupCategory(rec) {
+    const card = rec && rec.cardId && state.cards.get(rec.cardId);
+    return card ? card.category || '' : '';
+  }
+
+  function suggestionChipsHtml(rec, path, section) {
+    const sugg = suggestedAssets(section, setupCategory(rec));
+    if (!sugg.length) return '';
+    return `<div class="studio-suggest"><span class="studio-muted">Suggested:</span>${sugg.map(x => {
+      const img = (x.asset.images || [])[0];
+      return `<button type="button" class="studio-suggest-chip" data-action="suggest" data-path="${path}" data-asset="${escapeHtml(x.asset.id)}" title="${escapeHtml(x.reason)}">${img ? `<img src="${escapeHtml(img.url)}" alt="" />` : ''}<span>${escapeHtml(x.asset.name)}</span>${x.asset.preferred ? '<span class="studio-badge saved">Preferred</span>' : ''}</button>`;
+    }).join('')}</div>`;
+  }
+
+  // Presets for a job: pinned first, then the most used for the same category.
+  function suggestedPresets(category) {
+    const use = computeUsageInsights(category).presets;
+    const usedCount = (pid) => (use.find(([x]) => x === pid) || [0, 0])[1];
+    return Array.from(state.outfitPresets.values())
+      .filter(p => !p.archived && presetStatus(p) === 'approved' && (p.pinned || usedCount(p.id)))
+      .sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || usedCount(b.id) - usedCount(a.id))
+      .slice(0, 3)
+      .map(p => ({ preset: p, reason: p.pinned ? 'Pinned by the team' : `Used in ${usedCount(p.id)} ${category || ''} setup${usedCount(p.id) > 1 ? 's' : ''}` }));
+  }
+
+  // ---- Needs attention -------------------------------------------------------------------------
+  function assetIssues(item) {
+    const issues = [];
+    if (catDef(item.type).hasImages && !(item.images || []).length) issues.push('No reference image');
+    if (item.type !== 'preset' && !item.snippet) issues.push('No prompt text');
+    const dups = findLikelyDuplicates(item);
+    if (dups.length) issues.push(`Possible duplicate of ${dups.slice(0, 2).map(d => d.item.name).join(', ')}`);
+    return issues;
+  }
+
+  // ---- Bulk tagging ------------------------------------------------------------------------------
+  function bulkSelected() {
+    return Array.from(libUI.selected || []).map(id => state.libraries.get(id)).filter(Boolean);
+  }
+
+  function bulkApply(label, mutate) {
+    const items = bulkSelected();
+    const editable = items.filter(canEditAsset);
+    if (!editable.length) { showToast('You can only change assets you added (admins can change any).', 'warning'); return; }
+    editable.forEach(item => { const fields = mutate(item); if (fields) saveLibraryItem(item, label, fields); });
+    const skipped = items.length - editable.length;
+    showToast(`Updated ${editable.length} asset${editable.length > 1 ? 's' : ''}${skipped ? `; skipped ${skipped} you can't change` : ''}`, skipped ? 'warning' : 'success');
+    renderLibrariesView();
+  }
+
+  function bulkBarHtml() {
+    const n = (libUI.selected || new Set()).size;
+    return `<div class="lib-bulk-bar"><strong>${n} selected</strong>
+      <button type="button" class="btn btn-secondary btn-sm" data-bulk="all">Select all shown</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-bulk="add-tags"${n ? '' : ' disabled'}>Add tags…</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-bulk="remove-tag"${n ? '' : ' disabled'}>Remove tag…</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-bulk="archive"${n ? '' : ' disabled'}>Archive</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-bulk="export"${n ? '' : ' disabled'}>Export selected</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-bulk="done">Done</button></div>`;
+  }
+
+  function handleBulk(action, shownIds) {
+    if (action === 'done') { libUI.selecting = false; libUI.selected = new Set(); renderLibrariesView(); return; }
+    if (action === 'all') { shownIds.forEach(id => libUI.selected.add(id)); renderLibrariesView(); return; }
+    if (action === 'export') { downloadJson(`listingflow-assets-${new Date().toISOString().slice(0, 10)}.json`, { exportedAt: new Date().toISOString(), assets: bulkSelected() }); return; }
+    if (!ensureCanEdit('libraries')) return;
+    if (action === 'add-tags') {
+      const tags = (prompt('Tags to add to the selected assets (comma separated):') || '').split(',').map(t => t.trim()).filter(Boolean);
+      if (!tags.length) return;
+      bulkApply('tagged in bulk', item => {
+        const next = Array.from(new Set([...(item.tags || []), ...tags]));
+        if (next.length === (item.tags || []).length) return null;
+        item.tags = next;
+        return ['Tags'];
+      });
+    } else if (action === 'remove-tag') {
+      const tag = normText(prompt('Tag to remove from the selected assets:') || '');
+      if (!tag) return;
+      bulkApply('untagged in bulk', item => {
+        const next = (item.tags || []).filter(t => normText(t) !== tag);
+        if (next.length === (item.tags || []).length) return null;
+        item.tags = next;
+        return ['Tags'];
+      });
+    } else if (action === 'archive') {
+      if (!confirm(`Archive ${libUI.selected.size} assets? Jobs that use them keep working.`)) return;
+      bulkApply('archived', item => {
+        if (item.archived) return null;
+        item.archived = true;
+        item.archivedAt = new Date().toISOString();
+        return ['Archived'];
+      });
+      libUI.selected = new Set();
+    }
+  }
+
+  // ---- CSV import ---------------------------------------------------------------------------------
+  function parseCsv(text) {
+    const rows = [];
+    let row = [], field = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (quoted) {
+        if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (ch === '"') quoted = false;
+        else field += ch;
+      } else if (ch === '"') quoted = true;
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(field); field = '';
+        if (row.some(v => v.trim())) rows.push(row);
+        row = [];
+      } else field += ch;
+    }
+    row.push(field);
+    if (row.some(v => v.trim())) rows.push(row);
+    return rows;
+  }
+
+  const CSV_TEMPLATE = 'category,name,code,tags,aliases,description,constraints,notes\nTops,Navy Stripe Cropped Polo,FG-POL-01,"summer, stripe",navy polo,"Navy and white stripe cropped polo.","Worn untucked.",\nModels,Zayan,M01,,Z,"Mid-20s man, olive skin, short dark crop.","No hats.",\n';
+
+  function categoryFromCsv(value) {
+    const v = normText(value);
+    if (!v) return null;
+    const hit = assetCategories().find(([key, def]) => [key, def.label, def.singular, def.singular + 's'].some(x => normText(x) === v));
+    return hit ? hit[0] : null;
+  }
+
+  function importAssetsCsv(text) {
+    if (!canEditAsset({ _isNew: true })) { showToast('Creators and admins can import assets.', 'warning'); return; }
+    const rows = parseCsv(text);
+    if (rows.length < 2) { showToast('The CSV needs a header row and at least one asset.', 'warning'); return; }
+    const header = rows[0].map(h => normText(h));
+    const col = (names) => header.findIndex(h => names.includes(h));
+    const idx = { category: col(['category', 'type']), name: col(['name']), code: col(['code', 'sku', 'sku code', 'id']), tags: col(['tags']), aliases: col(['aliases', 'alias']),
+      snippet: col(['description', 'snippet', 'prompt', 'prompt text', 'identity lock', 'garment lock']), constraints: col(['constraints', 'fixed constraints']), notes: col(['notes']) };
+    if (idx.category < 0 || idx.name < 0) { showToast('The CSV needs "category" and "name" columns. Download the template to see the format.', 'warning'); return; }
+    const created = [], skipped = [], errors = [];
+    const now = new Date().toISOString();
+    const list = (v) => String(v || '').split(/[,;]/).map(t => t.trim()).filter(Boolean);
+    rows.slice(1).forEach((r, i) => {
+      const line = i + 2;
+      const type = categoryFromCsv(r[idx.category]);
+      const name = String(r[idx.name] || '').trim();
+      if (!type) return errors.push(`line ${line}: unknown category "${r[idx.category] || ''}"`);
+      if (!name) return errors.push(`line ${line}: no name`);
+      const def = catDef(type);
+      const item = { id: newLibraryId(), type, name, code: idx.code >= 0 ? String(r[idx.code] || '').trim() : '', tags: idx.tags >= 0 ? list(r[idx.tags]) : [], aliases: idx.aliases >= 0 ? list(r[idx.aliases]) : [],
+        snippet: idx.snippet >= 0 ? String(r[idx.snippet] || '').trim() : '', constraints: idx.constraints >= 0 ? String(r[idx.constraints] || '').trim() : '', notes: idx.notes >= 0 ? String(r[idx.notes] || '').trim() : '',
+        images: [], createdAt: now, createdBy: state.currentUser.id };
+      // Extra columns named after a category field (e.g. "fit", "colour") fill that field.
+      def.fields.forEach(f => {
+        const c = header.findIndex(h => h === normText(f.key) || h === normText(f.label));
+        if (c >= 0 && !(f.key in idx) && r[c]) item[f.key] = String(r[c]).trim();
+      });
+      const dups = [...findLikelyDuplicates(item), ...created.filter(o => o.type === item.type && normText(o.name) === normText(item.name)).map(o => ({ item: o, reason: 'same name in this file' }))];
+      if (dups.length) return skipped.push(`line ${line}: ${name} (${dups[0].reason}: ${dups[0].item.name})`);
+      created.push(item);
+    });
+    const summary = `Import ${created.length} new asset${created.length === 1 ? '' : 's'}?` +
+      (skipped.length ? `\n\nSkipped as likely duplicates (${skipped.length}):\n• ${skipped.slice(0, 8).join('\n• ')}` : '') +
+      (errors.length ? `\n\nRows with problems (${errors.length}):\n• ${errors.slice(0, 8).join('\n• ')}` : '') +
+      '\n\nImages are not imported; add them in each asset afterwards.';
+    if (!created.length) { alert(summary.replace(/^Import 0 new assets\?/, 'Nothing to import.')); return; }
+    if (!confirm(summary)) return;
+    created.forEach(item => {
+      if (!item.code && catDef(item.type).codePrefix) item.code = nextLibraryCode(item.type);
+      saveLibraryItem(item, 'imported from CSV');
+    });
+    renderLibrariesView();
+    showToast(`Imported ${created.length} asset${created.length === 1 ? '' : 's'}`, 'success');
+  }
+
+  // ---- Metadata export ------------------------------------------------------------------------------
+  function downloadJson(filename, data) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportLibraryMetadata() {
+    downloadJson(`listingflow-metadata-${new Date().toISOString().slice(0, 10)}.json`, {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      exportedBy: memberName(state.currentUser.id),
+      note: 'Asset Library and Prompt Studio metadata. Image files are referenced by URL; back up the data/files folder on the server for the images themselves.',
+      assets: Array.from(state.libraries.values()),
+      assetCategories: state.assetCategories || [],
+      outfitPresets: Array.from(state.outfitPresets.values()),
+      promptTemplates: Array.from(state.promptTemplates.values()),
+      productLinks: Array.from(state.productLinks.values()),
+      setups: Array.from(state.shoots.values())
+    });
+    showToast('Metadata exported', 'success');
+  }
+
+  // ---- Keyboard ---------------------------------------------------------------------------------------
+  // Picker: arrow keys move between results, Enter picks, Escape closes.
+  pickerModal.addEventListener('keydown', (e) => {
+    const items = Array.from(pickerGrid.querySelectorAll('.picker-item'));
+    if (!items.length) return;
+    const i = items.indexOf(document.activeElement);
+    const cols = Math.max(1, Math.round(pickerGrid.clientWidth / (items[0].offsetWidth || 1)));
+    let next = null;
+    if (e.key === 'ArrowDown') next = i < 0 ? 0 : Math.min(items.length - 1, i + cols);
+    else if (e.key === 'ArrowUp' && i >= 0) next = i - cols < 0 ? -1 : i - cols;
+    else if (e.key === 'ArrowRight' && i >= 0) next = Math.min(items.length - 1, i + 1);
+    else if (e.key === 'ArrowLeft' && i > 0) next = i - 1;
+    else return;
+    e.preventDefault();
+    if (next === -1) pickerSearch.focus(); else items[next].focus();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (pickerModal.classList.contains('active')) { closeAssetPicker(); e.preventDefault(); return; }
+      if (libEditorModal.classList.contains('active')) { closeLibraryEditor(); e.preventDefault(); return; }
+    }
+    // "/" jumps to the search box in the Asset Library and Prompt Studio.
+    if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && !document.activeElement.isContentEditable) {
+      const target = state.currentView === 'libraries' ? libSearchInput : state.currentView === 'studio' ? studioSearch : null;
+      if (target) { e.preventDefault(); target.focus(); }
+    }
+  });
 
   initDatabase().then(() => {
     refreshAssigneeFilter();

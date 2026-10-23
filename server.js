@@ -100,6 +100,26 @@ function requireMember(token) {
 
 // People waiting for a role may only comment. Automatic work the browser does
 // for everyone (tracker sync, cleanup) is marked `system` and is allowed for them.
+// Per-person limit on the assistant endpoints, on top of the AI budget in
+// ai/limits.js, so one browser can't flood the server (or the built-in matcher).
+const AI_PER_MEMBER_PER_MINUTE = Math.max(1, Number(process.env.AI_REQUESTS_PER_MEMBER_PER_MINUTE) || 20);
+const aiMemberHits = new Map(); // memberId -> recent request times
+
+function checkMemberAiRate(member) {
+  const now = Date.now();
+  const recent = (aiMemberHits.get(member.id) || []).filter(t => now - t < 60000);
+  if (recent.length >= AI_PER_MEMBER_PER_MINUTE) {
+    throw new HttpError(429, `Too many assistant requests. Try again in ${Math.ceil((60000 - (now - recent[0])) / 1000)} seconds.`);
+  }
+  recent.push(now);
+  aiMemberHits.set(member.id, recent);
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, times] of aiMemberHits) if (!times.some(t => now - t < 60000)) aiMemberHits.delete(id);
+}, 5 * 60 * 1000).unref();
+
 // Write permissions live in permissions.js.
 const opAllowedFor = permissions.opAllowed;
 
@@ -187,6 +207,7 @@ async function handleDataApi(req, res, reqPath, query) {
     const body = await readJson(req);
     const member = requireMember(body.token);
     if (member.role === 'pending') throw new HttpError(403, 'You can use the assistant once the owner approves your role.');
+    checkMemberAiRate(member);
     const message = String(body.message || '').trim().slice(0, 1000);
     if (!message) throw new HttpError(400, 'Type what you want to set up.');
     const result = await assistant.assist({
@@ -199,6 +220,7 @@ async function handleDataApi(req, res, reqPath, query) {
     const body = await readJson(req);
     const member = requireMember(body.token);
     if (member.role === 'pending') throw new HttpError(403, 'You can use the assistant once the owner approves your role.');
+    checkMemberAiRate(member);
     const sections = (Array.isArray(body.sections) ? body.sections : []).slice(0, 20).map(s => ({
       key: String(s.key || '').slice(0, 40), text: String(s.text || '').slice(0, 6000),
       locked: (Array.isArray(s.locked) ? s.locked : []).map(String).filter(Boolean).slice(0, 80)
