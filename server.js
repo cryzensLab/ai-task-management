@@ -11,6 +11,7 @@ const team = require('./team');
 const { createProvider } = require('./ai/providers');
 const { createLimiter } = require('./ai/limits');
 const assistant = require('./ai/assistant');
+const permissions = require('./permissions');
 
 const aiProvider = createProvider();
 const aiLimiter = createLimiter();
@@ -99,27 +100,8 @@ function requireMember(token) {
 
 // People waiting for a role may only comment. Automatic work the browser does
 // for everyone (tracker sync, cleanup) is marked `system` and is allowed for them.
-// Asset Library: anyone with a role can add, edit and archive assets, but only
-// admins and the owner can delete one for good or change the category list.
-const isAdmin = (member) => member.role === 'admin' || member.role === 'owner';
-
-// Prompt Studio: a finalized setup is a historical record. Nobody can change
-// or delete it; people duplicate it to start a new draft instead.
-function isFinalizedSetup(op) {
-  if (op.store !== 'shoots') return false;
-  const existing = store.getItem('shoots', String(op.key));
-  return Boolean(existing && existing.status === 'final');
-}
-
-function opAllowedFor(member, op) {
-  if (isFinalizedSetup(op)) return false;
-  if (op.store === 'libraries' && op.op === 'delete' && !isAdmin(member)) return false;
-  if (op.store === 'settings' && String(op.key) === 'assetCategories' && !isAdmin(member)) return false;
-  // Only the owner and admins can switch the AI assistant on or off.
-  if (op.store === 'settings' && String(op.key) === 'aiSettings' && !isAdmin(member)) return false;
-  if (member.role !== 'pending') return true;
-  return op.store === 'comments' || op.system === true;
-}
+// Write permissions live in permissions.js.
+const opAllowedFor = permissions.opAllowed;
 
 // The owner switches the assistant on in Prompt Studio (settings/aiSettings).
 function aiEnabled() {
@@ -150,11 +132,14 @@ async function handleDataApi(req, res, reqPath, query) {
   if (reqPath === '/api/store/batch' && req.method === 'POST') {
     const body = await readJson(req);
     const member = requireMember(body.token || req.headers['x-session-token']);
-    const ops = (Array.isArray(body.ops) ? body.ops : []).filter(op => op && opAllowedFor(member, op));
+    const all = (Array.isArray(body.ops) ? body.ops : []).filter(Boolean);
+    const ops = all.filter(op => opAllowedFor(member, op));
     const applied = store.applyOps(ops);
     if (applied.length) store.emit({ type: 'store', clientId: body.clientId, ops: applied }, body.clientId);
-    // Return the stored items so the sender can pick up extracted image URLs.
-    return sendJson(res, 200, { ok: true, applied: applied.length, ops: applied });
+    // Return the stored items so the sender can pick up extracted image URLs,
+    // and say which changes the sender's role does not allow.
+    const rejected = all.filter(op => !ops.includes(op)).map(op => ({ store: op.store, key: String(op.key) }));
+    return sendJson(res, 200, { ok: true, applied: applied.length, ops: applied, rejected });
   }
 
   if (reqPath === '/api/files' && req.method === 'POST') {

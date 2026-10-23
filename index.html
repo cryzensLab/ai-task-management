@@ -2038,6 +2038,22 @@
     .studio-template-order li { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .studio-template-order .icon-btn { width: 22px; height: 22px; }
 
+    /* Board integration */
+    .card-studio-badge {
+      font-size: 0.62rem; font-weight: 700; padding: 1px 6px; border-radius: 2px;
+      border: 1px solid var(--primary); color: var(--primary); background: var(--primary-light);
+    }
+    .card-studio-badge.final { border-color: var(--success); color: var(--success); background: var(--success-light); }
+    .card-studio-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
+    .card-studio-chip { display: flex; gap: 8px; align-items: center; border: 1px solid var(--border-subtle); padding: 6px; background: var(--bg-surface); min-width: 0; }
+    .card-studio-chip-thumb { width: 36px; height: 44px; flex-shrink: 0; background: var(--bg-subtle); overflow: hidden; }
+    .card-studio-chip-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; cursor: zoom-in; }
+    .card-studio-chip-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 0.78rem; }
+    .card-studio-chip-body strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-studio-chip-body .studio-badge { align-self: flex-start; }
+    .card-studio-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .card-studio-row .card-studio-chip { flex: 1; min-width: 200px; }
+
     @media (max-width: 1200px) {
       .studio-layout { grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: max-content 1fr; overflow-y: auto; }
       .studio-aside { grid-row: 1 / span 2; position: sticky; top: 0; max-height: 100%; }
@@ -2757,6 +2773,7 @@
 
     <div class="drawer-tabs" role="tablist">
       <button class="drawer-tab active" data-drawer-tab="details" role="tab">Details</button>
+      <button class="drawer-tab" data-drawer-tab="studio" role="tab">Prompt Studio <span class="drawer-tab-hint" id="drawer-studio-hint"></span></button>
       <button class="drawer-tab" data-drawer-tab="job" role="tab">Job setup <span class="drawer-tab-hint" id="drawer-job-hint"></span></button>
       <button class="drawer-tab" data-drawer-tab="prompts" role="tab">Prompts <span class="drawer-tab-hint" id="drawer-prompts-hint"></span></button>
     </div>
@@ -2909,6 +2926,7 @@
      </div>
 
      <!-- JOB SETUP: model, garment, pairing, background, props, presets, shots -->
+     <div class="drawer-tab-pane" id="drawer-tab-studio"></div>
      <div class="drawer-tab-pane" id="drawer-tab-job"></div>
 
      <!-- PROMPTS: reference order + one prompt per shot -->
@@ -3447,6 +3465,7 @@
     shoots: new Map(), // setupId -> Prompt Studio setup (draft or finalized)
     outfitPresets: new Map(), // presetId -> outfit preset (asset ids only)
     promptTemplates: new Map(), // templateId -> saved prompt template (versioned)
+    productLinks: new Map(), // cardId -> { cardId, assetId, sku, linkedAt, linkedBy }
     assetCategories: [], // categories added by admins: [{ key, label, singular }]
     settings: { ...DEFAULT_TEAM },
 
@@ -3751,6 +3770,8 @@
       (await getAllFromStore('outfit_presets')).forEach(rec => state.outfitPresets.set(rec.id, rec));
       state.promptTemplates.clear();
       (await getAllFromStore('prompt_templates')).forEach(rec => state.promptTemplates.set(rec.id, rec));
+      state.productLinks.clear();
+      (await getAllFromStore('product_links')).forEach(rec => state.productLinks.set(rec.cardId, rec));
 
     } catch(err) {
       console.error('Error loading data from DB', err);
@@ -3785,7 +3806,28 @@
     if (systemWriteDepth > 0) return true;
     const role = state.currentUser && state.currentUser.role;
     if (role === 'pending') return storeName === 'comments';
-    return role !== 'guest';
+    if (role === 'guest') return false;
+    // Same rules as permissions.js on the server.
+    if (storeName === 'shoots' || storeName === 'product_links') return role === 'creator' || isAdminRole(role);
+    if (storeName === 'prompt_templates') return isAdminRole(role);
+    return true;
+  }
+
+  // Shared assets: admins, or whoever added the asset. Others can still use,
+  // favourite and duplicate it.
+  function canEditAsset(item) {
+    if (!item || item._isNew) return canCurrentUserWrite('libraries') && state.currentUser.role !== 'reviewer';
+    return canCurrentUserWrite('libraries') && (isAdminRole(state.currentUser.role) || item.createdBy === state.currentUser.id);
+  }
+
+  // Presets: admins manage them; others can change only their own candidate.
+  function canEditPreset(p) {
+    if (!p || !canCurrentUserWrite('outfit_presets')) return false;
+    return isAdminRole(state.currentUser.role) || (p.status === 'candidate' && p.createdBy === state.currentUser.id);
+  }
+
+  function presetStatus(p) {
+    return p && p.status === 'candidate' ? 'candidate' : 'approved'; // presets from before Phase 4 count as approved
   }
 
   function writeBlockedMessage() {
@@ -3847,6 +3889,19 @@
       err.status = res.status;
       throw err;
     }
+    // The server enforces role rules; anything it refused is undone here too.
+    let data = null;
+    try { data = await res.json(); } catch (e) {}
+    if (data && Array.isArray(data.rejected) && data.rejected.length) onServerRejected(data.rejected);
+  }
+
+  let rejectedReloadTimer = null;
+  function onServerRejected(rejected) {
+    const stores = Array.from(new Set(rejected.map(r => r.store)));
+    console.warn('Changes refused by the server for this role:', rejected);
+    showToast(`Your role can't make ${rejected.length === 1 ? 'that change' : 'some of those changes'} (${stores.join(', ')}). Showing the saved version.`, 'warning');
+    clearTimeout(rejectedReloadTimer);
+    rejectedReloadTimer = setTimeout(() => reloadFromServer(), 300);
   }
 
   // Changes made before anyone signs in on this browser wait here until they do.
@@ -4009,7 +4064,7 @@
     state.boards.clear();
     state.shapes.clear();
     await loadAllDataFromDB();
-    scheduleRemoteRender(new Set(['cards', 'comments', 'activity', 'shapes', 'settings', 'libraries', 'shoots', 'outfit_presets', 'prompt_templates']));
+    scheduleRemoteRender(new Set(['cards', 'comments', 'activity', 'shapes', 'settings', 'libraries', 'shoots', 'outfit_presets', 'prompt_templates', 'product_links']));
   }
 
   function upsertById(map, groupKey, item) {
@@ -4072,6 +4127,9 @@
       case 'prompt_templates':
         if (isPut) state.promptTemplates.set(op.key, item); else state.promptTemplates.delete(op.key);
         break;
+      case 'product_links':
+        if (isPut) state.productLinks.set(op.key, item); else state.productLinks.delete(op.key);
+        break;
     }
     remoteTouched.add(op.store);
     if (op.store === 'cards' && op.key === state.activeCardId) remoteTouched.add('activeCard');
@@ -4085,7 +4143,7 @@
       remoteRenderTimer = null;
       const touched = new Set(remoteTouched);
       remoteTouched.clear();
-      if (touched.has('cards') || touched.has('activity')) {
+      if (touched.has('cards') || touched.has('activity') || touched.has('shoots') || touched.has('product_links')) {
         renderKanbanBoard();
         if (state.currentView === 'archive') updateArchiveStats();
       }
@@ -4100,7 +4158,7 @@
       if (touched.has('settings')) onTeamChanged();
       if (touched.has('libraries') || (touched.has('settings') && state.currentView === 'libraries')) renderLibrariesView();
       if (['shoots', 'outfit_presets', 'prompt_templates', 'libraries', 'cards', 'settings'].some(k => touched.has(k))) onRemoteStudioChange();
-      if ((touched.has('libraries') || touched.has('settings')) && state.activeCardId && state.cards.get(state.activeCardId)) {
+      if ((touched.has('libraries') || touched.has('settings') || touched.has('shoots') || touched.has('product_links') || touched.has('outfit_presets')) && state.activeCardId && state.cards.get(state.activeCardId)) {
         renderJobAndPrompts(state.cards.get(state.activeCardId));
       }
     }, 120);
@@ -4462,6 +4520,7 @@
         <div style="display:flex; align-items:center; gap:6px;">
           ${card.sku ? `<span class="card-sku">${escapeHtml(card.sku)}</span>` : ''}
           ${card.fromSheet ? `<span class="card-sheet-badge" title="Imported from Google Sheet Tracker">From sheet</span>` : ''}
+          ${cardStudioBadge(card)}
           ${card.stage === 'Delivered' ? `<span class="card-delivered-badge" style="font-size:0.65rem; font-weight:700; background:var(--success-light); color:var(--success); border:1px solid var(--success); padding:1px 6px; border-radius: 2px;">Delivered</span>` : ''}
         </div>
         <span class="card-category-badge">${escapeHtml(card.category || 'Apparel')}</span>
@@ -4569,6 +4628,12 @@
       return;
     }
 
+    // QC decisions belong to reviewers, admins and the owner (also checked on the server).
+    if ((targetStage === 'Changes requested' || targetStage === 'Passed QC') && !(actor.role === 'reviewer' || isAdminRole(actor.role))) {
+      showToast('Only reviewers and admins can pass QC or request changes.', 'error');
+      return;
+    }
+
     // Workflow Rule 3: Changes requested requires at least one needs_fix output
     if (targetStage === 'Changes requested') {
       const hasNeedsFix = card.outputs && card.outputs.some(o => o.status === 'needs_fix');
@@ -4609,6 +4674,16 @@
       }
       const deliveryNote = prompt('Enter delivery listing URL / platform destination:', 'Shopify Store / Amazon Fashion');
       if (deliveryNote === null) return; // user cancelled
+      // Keep the Prompt Studio setup used for this product: finalize its draft so
+      // the prompt, configuration, model and reference roles are frozen as delivered.
+      const setup = currentCardSetup(card);
+      if (setup && setup.status !== 'final' && canCurrentUserWrite('shoots')) {
+        const open = studioChecklist(setup).filter(i => !i.ok);
+        if (open.length) showToast(`The Prompt Studio setup is not complete (${open.map(i => i.label).join(', ')}), so it stays a draft.`, 'warning');
+        else if (confirm('Finalize this product\'s Prompt Studio setup now, so its final prompt and configuration are kept with the delivery?')) finalizeSetup(setup, { confirmed: true });
+      }
+      const kept = currentCardSetup(card);
+      if (kept) card.deliveredSetupId = kept.id;
       card.deliveryNote = deliveryNote;
       card.deliveredAt = new Date().toISOString();
       transitionCard(card, targetStage, `Delivered: ${deliveryNote}`);
@@ -5150,8 +5225,11 @@
       actions.push({ label: 'Submit to QC Queue', stage: 'Ready for QC', cls: 'btn-primary' });
     } else if (card.stage === 'Ready for QC') {
       actions.push({ label: 'Open Review & Markup', action: 'compare', cls: 'btn-primary' });
-      actions.push({ label: 'Request Changes', stage: 'Changes requested', cls: 'btn-danger' });
-      actions.push({ label: 'Pass QC', stage: 'Passed QC', cls: 'btn-success' });
+      // QC decisions are for reviewers, admins and the owner (enforced on the server too).
+      if (state.currentUser.role === 'reviewer' || isAdminRole(state.currentUser.role)) {
+        actions.push({ label: 'Request Changes', stage: 'Changes requested', cls: 'btn-danger' });
+        actions.push({ label: 'Pass QC', stage: 'Passed QC', cls: 'btn-success' });
+      }
     } else if (card.stage === 'Changes requested') {
       actions.push({ label: 'Resubmit for QC (Advance Round)', action: 'resubmit', cls: 'btn-primary' });
     } else if (card.stage === 'Passed QC') {
@@ -5830,9 +5908,10 @@
           <span style="font-size:0.7rem; color:var(--text-subtle); margin-left:8px;">(${card.monthKey || 'Past Month'})</span>
         </div>
         <div style="display:flex; gap:6px;">
-          <button class="btn btn-secondary btn-sm" onclick="duplicateCardAsNew(state.cards.get('${card.id}'))">Reuse / Duplicate</button>
+          <button class="btn btn-secondary btn-sm" data-reuse>Reuse / Duplicate</button>
         </div>
       `;
+      item.querySelector('[data-reuse]').addEventListener('click', () => duplicateCardAsNew(state.cards.get(card.id)));
       archivedCardsList.appendChild(item);
     });
   }
@@ -5853,11 +5932,15 @@
     const exportBoards = Array.from(state.boards.values()).filter(b => b.monthKey === mKey || b.keep);
     const exportShapes = Array.from(state.shapes.values());
 
+    const monthSetups = Array.from(state.shoots.values()).filter(sh => sh.cardId && cardIds.has(sh.cardId));
+    const monthLinks = Array.from(state.productLinks.values()).filter(l => cardIds.has(l.cardId));
     const payload = {
       version: 1,
       exportedAt: new Date().toISOString(),
       monthKey: mKey,
       cards: monthCards,
+      setups: monthSetups,
+      productLinks: monthLinks,
       comments: exportComments,
       activity: exportActivity,
       boards: exportBoards,
@@ -5956,6 +6039,19 @@
             putToStore('shapes', s);
           });
         }
+
+        // Prompt Studio setups (with their finalized snapshots) and product links.
+        // Setups that already exist are left alone so history is never rewritten.
+        (data.setups || []).forEach(sh => {
+          if (!sh || !sh.id || state.shoots.has(sh.id)) return;
+          state.shoots.set(sh.id, sh);
+          putToStore('shoots', sh);
+        });
+        (data.productLinks || []).forEach(l => {
+          if (!l || !l.cardId || state.productLinks.has(l.cardId)) return;
+          state.productLinks.set(l.cardId, l);
+          putToStore('product_links', l);
+        });
 
         renderKanbanBoard();
         updateArchiveStats();
@@ -8305,9 +8401,17 @@
     libEditorDelete.style.display = !isNew && item.archived && isAdminRole(state.currentUser.role) ? '' : 'none';
     libEditorArchive.style.display = isNew ? 'none' : '';
     libEditorArchive.textContent = item.archived ? 'Restore' : 'Archive';
-    libEditorDuplicate.style.display = isNew ? 'none' : '';
+    libEditorDuplicate.style.display = isNew || !canEditAsset({ _isNew: true }) ? 'none' : '';
     renderLibraryEditorImages();
     renderLibraryEditorHistory();
+    // View-only for assets this person may not change (admins or whoever added it can).
+    const ro = Boolean(libUI.readOnly);
+    libEditorForm.querySelectorAll('input, textarea, select').forEach(el => { el.disabled = ro; });
+    libEditorSave.style.display = ro ? 'none' : '';
+    if (ro) libEditorArchive.style.display = 'none';
+    libEditorDropzone.style.display = ro ? 'none' : '';
+    libEditorImages.querySelectorAll('.lib-image-remove, .lib-image-cover').forEach(b => { b.style.display = ro ? 'none' : ''; });
+    if (ro) libEditorTitle.textContent = catDef(item.type).singular.replace(/^./, c => c.toUpperCase()) + ' (view only: admins or the person who added it can edit)';
   }
 
   // Copy what is typed in the form onto the working copy.
@@ -8324,8 +8428,9 @@
   }
 
   function openLibraryEditor(item, forType) {
-    if (!ensureCanEdit('libraries')) return;
     const isNew = !item;
+    if (isNew && !ensureCanEdit('libraries')) return;
+    if (isNew && state.currentUser.role === 'reviewer') { showToast('Reviewers can view assets; creators and admins add them.', 'warning'); return; }
     let type = forType || (isNew ? libUI.activeType : item.type);
     if (isNew && LIB_VIEWS[type]) type = 'model';
     libUI.editing = isNew
@@ -8333,6 +8438,7 @@
       : JSON.parse(JSON.stringify(state.libraries.get(item.id) || item));
     if (!libUI.editing.images) libUI.editing.images = [];
     libUI.editing._before = isNew ? null : JSON.stringify(libUI.editing);
+    libUI.readOnly = !isNew && !canEditAsset(libUI.editing);
     renderLibraryEditorForm();
     libEditorModal.classList.add('active');
     const first = libEditorForm.querySelector(isNew ? 'input' : 'input, textarea, select');
@@ -8431,6 +8537,7 @@
     if (!ensureCanEdit('libraries')) return;
     const item = libUI.editing;
     if (!item) return;
+    if (libUI.readOnly || !canEditAsset(item)) { showToast('Only admins or the person who added this asset can change it.', 'warning'); return; }
     if (libUI.uploading > 0) {
       showToast('Wait for the images to finish uploading', 'warning');
       return;
@@ -8474,6 +8581,7 @@
     if (!ensureCanEdit('libraries')) return;
     const item = libUI.editing && state.libraries.get(libUI.editing.id);
     if (!item) return;
+    if (!canEditAsset(item)) { showToast('Only admins or the person who added this asset can archive it.', 'warning'); return; }
     const def = catDef(item.type);
     if (item.archived) {
       item.archived = false;
@@ -8933,6 +9041,8 @@
     const typingIn = (pane) => !force && pane.contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
     if (activeDrawerTab === 'job' && !typingIn(drawerJobPane)) renderJobSetup(card);
     if (activeDrawerTab === 'prompts' && !typingIn(drawerPromptsPane)) renderPrompts(card);
+    const studioPane = document.getElementById('drawer-tab-studio');
+    if (activeDrawerTab === 'studio' && !typingIn(studioPane)) renderCardStudio(card);
   }
 
   function libOptionLabel(item) {
@@ -9335,6 +9445,7 @@
   function studioReadOnly(rec, kind) {
     if (!rec) return true;
     if (kind === 'shoot' && rec.status === 'final') return true;
+    if (kind === 'preset') return !canEditPreset(rec);
     return !canCurrentUserWrite(studioStoreFor(kind));
   }
 
@@ -9450,7 +9561,7 @@
   }
 
   function renderAssetPicker() {
-    if (!pickerState) return;
+    if (!pickerState || pickerState.list) return;
     const q = normText(pickerSearch.value);
     const items = pickerState.types.flatMap(t => libItemsOfType(t))
       .filter(it => (!pickerState.filter || pickerState.filter(it)) && libMatchesSearch(it, q))
@@ -10232,18 +10343,23 @@
         </div>`;
       }).join('') : `<div class="studio-muted" style="padding:12px;">${q ? 'No setups match.' : 'No setups yet. Start one with "+ New setup" or from an outfit preset.'}</div>`;
     } else {
+      const admin = isAdminRole(state.currentUser.role);
+      // Candidates are proposals waiting for an admin; only admins and the proposer see them.
       const items = Array.from(state.outfitPresets.values())
         .filter(p => !p.archived && (!studioUI.favouritesOnly || isFavourite(p)))
+        .filter(p => presetStatus(p) === 'approved' || admin || p.createdBy === state.currentUser.id)
         .filter(p => !q || normText(p.name).includes(q) || (p.tags || []).some(t => normText(t).includes(q)))
-        .sort((a, b) => Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''));
+        .sort((a, b) => Number(presetStatus(a) === 'candidate') - Number(presetStatus(b) === 'candidate') || Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''));
       studioList.innerHTML = items.length ? items.map(p => {
+        const candidate = presetStatus(p) === 'candidate';
         const isOpen = studioUI.open && studioUI.open.kind === 'preset' && studioUI.open.id === p.id;
         const thumbs = studioAssetIds(normalizeStudioConfig(p.config)).map(id => state.libraries.get(id)).filter(a => a && (a.images || []).length).slice(0, 5);
         return `<div class="studio-list-entry${isOpen ? ' active' : ''}" data-open-preset="${escapeHtml(p.id)}" tabindex="0" role="button">
           <div class="studio-entry-top"><button type="button" class="lib-fav-btn${isFavourite(p) ? ' on' : ''}" data-fav-preset="${escapeHtml(p.id)}" aria-label="Favourite">${isFavourite(p) ? '★' : '☆'}</button><strong>${escapeHtml(p.name || 'Untitled preset')}</strong></div>
+          ${candidate ? `<div class="studio-entry-sub"><span class="studio-badge new">Waiting for approval</span> proposed by ${escapeHtml(memberName(p.createdBy))}</div>` : ''}
           ${thumbs.length ? `<div class="studio-mini-images">${thumbs.map(a => `<img src="${escapeHtml(a.images[0].url)}" alt="" />`).join('')}</div>` : ''}
           ${tagsHtml(p, 4)}
-          <div class="studio-row"><button type="button" class="btn btn-primary btn-sm" data-start-preset="${escapeHtml(p.id)}">Start setup</button></div>
+          ${!candidate ? `<div class="studio-row"><button type="button" class="btn btn-primary btn-sm" data-start-preset="${escapeHtml(p.id)}">Start setup</button></div>` : ''}
         </div>`;
       }).join('') : `<div class="studio-muted" style="padding:12px;">${q || studioUI.favouritesOnly ? 'No presets match.' : 'No outfit presets yet. Build a setup and use "Save as preset".'}</div>`;
     }
@@ -10271,11 +10387,12 @@
     if (kind === 'preset') {
       header = `
         <div class="studio-header">
-          <span class="studio-badge">Outfit preset</span>
+          <div class="studio-row"><span class="studio-badge">Outfit preset</span>${presetStatus(rec) === 'candidate' ? `<span class="studio-badge new">Candidate</span><span class="studio-muted">Proposed by ${escapeHtml(memberName(rec.createdBy))}${rec.sourceCardId && state.cards.get(rec.sourceCardId) ? ' from ' + escapeHtml(linkedCardLabel(state.cards.get(rec.sourceCardId))) : ''}. An admin must approve it before the team can use it.</span>` : ''}</div>
+          ${presetStatus(rec) === 'candidate' && isAdminRole(state.currentUser.role) ? `<div class="studio-row"><button type="button" class="btn btn-primary btn-sm" data-action="approve-preset">Approve preset</button><button type="button" class="btn btn-secondary btn-sm" data-action="reject-preset">Reject</button></div>` : ''}
           <input class="form-input studio-title-input" data-input="__name" value="${escapeHtml(rec.name || '')}" placeholder="Preset name"${dis} />
           <input class="form-input" data-input="__tags" value="${escapeHtml((rec.tags || []).join(', '))}" placeholder="Tags, comma separated"${dis} />
           <div class="studio-row">
-            <button type="button" class="btn btn-primary btn-sm" data-action="start-from-preset">Start setup from this preset</button>
+            ${presetStatus(rec) === 'approved' ? '<button type="button" class="btn btn-primary btn-sm" data-action="start-from-preset">Start setup from this preset</button>' : ''}
             <button type="button" class="btn btn-secondary btn-sm" data-action="duplicate-preset">Duplicate</button>
             ${editable ? '<button type="button" class="btn btn-danger btn-sm" data-action="delete-preset">Delete</button>' : ''}
             <span class="studio-muted" id="studio-save-status">${editable ? 'Changes save automatically' : 'View only'}</span>
@@ -10831,13 +10948,14 @@
     return { createdAt: now, createdBy: state.currentUser.id, updatedAt: now, updatedBy: state.currentUser.id };
   }
 
-  function createSetup(fields) {
+  function createSetup(fields, opts = {}) {
     if (!ensureCanEdit('shoots')) return null;
     const rec = { ...newStudioRecordBase(), id: 'shoot_' + Date.now().toString(36) + studioUid(), status: 'draft', name: 'New setup', config: emptyStudioConfig(), ...fields };
     rec.config = normalizeStudioConfig(rec.config);
     state.shoots.set(rec.id, rec);
     putToStore('shoots', rec);
     markAssetsUsed(studioAssetIds(rec.config));
+    if (opts.stay) return rec; // created from a board card; stay there
     studioUI.panel = 'setups';
     setStudioOpen('shoot', rec.id);
     renderStudio();
@@ -10861,23 +10979,28 @@
     const name = (prompt('Name for this outfit preset:', rec.name || '') || '').trim();
     if (!name) return;
     const tags = (prompt('Tags (optional, comma separated):', '') || '').split(',').map(t => t.trim()).filter(Boolean);
-    const preset = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name, tags, favouredBy: [], config: presetConfigFrom(rec.config), sourceSetupId: rec.id };
+    const admin = isAdminRole(state.currentUser.role);
+    const preset = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name, tags, favouredBy: [], config: presetConfigFrom(rec.config), sourceSetupId: rec.id,
+      sourceCardId: rec.cardId || '', status: admin ? 'approved' : 'candidate' };
     state.outfitPresets.set(preset.id, preset);
     putToStore('outfit_presets', preset);
     renderStudioList();
-    showToast(`Saved outfit preset "${name}"`, 'success');
+    showToast(admin ? `Saved outfit preset "${name}"` : `Proposed "${name}" as a preset. An admin approves it before the team can use it.`, 'success');
+    return preset;
   }
 
-  function duplicateSetup(rec) {
+  function duplicateSetup(rec, opts = {}) {
     const cfg = rec.status === 'final' && rec.snapshot ? rec.snapshot.config : rec.config;
     const templateId = rec.status === 'final' && rec.snapshot && rec.snapshot.template ? (rec.snapshot.template.builtin ? 'tpl_builtin' : rec.snapshot.template.id) : rec.templateId;
-    const copy = createSetup({ name: (rec.name || 'Setup') + ' (copy)', config: normalizeStudioConfig(cfg), cardId: rec.cardId || '', sourceSetupId: rec.id, presetId: rec.presetId || '', templateId: templateId || 'tpl_builtin', ...(rec.templateOverride ? { templateOverride: JSON.parse(JSON.stringify(rec.templateOverride)) } : {}) });
+    const copy = createSetup({ name: (rec.name || 'Setup') + ' (copy)', config: normalizeStudioConfig(cfg), cardId: rec.cardId || '', sourceSetupId: rec.id, presetId: rec.presetId || '', templateId: templateId || 'tpl_builtin', ...(rec.templateOverride ? { templateOverride: JSON.parse(JSON.stringify(rec.templateOverride)) } : {}) }, opts);
     if (copy) showToast('Duplicated as a new draft', 'success');
+    return copy;
   }
 
   function duplicatePreset(preset) {
     if (!ensureCanEdit('outfit_presets')) return;
-    const copy = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name: (preset.name || 'Preset') + ' (copy)', tags: [...(preset.tags || [])], favouredBy: [], config: presetConfigFrom(preset.config) };
+    const copy = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name: (preset.name || 'Preset') + ' (copy)', tags: [...(preset.tags || [])], favouredBy: [], config: presetConfigFrom(preset.config),
+      status: isAdminRole(state.currentUser.role) ? 'approved' : 'candidate' };
     state.outfitPresets.set(copy.id, copy);
     putToStore('outfit_presets', copy);
     setStudioOpen('preset', copy.id);
@@ -10885,14 +11008,14 @@
     showToast('Preset duplicated', 'success');
   }
 
-  function finalizeSetup(rec) {
-    if (!ensureCanEdit('shoots')) return;
+  function finalizeSetup(rec, opts = {}) {
+    if (!ensureCanEdit('shoots')) return false;
     const missing = studioChecklist(rec).filter(i => !i.ok);
     if (missing.length) {
       showToast(`Finish these first: ${missing.map(i => i.label).join(', ')}`, 'warning');
-      return;
+      return false;
     }
-    if (!confirm('Finalize this setup? It becomes a read-only snapshot of the assets and prompt as they are now. You can duplicate it later to make changes.')) return;
+    if (!opts.confirmed && !confirm('Finalize this setup? It becomes a read-only snapshot of the assets and prompt as they are now. You can duplicate it later to make changes.')) return false;
     const cur = currentPrompt(rec);
     const plan = cur.plan;
     const assets = {};
@@ -10915,6 +11038,7 @@
     putToStore('shoots', rec);
     renderStudio();
     showToast('Setup finalized', 'success');
+    return true;
   }
 
   // Create an Asset Library item from a new reference, then point the section at it.
@@ -11065,6 +11189,26 @@
         renderStudio();
         break;
       case 'start-from-preset': startSetupFromPreset(rec); break;
+      case 'approve-preset':
+      case 'reject-preset': {
+        if (!isAdminRole(state.currentUser.role)) return;
+        if (action === 'reject-preset') {
+          if (!confirm(`Reject the proposed preset "${rec.name}"? It is deleted; the setup it came from is not affected.`)) return;
+          state.outfitPresets.delete(rec.id);
+          deleteFromStore('outfit_presets', rec.id);
+          setStudioOpen(null);
+          renderStudio();
+          showToast('Proposal rejected', 'info');
+          return;
+        }
+        rec.status = 'approved';
+        rec.approvedAt = new Date().toISOString();
+        rec.approvedBy = state.currentUser.id;
+        scheduleStudioSave('preset', rec);
+        renderStudio();
+        showToast(`Approved "${rec.name}" for the whole team`, 'success');
+        break;
+      }
       case 'duplicate-preset': duplicatePreset(rec); break;
       case 'delete-preset':
         if (!ensureCanEdit('outfit_presets')) return;
@@ -11148,7 +11292,8 @@
     if (!ensureCanEdit('outfit_presets')) return;
     const name = (prompt('Name for the new outfit preset:') || '').trim();
     if (!name) return;
-    const preset = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name, tags: [], favouredBy: [], config: presetConfigFrom(emptyStudioConfig()) };
+    const preset = { ...newStudioRecordBase(), id: 'opre_' + Date.now().toString(36) + studioUid(), name, tags: [], favouredBy: [], config: presetConfigFrom(emptyStudioConfig()),
+      status: isAdminRole(state.currentUser.role) ? 'approved' : 'candidate' };
     state.outfitPresets.set(preset.id, preset);
     putToStore('outfit_presets', preset);
     setStudioOpen('preset', preset.id);
@@ -11162,6 +11307,398 @@
     const typingSide = studioTypingInside(studioSide);
     if (studioTypingInside(studioMain)) { if (!typingSide) renderStudioSide(); }
     else if (!typingSide) renderStudioEditor();
+  }
+
+  // -------------------------------------------------------------------
+  // TEAM BOARD ↔ PROMPT STUDIO
+  // Each board card (a product from the tracker) can have Prompt Studio
+  // setups (shoots with cardId = card.id) and a link to the Asset Library
+  // item that is this product ('product_links', keyed by card id). Neither is
+  // stored on the card itself, so the sheet sync, which rewrites cards, can
+  // never overwrite them, and the sheet stays the source of truth for the
+  // fields it controls. Links are only made by a person: by picking the asset,
+  // or by confirming an exact SKU match. Similar names are never enough.
+  // -------------------------------------------------------------------
+  const drawerStudioPane = document.getElementById('drawer-tab-studio');
+  const drawerStudioHint = document.getElementById('drawer-studio-hint');
+
+  function cardSetups(card) {
+    return Array.from(state.shoots.values())
+      .filter(s => s.cardId === card.id)
+      .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+  }
+
+  // The setup a card works with: its newest draft, otherwise its newest finalized one.
+  function currentCardSetup(card) {
+    const all = cardSetups(card);
+    return all.find(s => s.status !== 'final') || all[0] || null;
+  }
+
+  function productLinkFor(card) {
+    const link = state.productLinks.get(card.id);
+    return link && state.libraries.get(link.assetId) ? link : null;
+  }
+
+  // An asset whose SKU / code equals the card's SKU exactly, if there is exactly one.
+  function skuMatchFor(card) {
+    const sku = normText(card.sku);
+    if (!sku) return null;
+    const hits = libItemsOfType('garment').filter(a => normText(a.code) === sku);
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  // The tracker's Character column, matched exactly (name or alias) to a saved model.
+  function trackerModelFor(card) {
+    const name = normText(card.character);
+    if (!name) return null;
+    const hits = libItemsOfType('model').filter(m => normText(m.name) === name || (m.aliases || []).some(a => normText(a) === name));
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  // Put this card's product into the right section of a configuration.
+  function placeCardProduct(cfg, card) {
+    const link = productLinkFor(card);
+    const asset = link && state.libraries.get(link.assetId);
+    if (asset) {
+      if (asset.type === 'top' || asset.type === 'bottom') { cfg[asset.type].mode = 'saved'; cfg[asset.type].assetId = asset.id; return asset.type; }
+      if (asset.type === 'shoes') { cfg.shoes.mode = 'saved'; cfg.shoes.assetId = asset.id; return 'shoes'; }
+      if (!cfg.accessories.some(a => a.assetId === asset.id)) cfg.accessories.unshift({ uid: studioUid(), kind: 'saved', assetId: asset.id, text: '', images: [] });
+      return 'accessories';
+    }
+    // Not linked: use the card's own photos as a new product reference.
+    const section = /bottom|trouser|pant|jean|short/i.test(card.category || '') ? 'bottom' : 'top';
+    const images = (card.rawFiles || []).map(rf => ({ url: resolveImageURL(rf), name: rf.name || 'product photo' })).filter(img => img.url && img.url.startsWith('/api/files/'));
+    cfg[section] = { ...cfg[section], mode: 'new', assetId: '', name: card.name || '', images, text: cfg[section].mode === 'new' ? cfg[section].text : '' };
+    return section;
+  }
+
+  function productSectionFor(card) {
+    const link = productLinkFor(card);
+    const asset = link && state.libraries.get(link.assetId);
+    if (!asset) return /bottom|trouser|pant|jean|short/i.test(card.category || '') ? 'bottom' : 'top';
+    return asset.type === 'top' || asset.type === 'bottom' || asset.type === 'shoes' ? asset.type : 'accessories';
+  }
+
+  // Change a setup that is not open in Prompt Studio (same rules as editing it there).
+  function updateSetupRecord(rec, mutator) {
+    if (!rec || rec.status === 'final' || !ensureCanEdit('shoots')) return false;
+    rec.config = normalizeStudioConfig(rec.config);
+    const before = new Set(studioAssetIds(rec.config));
+    mutator(rec.config, rec);
+    markAssetsUsed(studioAssetIds(rec.config).filter(id => !before.has(id)));
+    scheduleStudioSave('shoot', rec);
+    afterCardStudioChange();
+    return true;
+  }
+
+  function afterCardStudioChange() {
+    const card = state.activeCardId && state.cards.get(state.activeCardId);
+    if (card) renderCardStudio(card);
+    if (state.currentView === 'studio') renderStudio();
+    renderKanbanBoard();
+  }
+
+  function createCardSetup(card, baseConfig, extra = {}) {
+    if (!ensureCanEdit('shoots')) return null;
+    const cfg = normalizeStudioConfig(baseConfig || emptyStudioConfig());
+    placeCardProduct(cfg, card);
+    if (cfg.model.mode === 'saved' && !cfg.model.assetId) {
+      const model = trackerModelFor(card);
+      if (model) cfg.model.assetId = model.id;
+    }
+    const rec = createSetup({ name: linkedCardLabel(card), cardId: card.id, config: cfg, ...extra }, { stay: true });
+    if (rec) afterCardStudioChange();
+    return rec;
+  }
+
+  // ---- Pickers for presets and previous setups ---------------------------------------
+  function openListPicker(title, items, onPick, emptyText) {
+    pickerState = { types: [], onPick, list: true };
+    pickerTitle.textContent = title;
+    pickerSearch.value = '';
+    const draw = () => {
+      const q = normText(pickerSearch.value);
+      const shown = items.filter(it => !q || normText(it.search).includes(q));
+      pickerGrid.innerHTML = shown.length ? shown.map(it => `
+        <button type="button" class="picker-item" data-pick="${escapeHtml(it.id)}">
+          <span class="picker-thumb">${it.thumb ? `<img src="${escapeHtml(it.thumb)}" alt="" />` : ''}</span>
+          <span class="picker-body"><span class="lib-cat-label">${escapeHtml(it.kind)}</span><span class="picker-name">${escapeHtml(it.label)}</span><span class="picker-details">${escapeHtml(it.details || '')}</span></span>
+        </button>`).join('') : `<div class="lib-empty">${escapeHtml(emptyText)}</div>`;
+      pickerGrid.querySelectorAll('[data-pick]').forEach(btn => btn.addEventListener('click', () => { closeAssetPicker(); onPick(btn.dataset.pick); }));
+    };
+    pickerState.redraw = draw;
+    draw();
+    pickerModal.classList.add('active');
+    setTimeout(() => pickerSearch.focus(), 30);
+  }
+
+  // The asset picker's search box also drives list pickers.
+  pickerSearch.addEventListener('input', () => { if (pickerState && pickerState.redraw) pickerState.redraw(); });
+
+  function configThumb(cfg) {
+    const id = studioAssetIds(normalizeStudioConfig(cfg)).find(x => { const a = state.libraries.get(x); return a && (a.images || []).length; });
+    return id ? state.libraries.get(id).images[0].url : '';
+  }
+
+  function configSummary(cfg) {
+    const c = normalizeStudioConfig(cfg);
+    const name = (id) => (state.libraries.get(id) || {}).name;
+    return [c.model.mode === 'saved' && name(c.model.assetId), c.top.mode === 'saved' ? name(c.top.assetId) : c.top.mode === 'new' && (c.top.name || 'new top'),
+      c.bottom.mode === 'saved' ? name(c.bottom.assetId) : c.bottom.mode === 'new' && (c.bottom.name || 'new bottom'), c.pose.mode === 'saved' && name(c.pose.assetId)]
+      .filter(Boolean).join(' · ');
+  }
+
+  function pickPreset(onPick) {
+    const items = Array.from(state.outfitPresets.values()).filter(p => !p.archived && presetStatus(p) === 'approved')
+      .sort((a, b) => Number(isFavourite(b)) - Number(isFavourite(a)) || (a.name || '').localeCompare(b.name || ''))
+      .map(p => ({ id: p.id, kind: 'Outfit preset' + (isFavourite(p) ? ' · ★' : ''), label: p.name || 'Untitled preset', details: configSummary(p.config), thumb: configThumb(p.config), search: `${p.name} ${(p.tags || []).join(' ')}` }));
+    openListPicker('Apply an outfit preset', items, onPick, 'No approved outfit presets yet. Save one from a setup in Prompt Studio.');
+  }
+
+  function pickPreviousSetup(card, onPick) {
+    const items = Array.from(state.shoots.values()).filter(s => s.cardId !== card.id)
+      .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))
+      .map(s => {
+        const other = s.cardId && state.cards.get(s.cardId);
+        const cfg = s.status === 'final' && s.snapshot ? s.snapshot.config : s.config;
+        return { id: s.id, kind: `${s.status === 'final' ? 'Finalized' : 'Draft'} setup${other ? ' · ' + linkedCardLabel(other) : ''}`, label: s.name || 'Untitled setup', details: configSummary(cfg), thumb: configThumb(cfg), search: `${s.name} ${other ? linkedCardLabel(other) : ''}` };
+      });
+    openListPicker('Duplicate a previous configuration', items, onPick, 'There are no other setups yet.');
+  }
+
+  // Copy a configuration into this card's setup, keeping this card's own product.
+  function applyConfigToCard(card, sourceCfg, sourceLabel, sectionsToCopy) {
+    const keep = productSectionFor(card);
+    const src = normalizeStudioConfig(sourceCfg);
+    const keys = (sectionsToCopy || PRESET_SECTIONS).filter(k => k !== keep);
+    const rec = currentCardSetup(card);
+    if (!rec || rec.status === 'final') {
+      const base = emptyStudioConfig();
+      keys.forEach(k => { base[k] = JSON.parse(JSON.stringify(src[k])); });
+      const created = createCardSetup(card, base, { sourceLabel });
+      if (created) showToast(`Created a setup from ${sourceLabel}`, 'success');
+      return;
+    }
+    const cfg = normalizeStudioConfig(rec.config);
+    const changing = keys.filter(k => JSON.stringify(cfg[k]) !== JSON.stringify(src[k]) && JSON.stringify(src[k]) !== JSON.stringify(emptyStudioConfig()[k]));
+    if (!changing.length) { showToast('Nothing to change: the setup already matches', 'info'); return; }
+    const labels = { model: 'Model', sunglasses: 'Sunglasses', top: 'Top', bottom: 'Bottom', shoes: 'Shoes', accessories: 'Props and accessories', pose: 'Pose', style: 'House style', settings: 'Prompt settings' };
+    if (!confirm(`Apply ${sourceLabel}?\n\nThese sections of the current setup will be replaced:\n• ${changing.map(k => labels[k] || k).join('\n• ')}\n\nThis product (${labels[keep] || keep}) and everything else stay as they are.${rec.prompt && rec.prompt.edited ? '\n\nYour hand-edited prompt is kept; you can switch to the new generated prompt afterwards.' : ''}`)) return;
+    updateSetupRecord(rec, c => { changing.forEach(k => { c[k] = JSON.parse(JSON.stringify(src[k])); }); });
+    showToast(`Applied ${sourceLabel}`, 'success');
+  }
+
+  // ---- Rendering the drawer tab ----------------------------------------------------------
+  function studioChipHtml(rec, label, id, fallback) {
+    const a = id ? studioAsset(rec, id) : null;
+    if (!a && !fallback) return '';
+    const img = a && (a.images || [])[0];
+    return `<div class="card-studio-chip">
+      <span class="card-studio-chip-thumb">${img ? `<img src="${escapeHtml(img.url)}" alt="" data-card-zoom="${escapeHtml(img.url)}" />` : ''}</span>
+      <span class="card-studio-chip-body"><span class="lib-cat-label">${escapeHtml(label)}</span><strong>${escapeHtml(a ? a.name : fallback)}</strong>
+      <span class="studio-badge ${a ? 'saved' : 'new'}">${a ? 'Saved asset' : 'New reference'}</span></span></div>`;
+  }
+
+  function renderCardStudio(card) {
+    if (!drawerStudioPane) return;
+    const setups = cardSetups(card);
+    const rec = currentCardSetup(card);
+    const canConfigureHere = canCurrentUserWrite('shoots');
+    const canLink = canCurrentUserWrite('product_links');
+    const reviewer = state.currentUser.role === 'reviewer' || isAdminRole(state.currentUser.role);
+    drawerStudioHint.textContent = rec ? (rec.status === 'final' ? 'final' : 'draft') : '';
+    drawerStudioHint.classList.toggle('warn', false);
+
+    const link = productLinkFor(card);
+    const linked = link && state.libraries.get(link.assetId);
+    const skuMatch = !linked ? skuMatchFor(card) : null;
+    const linkHtml = `
+      <div class="job-section">
+        <span class="job-section-title">Library product</span>
+        ${linked ? `<div class="card-studio-row">${studioChipHtml({}, catDef(linked.type).label, linked.id)}
+            ${canLink ? '<div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-cs="link">Change</button><button type="button" class="btn btn-secondary btn-sm" data-cs="unlink">Unlink</button></div>' : ''}</div>
+            <span class="job-section-sub">Linked by ${escapeHtml(memberName(link.linkedBy))} ${escapeHtml(timeAgo(link.linkedAt))}. Setups for this card use this asset for the product.</span>`
+          : `<span class="job-section-sub">Not linked to the Asset Library. Setups use this card's own photos as a new product until you link it.</span>
+            ${skuMatch && canLink ? `<div class="studio-clarify"><span class="studio-asset-text">SKU <strong>${escapeHtml(card.sku)}</strong> matches <strong>${escapeHtml(skuMatch.name)}</strong> (${escapeHtml(catDef(skuMatch.type).singular)}) in the Asset Library.</span><div class="studio-row"><button type="button" class="btn btn-primary btn-sm" data-cs="link-sku" data-asset="${escapeHtml(skuMatch.id)}">Link to it</button></div></div>` : ''}
+            ${canLink ? '<div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-cs="link">Link to a library asset…</button></div><span class="job-section-sub">Links are made only when you pick the asset or confirm an exact SKU match, never from similar names.</span>' : ''}`}
+      </div>`;
+
+    let setupHtml;
+    if (!rec) {
+      const model = trackerModelFor(card);
+      setupHtml = `
+        <div class="job-section">
+          <span class="job-section-title">Prompt Studio setup</span>
+          <span class="job-section-sub">No setup yet. A new setup starts with this product${model ? ` and the model ${escapeHtml(model.name)} named in the tracker` : ''}.</span>
+          ${canConfigureHere ? `<div class="studio-row">
+            <button type="button" class="btn btn-primary btn-sm" data-cs="create">Create setup</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-cs="preset">Apply an outfit preset…</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-cs="duplicate">Duplicate a previous configuration…</button>
+          </div>` : '<span class="job-section-sub">Creators and admins set up shoots. You can view setups once they exist.</span>'}
+        </div>`;
+    } else {
+      const c = normalizeStudioConfig(rec.status === 'final' && rec.snapshot ? rec.snapshot.config : rec.config);
+      const editable = rec.status !== 'final' && canConfigureHere;
+      const checklist = studioChecklist(rec);
+      const todo = checklist.filter(i => !i.ok);
+      const cur = currentPrompt(rec);
+      const refs = rec.status === 'final' && rec.snapshot ? rec.snapshot.refs : cur.plan.refs;
+      const chips = [
+        c.model.mode === 'saved' ? studioChipHtml(rec, 'Model', c.model.assetId) : c.model.mode === 'new' ? studioChipHtml(rec, 'Model', '', c.model.name || 'New model') : '',
+        c.top.mode === 'saved' ? studioChipHtml(rec, 'Top', c.top.assetId) : c.top.mode === 'new' ? studioChipHtml(rec, 'Top', '', c.top.name || 'New top') : '',
+        c.bottom.mode === 'saved' ? studioChipHtml(rec, 'Bottom', c.bottom.assetId) : c.bottom.mode === 'new' ? studioChipHtml(rec, 'Bottom', '', c.bottom.name || 'New bottom') : '',
+        c.shoes.mode === 'saved' ? studioChipHtml(rec, 'Shoes', c.shoes.assetId) : c.shoes.mode !== 'none' ? studioChipHtml(rec, 'Shoes', '', c.shoes.text || c.shoes.name || 'Shoes reference') : '',
+        c.sunglasses.enabled ? (c.sunglasses.mode === 'saved' ? studioChipHtml(rec, 'Sunglasses', c.sunglasses.assetId) : studioChipHtml(rec, 'Sunglasses', '', 'Sunglasses reference')) : '',
+        ...c.accessories.map(a => a.kind === 'saved' ? studioChipHtml(rec, 'Accessory / prop', a.assetId) : studioChipHtml(rec, 'Accessory / prop', '', a.text || 'Custom item')),
+        c.pose.mode === 'saved' ? studioChipHtml(rec, 'Pose', c.pose.assetId) : studioChipHtml(rec, 'Pose', '', c.pose.mode === 'text' ? (c.pose.text || 'Pose description') : 'Pose reference'),
+        studioChipHtml(rec, 'House style', c.style.assetId)
+      ].filter(Boolean).join('');
+      setupHtml = `
+        <div class="job-section">
+          <div class="job-section-head"><span class="job-section-title">Prompt Studio setup</span>
+            <span class="studio-badge ${rec.status === 'final' ? 'final' : ''}">${rec.status === 'final' ? 'Finalized' : 'Draft'}</span></div>
+          <span class="job-section-sub">${escapeHtml(rec.name || 'Untitled setup')} · updated ${escapeHtml(timeAgo(rec.updatedAt))} by ${escapeHtml(memberName(rec.updatedBy || rec.createdBy))}${rec.status !== 'final' ? (todo.length ? ` · <span class="studio-warn">${todo.length} thing${todo.length > 1 ? 's' : ''} left: ${escapeHtml(todo.map(i => i.label).join(', '))}</span>` : ' · ready to finalize') : ` · finalized ${escapeHtml(new Date(rec.finalizedAt).toLocaleString())}`}</span>
+          <div class="card-studio-chips">${chips}</div>
+          <div class="studio-row">
+            <button type="button" class="btn btn-primary btn-sm" data-cs="open">Open in Prompt Studio</button>
+            ${editable ? `<button type="button" class="btn btn-secondary btn-sm" data-cs="pick" data-section="model">Choose model…</button>
+              <button type="button" class="btn btn-secondary btn-sm" data-cs="pick" data-section="top">Top…</button>
+              <button type="button" class="btn btn-secondary btn-sm" data-cs="pick" data-section="bottom">Bottom…</button>
+              <button type="button" class="btn btn-secondary btn-sm" data-cs="preset">Apply outfit preset…</button>
+              <button type="button" class="btn btn-secondary btn-sm" data-cs="duplicate">Duplicate previous configuration…</button>` : ''}
+            ${rec.status === 'final' && canConfigureHere ? '<button type="button" class="btn btn-secondary btn-sm" data-cs="new-draft">Start a new draft from this</button>' : ''}
+            ${canCurrentUserWrite('outfit_presets') && (canConfigureHere || reviewer) ? `<button type="button" class="btn btn-secondary btn-sm" data-cs="save-preset">${isAdminRole(state.currentUser.role) ? 'Save as preset' : 'Propose as preset'}</button>` : ''}
+          </div>
+          ${setups.length > 1 ? `<span class="job-section-sub">This card has ${setups.length} setups: ${setups.map(s => `<button type="button" class="identity-link" data-cs="open-other" data-id="${escapeHtml(s.id)}">${escapeHtml(s.name || 'setup')} (${s.status === 'final' ? 'final' : 'draft'})</button>`).join(', ')}</span>` : ''}
+        </div>
+        <div class="job-section">
+          <div class="job-section-head"><span class="job-section-title">Prompt</span>
+            <div class="studio-row"><button type="button" class="btn btn-secondary btn-sm" data-cs="copy-prompt">Copy</button>
+            ${editable && rec.prompt && rec.prompt.edited ? '<button type="button" class="btn btn-secondary btn-sm" data-cs="use-generated">Use generated</button>' : ''}</div></div>
+          ${cur.stale ? '<span class="studio-warn">The setup changed after this prompt was edited by hand. "Use generated" switches to the new prompt.</span>' : ''}
+          ${cur.plan && cur.plan.unresolved.length ? `<span class="studio-warn">${cur.plan.unresolved.length} instruction conflict${cur.plan.unresolved.length > 1 ? 's' : ''} to decide in Prompt Studio.</span>` : ''}
+          ${editable ? `<textarea class="form-textarea studio-prompt-editor" id="card-studio-prompt" rows="12" spellcheck="false">${escapeHtml(cur.text)}</textarea><span class="job-section-sub">Edits save automatically. Locked facts are only guaranteed while the prompt is generated; check hand edits carefully.</span>`
+            : `<pre class="studio-prompt">${escapeHtml(cur.text)}</pre>`}
+        </div>
+        <div class="job-section">
+          <span class="job-section-title">Reference images in order (${refs.reduce((n, r) => n + r.urls.length, 0)})</span>
+          ${refs.length ? `<ol class="studio-refs">${refs.map(r => `<li><span class="studio-ref-range">${escapeHtml(r.range)}</span><span class="studio-badge ${r.saved ? 'saved' : 'new'}">${r.saved ? 'Saved' : 'New'}</span> ${escapeHtml(r.label)}${r.role ? ` <span class="studio-muted">(${escapeHtml(r.role)})</span>` : ''}<div class="studio-mini-images">${r.urls.map(u => `<img src="${escapeHtml(u)}" alt="" data-card-zoom="${escapeHtml(u)}" />`).join('')}</div></li>`).join('')}</ol>` : '<span class="job-section-sub">No reference images yet.</span>'}
+        </div>`;
+    }
+    drawerStudioPane.innerHTML = linkHtml + setupHtml;
+  }
+
+  drawerStudioPane.addEventListener('click', (e) => {
+    const zoom = e.target.closest('[data-card-zoom]');
+    if (zoom) { openImageZoomModal(zoom.dataset.cardZoom, ''); return; }
+    const el = e.target.closest('[data-cs]');
+    const card = state.activeCardId && state.cards.get(state.activeCardId);
+    if (!el || !card) return;
+    const rec = currentCardSetup(card);
+    switch (el.dataset.cs) {
+      case 'link':
+        if (!ensureCanEdit('product_links')) return;
+        openAssetPicker({ title: `Which library asset is ${card.name || 'this product'}?`, types: ['top', 'bottom', 'shoes', 'accessory'], onPick: (id) => setProductLink(card, id) });
+        break;
+      case 'link-sku': setProductLink(card, el.dataset.asset); break;
+      case 'unlink': {
+        if (!ensureCanEdit('product_links')) return;
+        if (!confirm('Unlink this product from the Asset Library? Existing setups keep what they have.')) return;
+        state.productLinks.delete(card.id);
+        deleteFromStore('product_links', card.id);
+        afterCardStudioChange();
+        break;
+      }
+      case 'create': createCardSetup(card); break;
+      case 'preset':
+        pickPreset((id) => { const p = state.outfitPresets.get(id); if (p) applyConfigToCard(card, p.config, `the preset "${p.name}"`); });
+        break;
+      case 'duplicate':
+        pickPreviousSetup(card, (id) => {
+          const s = state.shoots.get(id);
+          if (!s) return;
+          applyConfigToCard(card, s.status === 'final' && s.snapshot ? s.snapshot.config : s.config, `the configuration "${s.name}"`, [...PRESET_SECTIONS, 'expression', 'references']);
+        });
+        break;
+      case 'pick': {
+        if (!rec) return;
+        const section = el.dataset.section;
+        openAssetPicker({
+          ...STUDIO_PICKERS[section],
+          onPick: (id) => {
+            const cfg = normalizeStudioConfig(rec.config);
+            const current = cfg[section].mode === 'saved' ? cfg[section].assetId : '';
+            const currentName = current ? (state.libraries.get(current) || {}).name : (cfg[section].mode === 'new' ? cfg[section].name || 'the new reference' : '');
+            if (currentName && current !== id && !confirm(`Replace ${currentName} with ${(state.libraries.get(id) || {}).name}? Nothing else in the setup changes.`)) return;
+            updateSetupRecord(rec, c => { c[section].mode = 'saved'; c[section].assetId = id; });
+          }
+        });
+        break;
+      }
+      case 'open':
+      case 'open-other': {
+        const target = el.dataset.cs === 'open-other' ? state.shoots.get(el.dataset.id) : rec;
+        if (!target) return;
+        setStudioOpen('shoot', target.id);
+        studioUI.panel = 'setups';
+        closeCardDrawer();
+        document.getElementById('tab-studio').click();
+        break;
+      }
+      case 'new-draft': if (rec) { duplicateSetup(rec, { stay: true }); afterCardStudioChange(); } break;
+      case 'save-preset': if (rec) savePresetFromSetup(rec); break;
+      case 'copy-prompt': if (rec) { copyText(currentPrompt(rec).text); showToast('Prompt copied', 'success'); } break;
+      case 'use-generated':
+        if (!rec || !ensureCanEdit('shoots')) return;
+        if (!confirm('Replace your hand-edited prompt with the generated one? The edited text is saved as a version first.')) return;
+        pushPromptVersion(rec, currentPrompt(rec).text, 'edited (before using generated)');
+        rec.prompt = { edited: false, wording: (rec.prompt && rec.prompt.wording) || 0, ai: null };
+        scheduleStudioSave('shoot', rec);
+        afterCardStudioChange();
+        break;
+    }
+  });
+
+  drawerStudioPane.addEventListener('input', (e) => {
+    if (e.target.id !== 'card-studio-prompt') return;
+    const card = state.activeCardId && state.cards.get(state.activeCardId);
+    const rec = card && currentCardSetup(card);
+    if (!rec || rec.status === 'final' || !canCurrentUserWrite('shoots')) return;
+    const cur = currentPrompt(rec);
+    rec.prompt = { ...(rec.prompt || {}), text: e.target.value, edited: true, engineText: (rec.prompt && rec.prompt.edited && rec.prompt.engineText) || cur.engineText, ai: rec.prompt && rec.prompt.ai };
+    scheduleStudioSave('shoot', rec);
+  });
+
+  function setProductLink(card, assetId) {
+    if (!ensureCanEdit('product_links')) return;
+    const asset = state.libraries.get(assetId);
+    if (!asset) return;
+    const takenBy = Array.from(state.productLinks.values()).find(l => l.assetId === assetId && l.cardId !== card.id && state.cards.get(l.cardId));
+    if (takenBy && !confirm(`${asset.name} is already linked to ${linkedCardLabel(state.cards.get(takenBy.cardId))}. Link it to this product as well?`)) return;
+    const link = { key: card.id, cardId: card.id, assetId, sku: card.sku || '', linkedAt: new Date().toISOString(), linkedBy: state.currentUser.id };
+    state.productLinks.set(card.id, link);
+    putToStore('product_links', link);
+    // A draft setup that still uses the card's photos as a new product switches to the linked asset.
+    const rec = currentCardSetup(card);
+    if (rec && rec.status !== 'final') {
+      const cfg = normalizeStudioConfig(rec.config);
+      const usesCardPhotos = ['top', 'bottom'].some(k => cfg[k].mode === 'new' && cfg[k].name === (card.name || ''));
+      if (usesCardPhotos && confirm(`Use ${asset.name} as the product in the current draft setup?`)) {
+        updateSetupRecord(rec, c => {
+          ['top', 'bottom'].forEach(k => { if (c[k].mode === 'new' && c[k].name === (card.name || '')) { c[k] = { ...emptyStudioConfig()[k], mode: 'none' }; } });
+          placeCardProduct(c, card);
+        });
+      }
+    }
+    afterCardStudioChange();
+    showToast(`Linked to ${asset.name}`, 'success');
+  }
+
+  // A small marker on board cards that have a setup.
+  function cardStudioBadge(card) {
+    const rec = currentCardSetup(card);
+    if (!rec) return '';
+    return `<span class="card-studio-badge${rec.status === 'final' ? ' final' : ''}" title="Prompt Studio setup: ${rec.status === 'final' ? 'finalized' : 'draft'}">${rec.status === 'final' ? 'Prompt ✓' : 'Setup'}</span>`;
   }
 
   initDatabase().then(() => {
