@@ -15,7 +15,8 @@ const FILE_NAME_RE = /^[a-f0-9]{40}\.[a-z0-9]{1,5}$/;
 
 const EXT_BY_TYPE = {
   'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
-  'image/gif': 'gif', 'image/svg+xml': 'svg', 'image/bmp': 'bmp', 'image/avif': 'avif'
+  'image/gif': 'gif', 'image/svg+xml': 'svg', 'image/bmp': 'bmp', 'image/avif': 'avif',
+  'image/heic': 'heic', 'image/heif': 'heif'
 };
 const TYPE_BY_EXT = Object.fromEntries(Object.entries(EXT_BY_TYPE).map(([t, e]) => [e, t]));
 TYPE_BY_EXT.jpg = 'image/jpeg';
@@ -35,6 +36,44 @@ if (fs.existsSync(DB_FILE)) {
   }
 }
 
+// ---- One-time data migrations ----------------------------------------------
+// Each runs once; db.migrations records when. A copy of db.json is kept first.
+const MIGRATIONS = {
+  // Libraries became the Asset Library: "product" splits into tops, bottoms and
+  // accessories by its old category, and "background" becomes "style".
+  // Item ids stay the same, so jobs that reference them keep working.
+  assetLibraryV1(stores) {
+    const productType = { Top: 'top', Outerwear: 'top', Bottom: 'bottom' };
+    let changed = 0;
+    for (const item of Object.values(stores.libraries || {})) {
+      if (item.type === 'product') {
+        item.type = productType[item.category] || 'accessory';
+        changed++;
+      } else if (item.type === 'background') {
+        item.type = 'style';
+        changed++;
+      }
+    }
+    return changed;
+  }
+};
+
+function runMigrations() {
+  db.migrations = db.migrations || {};
+  const pending = Object.keys(MIGRATIONS).filter(name => !db.migrations[name]);
+  if (!pending.length) return;
+  if (fs.existsSync(DB_FILE)) fs.copyFileSync(DB_FILE, path.join(DATA_DIR, `db.before-${pending[0]}.json`));
+  for (const name of pending) {
+    const changed = MIGRATIONS[name](db.stores);
+    db.migrations[name] = new Date().toISOString();
+    console.log(`Migration ${name}: updated ${changed} item(s).`);
+  }
+  const tmp = DB_FILE + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(db));
+  fs.renameSync(tmp, DB_FILE);
+}
+runMigrations();
+
 // Writes are coalesced and done atomically (temp file + rename).
 let saveTimer = null;
 function writeDbAtomically() {
@@ -53,6 +92,11 @@ function scheduleSave() {
 
 function extForType(contentType) {
   return EXT_BY_TYPE[String(contentType || '').split(';')[0].trim().toLowerCase()] || 'bin';
+}
+
+// Only images may be uploaded.
+function isAllowedUploadType(contentType) {
+  return extForType(contentType) !== 'bin';
 }
 
 function saveFileBuffer(buf, contentType) {
@@ -234,5 +278,5 @@ function getPrivate() {
 
 module.exports = {
   applyOps, snapshot, addClient, emit, saveFileBuffer, saveFileStream, filePath, fileType, flushNow,
-  getItem, putItemAsServer, getPrivate, scheduleSave, startBackups, DATA_DIR
+  getItem, putItemAsServer, getPrivate, scheduleSave, startBackups, DATA_DIR, isAllowedUploadType
 };

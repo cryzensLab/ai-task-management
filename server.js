@@ -88,7 +88,13 @@ function requireMember(token) {
 
 // People waiting for a role may only comment. Automatic work the browser does
 // for everyone (tracker sync, cleanup) is marked `system` and is allowed for them.
+// Asset Library: anyone with a role can add, edit and archive assets, but only
+// admins and the owner can delete one for good or change the category list.
+const isAdmin = (member) => member.role === 'admin' || member.role === 'owner';
+
 function opAllowedFor(member, op) {
+  if (op.store === 'libraries' && op.op === 'delete' && !isAdmin(member)) return false;
+  if (op.store === 'settings' && String(op.key) === 'assetCategories' && !isAdmin(member)) return false;
   if (member.role !== 'pending') return true;
   return op.store === 'comments' || op.system === true;
 }
@@ -111,6 +117,7 @@ async function handleDataApi(req, res, reqPath, query) {
 
   if (reqPath === '/api/files' && req.method === 'POST') {
     requireMember(req.headers['x-session-token']);
+    if (!store.isAllowedUploadType(req.headers['content-type'])) throw new HttpError(415, 'Only image files can be uploaded');
     const declared = Number(req.headers['content-length'] || 0);
     if (declared > MAX_FILE_BYTES) throw new HttpError(413, 'File too large');
     const url = await store.saveFileStream(req, req.headers['content-type'], MAX_FILE_BYTES);

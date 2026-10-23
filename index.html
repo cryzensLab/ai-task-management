@@ -1830,6 +1830,79 @@
     }
     .lib-dropzone.drag-active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
 
+    /* Asset Library additions */
+    .lib-sidebar-title.dynamic { padding-top: 14px; }
+    .lib-sidebar-title.dynamic:first-child { padding-top: 0; }
+    .lib-layout-toggle { display: flex; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); overflow: hidden; }
+    .lib-layout-btn {
+      width: 32px; height: 30px; display: flex; align-items: center; justify-content: center;
+      border: none; background: var(--bg-surface); color: var(--text-muted); cursor: pointer;
+    }
+    .lib-layout-btn + .lib-layout-btn { border-left: 1px solid var(--border-strong); }
+    .lib-layout-btn.active { background: var(--primary-light); color: var(--primary); }
+    .lib-item { position: relative; }
+    .lib-item:focus-visible, .lib-list-row:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .lib-item.archived, .lib-list-row.archived { opacity: 0.7; }
+    .lib-fav-btn {
+      position: absolute; top: 6px; right: 6px; z-index: 1;
+      width: 26px; height: 26px; padding: 0; border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-subtle);
+      font-size: 0.95rem; line-height: 1; cursor: pointer;
+    }
+    .lib-fav-btn:hover { color: var(--warning); border-color: var(--warning); }
+    .lib-fav-btn.on { color: var(--warning); }
+    .lib-cat-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-subtle); }
+    .lib-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .lib-tag {
+      font-size: 0.66rem; font-weight: 600; padding: 1px 6px; border-radius: 2px;
+      background: var(--bg-subtle); border: 1px solid var(--border-subtle); color: var(--text-muted);
+    }
+    .lib-list { display: flex; flex-direction: column; border: 1px solid var(--border-subtle); background: var(--bg-surface); }
+    .lib-list-row {
+      display: grid; grid-template-columns: 44px minmax(160px, 2fr) minmax(90px, 1fr) minmax(100px, 1.4fr) minmax(90px, 1fr) minmax(110px, 1.2fr) 34px;
+      gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.78rem; color: var(--text-muted); cursor: pointer; position: relative;
+    }
+    .lib-list-row:last-child { border-bottom: none; }
+    .lib-list-row:hover { background: var(--bg-subtle); }
+    .lib-list-row .lib-fav-btn { position: static; }
+    .lib-list-head { cursor: default; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-subtle); }
+    .lib-list-head:hover { background: transparent; }
+    .lib-list-thumb { width: 44px; height: 44px; background: var(--bg-subtle); overflow: hidden; }
+    .lib-list-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .lib-list-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; color: var(--text-main); }
+    .lib-list-name strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lib-list-sub { font-size: 0.7rem; color: var(--text-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lib-image-cover {
+      position: absolute; left: 4px; bottom: 4px; padding: 2px 6px; border: none; border-radius: 2px;
+      background: rgba(20, 19, 16, 0.75); color: #fff; font-size: 0.62rem; font-weight: 600; cursor: pointer;
+    }
+    .lib-cover-badge {
+      position: absolute; left: 4px; bottom: 4px; padding: 2px 6px; border-radius: 2px;
+      background: var(--primary); color: #fff; font-size: 0.62rem; font-weight: 700;
+    }
+    .lib-image-tile.uploading {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      font-size: 0.7rem; color: var(--text-muted);
+    }
+    .lib-spinner {
+      display: inline-block; width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border-strong); border-top-color: var(--primary); animation: spin 0.8s linear infinite;
+    }
+    .lib-empty .lib-spinner { display: block; margin: 0 auto 10px; }
+    .lib-error { border-color: var(--danger); }
+    .lib-history { margin-top: 16px; font-size: 0.78rem; color: var(--text-muted); }
+    .lib-history summary { cursor: pointer; font-weight: 600; color: var(--text-main); }
+    .lib-history-meta { margin: 8px 0; line-height: 1.5; }
+    .lib-history-id { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle); }
+    .lib-history ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+    .lib-history li span { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle); }
+    @media (max-width: 768px) {
+      .lib-list-row { grid-template-columns: 44px 1fr 34px; }
+      .lib-list-row > :nth-child(3), .lib-list-row > :nth-child(4), .lib-list-row > :nth-child(5), .lib-list-row > :nth-child(6) { display: none; }
+      .lib-search { width: 100%; }
+    }
+
     /* =====================================================================
        CARD DRAWER TABS: JOB SETUP & PROMPTS
        ===================================================================== */
@@ -2194,7 +2267,7 @@
         </button>
         <button class="nav-tab" data-view="libraries" id="tab-libraries">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          <span>Libraries</span>
+          <span>Asset Library</span>
         </button>
       </nav>
     </div>
@@ -2453,11 +2526,11 @@
     <section class="app-view" id="view-libraries">
       <div class="libraries-layout">
         <aside class="lib-sidebar" id="lib-sidebar">
-          <div class="lib-sidebar-title">Libraries</div>
-          <!-- Type buttons rendered by renderLibrariesView() -->
+          <!-- View and category buttons rendered by renderLibrariesView() -->
           <div class="lib-sidebar-footer">
+            <button class="btn btn-secondary btn-sm" id="lib-add-category-btn" style="display:none;" title="Add a new asset category (admins and owner only)">+ Add category</button>
             <button class="btn btn-secondary btn-sm" id="lib-seed-btn" title="Create entries for models, paired products and repeated notes found in the tracker">Fill from tracker</button>
-            <p>Shared with the whole team. Prompt snippets here will feed the prompt builder.</p>
+            <p>Shared with the whole team. Jobs use these assets by ID, and their prompt text feeds the prompt builder.</p>
           </div>
         </aside>
         <div class="lib-main">
@@ -2466,7 +2539,11 @@
               <h2 id="lib-title">Models</h2>
               <p id="lib-desc"></p>
             </div>
-            <input type="search" class="form-input lib-search" id="lib-search" placeholder="Search this library..." />
+            <input type="search" class="form-input lib-search" id="lib-search" placeholder="Search name, alias, SKU or tag…" aria-label="Search assets" />
+            <div class="lib-layout-toggle" role="group" aria-label="Layout">
+              <button type="button" class="lib-layout-btn" data-lib-layout="grid" title="Grid view" aria-label="Grid view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+              <button type="button" class="lib-layout-btn" data-lib-layout="list" title="List view" aria-label="List view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+            </div>
             <button class="btn btn-primary" id="lib-add-btn">+ Add</button>
           </div>
           <div class="lib-body" id="lib-body"></div>
@@ -2810,15 +2887,19 @@
       <form id="lib-editor-form" autocomplete="off"></form>
       <div id="lib-editor-images-section">
         <div class="form-group" style="margin-bottom:0;">
-          <label>Reference images</label>
+          <label id="lib-editor-images-label">Reference images</label>
+          <span class="lib-form-hint" id="lib-editor-images-hint"></span>
           <div class="lib-images-grid" id="lib-editor-images"></div>
-          <div class="lib-dropzone" id="lib-editor-dropzone">Drop images here or click to add</div>
-          <input type="file" id="lib-editor-file-input" accept="image/*" multiple style="display:none;" />
+          <div class="lib-dropzone" id="lib-editor-dropzone">Drop images here or click to add (JPG, PNG, WebP, GIF or AVIF, up to 25 MB each)</div>
+          <input type="file" id="lib-editor-file-input" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" multiple style="display:none;" />
         </div>
       </div>
+      <div id="lib-editor-history"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" id="lib-editor-delete" style="margin-right:auto;">Delete</button>
+      <button class="btn btn-danger" id="lib-editor-delete" title="Delete for good (admins and owner only)">Delete</button>
+      <button class="btn btn-secondary" id="lib-editor-archive">Archive</button>
+      <button class="btn btn-secondary" id="lib-editor-duplicate" style="margin-right:auto;">Duplicate</button>
       <button class="btn btn-secondary" id="lib-editor-cancel">Cancel</button>
       <button class="btn btn-primary" id="lib-editor-save">Save</button>
     </div>
@@ -3162,7 +3243,8 @@
     activity: new Map(), // cardId -> array of activity
     boards: new Map(),
     shapes: new Map(), // shapeId -> shape object
-    libraries: new Map(), // itemId -> library item (model, pose, background, prop, product, preset)
+    libraries: new Map(), // assetId -> Asset Library item (see LIBRARY_TYPES)
+    assetCategories: [], // categories added by admins: [{ key, label, singular }]
     settings: { ...DEFAULT_TEAM },
 
     // UI state
@@ -3208,6 +3290,7 @@
   const LEGACY_STORES = ['cards', 'comments', 'activity', 'boards', 'shapes', 'settings', 'uploaded_images'];
   const MIGRATION_FLAG = 'listingflow_migrated_to_server_v1';
   let dbInstance = null; // truthy once the server snapshot is loaded
+  let libraryLoadFailed = false;
   let serverSnapshot = {};
   let liveEvents = null;
   let liveEventsHadError = false;
@@ -3234,6 +3317,8 @@
       connectLiveEvents();
     } catch (err) {
       console.error('Could not load data from the ListingFlow server', err);
+      libraryLoadFailed = true;
+      if (state.currentView === 'libraries') renderLibrariesView();
       showToast('Cannot reach the ListingFlow server. Start it with "npm start"; changes are not being saved.', 'warning');
     }
   }
@@ -3330,6 +3415,8 @@
         if (teamSetting && teamSetting.value) state.settings = { ...DEFAULT_TEAM, ...teamSetting.value };
         const styleSetting = settings.find(s => s.key === 'promptStyle');
         state.promptStyle = styleSetting ? styleSetting.value : null;
+        const categorySetting = settings.find(s => s.key === 'assetCategories');
+        state.assetCategories = categorySetting && Array.isArray(categorySetting.value) ? categorySetting.value : [];
       }
 
       // Restore persisted uploaded images into local session cache
@@ -3451,7 +3538,7 @@
       // Load Libraries
       state.libraries.clear();
       const libraryItems = await getAllFromStore('libraries');
-      libraryItems.forEach(item => state.libraries.set(item.id, item));
+      libraryItems.forEach(item => state.libraries.set(item.id, upgradeLegacyItem(item)));
 
     } catch(err) {
       console.error('Error loading data from DB', err);
@@ -3615,13 +3702,28 @@
     }
   });
 
+  function imageTypeFromName(name) {
+    const ext = String(name || '').split('.').pop().toLowerCase();
+    return ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif',
+      avif: 'image/avif', bmp: 'image/bmp', svg: 'image/svg+xml', heic: 'image/heic', heif: 'image/heif' })[ext] || '';
+  }
+
   async function uploadFileToServer(blob) {
-    const res = await fetch('/api/files', {
-      method: 'POST',
-      headers: { 'Content-Type': blob.type || 'application/octet-stream', 'X-Session-Token': sessionToken() || '' },
-      body: blob
-    });
-    if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
+    let res;
+    try {
+      res = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': blob.type || imageTypeFromName(blob.name) || 'application/octet-stream', 'X-Session-Token': sessionToken() || '' },
+        body: blob
+      });
+    } catch (e) {
+      throw new Error('the ListingFlow server could not be reached');
+    }
+    if (!res.ok) {
+      let message = 'Upload failed (' + res.status + ')';
+      try { message = (await res.json()).error || message; } catch (e) {}
+      throw new Error(message);
+    }
     return (await res.json()).url;
   }
 
@@ -3737,6 +3839,7 @@
       case 'settings':
         if (isPut && op.key === 'team' && item.value) state.settings = { ...DEFAULT_TEAM, ...item.value };
         if (isPut && op.key === 'promptStyle') state.promptStyle = item.value;
+        if (isPut && op.key === 'assetCategories') state.assetCategories = Array.isArray(item.value) ? item.value : [];
         break;
       case 'uploaded_images':
         if (isPut && item.dataUrl) {
@@ -3774,7 +3877,7 @@
       }
       if (touched.has('shapes')) requestWhiteboardRender();
       if (touched.has('settings')) onTeamChanged();
-      if (touched.has('libraries')) renderLibrariesView();
+      if (touched.has('libraries') || (touched.has('settings') && state.currentView === 'libraries')) renderLibrariesView();
       if ((touched.has('libraries') || touched.has('settings')) && state.activeCardId && state.cards.get(state.activeCardId)) {
         renderJobAndPrompts(state.cards.get(state.activeCardId));
       }
@@ -5747,6 +5850,7 @@
     lsSet(MEMBER_ID_KEY, member ? member.id : null);
     updateUserSwitcherUI();
     updateTeamBadge();
+    if (state.currentView === 'libraries') renderLibrariesView(); // admin-only controls depend on who this is
     if (member) scheduleFlushAfterSignIn();
   }
 
@@ -7325,8 +7429,9 @@
 
 
   // -------------------------------------------------------------------
-  // LIBRARIES: reusable models, poses, backgrounds, props, products and
-  // note presets. Each item is stored in the shared 'libraries' store.
+  // ASSET LIBRARY: reusable models, garments, shoes, accessories, props,
+  // poses, styles and note presets, shared by the whole team in the
+  // 'libraries' store. Jobs always reference assets by their id.
   // -------------------------------------------------------------------
   const POSE_GROUPS = [
     'Front waist-up',
@@ -7338,76 +7443,220 @@
     'Other'
   ];
 
+  const nameField = (label, placeholder) => ({ key: 'name', label: label || 'Name', required: true, placeholder: placeholder || '' });
+  const codeField = (label, placeholder) => ({ key: 'code', label: label || 'Code', placeholder: placeholder || '' });
+  const urlField = { key: 'url', label: 'Product link', placeholder: 'https://' };
+  const constraintsField = (label, hint) => ({ key: 'constraints', label: label || 'Fixed constraints', type: 'textarea', rows: 2,
+    hint: hint || 'Rules that must always hold when this asset is used. Added to every prompt unchanged.' });
+
+  // Fields every asset has, shown after the category's own fields.
+  const COMMON_FIELDS = [
+    { key: 'tags', label: 'Tags', type: 'list', placeholder: 'Comma separated, e.g. summer, black, oversized' },
+    { key: 'aliases', label: 'Aliases', type: 'list', placeholder: 'Other names people search for, comma separated' },
+    { key: 'notes', label: 'Internal notes', type: 'textarea', rows: 2 }
+  ];
+
   const LIBRARY_TYPES = {
     model: {
       label: 'Models', singular: 'model', codePrefix: 'M', hasImages: true,
-      desc: 'Your AI models. The identity lock text is pasted unchanged into every prompt so the face and body stay consistent.',
+      imagesLabel: 'Identity reference images',
+      imagesHint: 'Face and body references of this person only. Poses and garments have their own categories.',
+      desc: 'Reusable AI models. The identity lock is pasted unchanged into every prompt so the face and body stay consistent across products.',
       fields: [
-        { key: 'name', label: 'Name', required: true, placeholder: 'e.g. Zayan' },
-        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. M01' },
+        nameField('Name', 'e.g. Zayan'),
+        codeField('Model ID', 'Auto, e.g. M01'),
+        { key: 'genderPresentation', label: 'Gender presentation', type: 'select', options: ['Not specified', 'Masculine', 'Feminine', 'Androgynous'] },
+        { key: 'appearance', label: 'Appearance description', type: 'textarea', rows: 3, hint: 'Age range, skin tone, face. Write what you see; nothing is filled in automatically.' },
+        { key: 'bodyProportions', label: 'Body proportions', placeholder: 'e.g. 6\'1", slim athletic, broad shoulders' },
+        { key: 'hairstyle', label: 'Hairstyle', placeholder: 'e.g. short textured crop, dark brown' },
+        { key: 'facialHair', label: 'Facial hair', placeholder: 'e.g. light stubble' },
         { key: 'snippet', label: 'Identity lock (used in prompts)', type: 'textarea', rows: 4,
           hint: 'Face, age range, build, height, skin tone, hair. Write it once and keep it identical across jobs.' },
-        { key: 'notes', label: 'Internal notes', type: 'textarea', rows: 2 }
+        constraintsField('Approved styling constraints', 'e.g. No hats. Keep beard length. Always clean-shaven neck.')
       ]
     },
-    pose: {
-      label: 'Poses', singular: 'pose variation', codePrefix: 'P', hasImages: true, groupBy: 'poseGroup',
-      desc: 'Each pose with its body and hand variations. Add a reference image and the exact wording that produces it.',
+    top: {
+      label: 'Tops', singular: 'top', codePrefix: '', hasImages: true, garment: true, groupBy: 'garmentType',
+      imagesLabel: 'Garment reference images',
+      desc: 'Shirts, T-shirts, polos, Henleys, jackets and other upper-body garments you pair with products.',
       fields: [
-        { key: 'poseGroup', label: 'Pose', type: 'select', options: POSE_GROUPS, required: true },
-        { key: 'name', label: 'Variation name', required: true, placeholder: 'e.g. Hands in pockets, weight on left leg' },
-        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. P01' },
-        { key: 'snippet', label: 'Prompt snippet', type: 'textarea', rows: 4,
-          hint: 'Framing, camera angle, body and hand position. Avoid describing the garment here.' }
+        nameField('Product name'),
+        codeField('SKU / code'),
+        { key: 'garmentType', label: 'Type', type: 'select', options: ['Shirt', 'T-shirt', 'Polo', 'Henley', 'Jacket', 'Overshirt', 'Sweater', 'Hoodie', 'Other'] },
+        { key: 'fit', label: 'Fit', placeholder: 'e.g. Boxy, cropped, relaxed' },
+        { key: 'fabric', label: 'Fabric', placeholder: 'e.g. Heavyweight cotton jersey' },
+        { key: 'colour', label: 'Colour' },
+        { key: 'construction', label: 'Construction details', type: 'textarea', rows: 2, hint: 'Collar, closures, pockets, seams, prints.' },
+        urlField,
+        { key: 'snippet', label: 'Garment lock (used in prompts)', type: 'textarea', rows: 3,
+          hint: 'Fit, length, fabric, colour, buttons, pockets, prints. Only what you can see in the photos.' },
+        constraintsField()
       ]
     },
-    background: {
-      label: 'Backgrounds', singular: 'background', codePrefix: 'BG', hasImages: true,
-      desc: 'Soft grey studio and your custom backdrops, with the lighting wording that goes with them.',
+    bottom: {
+      label: 'Bottoms', singular: 'bottom', codePrefix: '', hasImages: true, garment: true, groupBy: 'garmentType',
+      imagesLabel: 'Garment reference images',
+      desc: 'Denim, trousers, flared jeans, shorts and other lower-body garments.',
       fields: [
-        { key: 'name', label: 'Name', required: true, placeholder: 'e.g. Soft grey studio' },
-        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. BG01' },
-        { key: 'snippet', label: 'Prompt snippet', type: 'textarea', rows: 4, hint: 'Backdrop, floor, lighting setup, shadows.' }
+        nameField('Product name'),
+        codeField('SKU / code'),
+        { key: 'garmentType', label: 'Type', type: 'select', options: ['Jeans', 'Flared jeans', 'Trousers', 'Shorts', 'Joggers', 'Cargos', 'Other'] },
+        { key: 'fit', label: 'Fit', placeholder: 'e.g. Baggy, straight, slim' },
+        { key: 'rise', label: 'Rise', placeholder: 'e.g. Mid rise' },
+        { key: 'length', label: 'Length', placeholder: 'e.g. Full length, stacked at ankle' },
+        { key: 'fabric', label: 'Fabric' },
+        { key: 'colour', label: 'Colour / wash' },
+        { key: 'construction', label: 'Construction details', type: 'textarea', rows: 2, hint: 'Waistband, pockets, hems, distressing.' },
+        urlField,
+        { key: 'snippet', label: 'Garment lock (used in prompts)', type: 'textarea', rows: 3 },
+        constraintsField()
+      ]
+    },
+    shoes: {
+      label: 'Shoes', singular: 'shoe', codePrefix: '', hasImages: true, garment: true, groupBy: 'shoeType',
+      imagesLabel: 'Shoe reference images',
+      desc: 'Sneakers, Chelsea boots, formal shoes and other footwear.',
+      fields: [
+        nameField('Name'),
+        codeField('SKU / code'),
+        { key: 'shoeType', label: 'Type', type: 'select', options: ['Sneakers', 'Chelsea boots', 'Formal shoes', 'Loafers', 'Boots', 'Sandals', 'Other'] },
+        { key: 'colour', label: 'Colour' },
+        { key: 'material', label: 'Material', placeholder: 'e.g. Suede, leather' },
+        urlField,
+        { key: 'snippet', label: 'Shoe description (used in prompts)', type: 'textarea', rows: 3 },
+        constraintsField()
+      ]
+    },
+    accessory: {
+      label: 'Sunglasses & accessories', singular: 'accessory', codePrefix: '', hasImages: true, garment: true, groupBy: 'accessoryType',
+      imagesLabel: 'Accessory reference images',
+      desc: 'Sunglasses, watches, jewellery, bags, belts and other accessories.',
+      fields: [
+        nameField('Name', 'e.g. Black aviator sunglasses'),
+        codeField('SKU / code'),
+        { key: 'accessoryType', label: 'Type', type: 'select', options: ['Sunglasses', 'Watch', 'Jewellery', 'Bag', 'Belt', 'Hat', 'Other'] },
+        { key: 'placement', label: 'Placement', placeholder: 'e.g. Worn on face / left wrist / hooked on collar' },
+        { key: 'colour', label: 'Colour' },
+        { key: 'material', label: 'Material' },
+        urlField,
+        { key: 'snippet', label: 'Description (used in prompts)', type: 'textarea', rows: 3 },
+        constraintsField()
       ]
     },
     prop: {
       label: 'Props', singular: 'prop', codePrefix: 'PR', hasImages: true,
-      desc: 'Sunglasses and other extras, with where and how they appear.',
+      imagesLabel: 'Prop reference images',
+      desc: 'Handheld objects and other styling props, with where and how they appear.',
       fields: [
-        { key: 'name', label: 'Name', required: true, placeholder: 'e.g. Black aviator sunglasses' },
-        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. PR01' },
-        { key: 'placement', label: 'Placement', placeholder: 'e.g. Worn on face / held in left hand / hooked on collar' },
-        { key: 'snippet', label: 'Prompt snippet', type: 'textarea', rows: 3 }
+        nameField('Name', 'e.g. Iced coffee cup'),
+        codeField('Code', 'Auto, e.g. PR01'),
+        { key: 'placement', label: 'Placement', placeholder: 'e.g. Held in left hand at waist height' },
+        { key: 'snippet', label: 'Prompt snippet', type: 'textarea', rows: 3 },
+        constraintsField()
       ]
     },
-    product: {
-      label: 'Products', singular: 'product', codePrefix: '', hasImages: true, groupBy: 'category',
-      desc: 'Products you reuse as pairings. The garment lock describes fit, fabric and details so they render the same every time.',
+    pose: {
+      label: 'Poses', singular: 'pose', codePrefix: 'P', hasImages: true, groupBy: 'poseGroup',
+      imagesLabel: 'Pose reference images',
+      imagesHint: 'Only the pose is copied from these, never the person or the clothes.',
+      desc: 'Each pose with its body and hand variations. Add a reference image and the exact wording that produces it.',
       fields: [
-        { key: 'name', label: 'Product name', required: true },
-        { key: 'code', label: 'SKU' },
-        { key: 'category', label: 'Category', type: 'select', options: ['Top', 'Bottom', 'Outerwear', 'Other'], required: true },
-        { key: 'url', label: 'Product link', placeholder: 'https://' },
-        { key: 'snippet', label: 'Garment lock (used in prompts)', type: 'textarea', rows: 4,
-          hint: 'Fit, length, fabric, colour, buttons/pockets/prints. Only what you can see in the photos.' },
-        { key: 'notes', label: 'Internal notes', type: 'textarea', rows: 2 }
+        { key: 'poseGroup', label: 'Pose', type: 'select', options: POSE_GROUPS, required: true },
+        nameField('Variation name', 'e.g. Hands in pockets, weight on left leg'),
+        codeField('Code', 'Auto, e.g. P01'),
+        { key: 'cameraAngle', label: 'Camera angle', placeholder: 'e.g. Eye level, slightly low' },
+        { key: 'bodyOrientation', label: 'Body orientation', placeholder: 'e.g. Torso turned 45° to camera left' },
+        { key: 'handPlacement', label: 'Hand placement', placeholder: 'e.g. Both hands in front pockets' },
+        { key: 'framing', label: 'Framing', placeholder: 'e.g. Waist up, head room 10%' },
+        { key: 'snippet', label: 'Pose description (used in prompts)', type: 'textarea', rows: 3,
+          hint: 'Framing, camera angle, body and hand position. Avoid describing the garment here.' },
+        constraintsField()
+      ]
+    },
+    style: {
+      label: 'Styles', singular: 'style', codePrefix: 'ST', hasImages: true,
+      imagesLabel: 'Style reference images',
+      desc: 'Reusable photography styles: lighting, background, camera and brand-specific visual rules.',
+      fields: [
+        nameField('Name', 'e.g. Soft grey studio'),
+        codeField('Code', 'Auto, e.g. ST01'),
+        { key: 'lighting', label: 'Lighting', placeholder: 'e.g. Large softbox key left, gentle fill' },
+        { key: 'background', label: 'Background', placeholder: 'e.g. Seamless light grey, soft floor shadow' },
+        { key: 'camera', label: 'Camera', placeholder: 'e.g. 85mm, f/8, eye level' },
+        { key: 'brandRules', label: 'Brand visual rules', type: 'textarea', rows: 2 },
+        { key: 'snippet', label: 'Style block (used in prompts)', type: 'textarea', rows: 4, hint: 'Backdrop, floor, lighting setup, shadows, camera.' },
+        constraintsField()
       ]
     },
     preset: {
       label: 'Note presets', singular: 'note preset', codePrefix: 'N', hasImages: false,
       desc: 'Instructions that come up again and again in the tracker notes, written once.',
       fields: [
-        { key: 'name', label: 'Short name', required: true, placeholder: 'e.g. Zara lighting & backdrop' },
-        { key: 'code', label: 'Code', placeholder: 'Auto, e.g. N01' },
+        nameField('Short name', 'e.g. Zara lighting & backdrop'),
+        codeField('Code', 'Auto, e.g. N01'),
         { key: 'snippet', label: 'Instruction text', type: 'textarea', rows: 5 }
       ]
     }
   };
 
+  // Types picked as "Paired with" in a job.
+  const GARMENT_TYPES = ['top', 'bottom', 'shoes', 'accessory'];
+
+  // Categories added by an admin. They get the generic fields.
+  function customCategoryDef(c) {
+    return {
+      label: c.label, singular: c.singular || c.label.toLowerCase(), codePrefix: '', hasImages: true, custom: true,
+      desc: c.desc || 'A custom category added by an admin.',
+      fields: [
+        nameField('Name'),
+        codeField('SKU / code'),
+        { key: 'description', label: 'Description', type: 'textarea', rows: 3 },
+        { key: 'snippet', label: 'Prompt instructions', type: 'textarea', rows: 3 },
+        constraintsField()
+      ]
+    };
+  }
+
+  function assetCategories() {
+    const out = Object.entries(LIBRARY_TYPES).map(([key, def]) => [key, def]);
+    (state.assetCategories || []).forEach(c => { if (c && c.key && !LIBRARY_TYPES[c.key]) out.push([c.key, customCategoryDef(c)]); });
+    return out;
+  }
+
+  function catDef(type) {
+    if (LIBRARY_TYPES[type]) return LIBRARY_TYPES[type];
+    const custom = (state.assetCategories || []).find(c => c.key === type);
+    if (custom) return customCategoryDef(custom);
+    return customCategoryDef({ label: type || 'Uncategorised', singular: 'asset' });
+  }
+
+  // Labels for the pickers in Job setup, which can span several categories.
+  function pickerLabels(type) {
+    if (type === 'garment') return { label: 'Products', singular: 'product' };
+    return catDef(type);
+  }
+
+  // Items saved by older versions of the app (before the server migration ran).
+  function upgradeLegacyItem(item) {
+    if (!item) return item;
+    if (item.type === 'product') item.type = ({ Top: 'top', Outerwear: 'top', Bottom: 'bottom' })[item.category] || 'accessory';
+    else if (item.type === 'background') item.type = 'style';
+    return item;
+  }
+
+  const LIB_VIEWS = {
+    all: { label: 'All assets', desc: 'Everything in the library. Search by name, alias, SKU or tag.' },
+    favourites: { label: 'Favourites', desc: 'Assets you starred. Favourites are personal to you.' },
+    recent: { label: 'Recently used', desc: 'Assets most recently picked in a job.' },
+    archived: { label: 'Archived', desc: 'Archived assets are hidden from job pickers. Restore them at any time.' }
+  };
+
   const libUI = {
-    activeType: 'model',
+    activeType: 'all', // a LIB_VIEWS key or a category key
     search: '',
-    editing: null // working copy of the item open in the editor
+    layout: (() => { try { return localStorage.getItem('listingflow_lib_layout') || 'grid'; } catch (e) { return 'grid'; } })(),
+    editing: null, // working copy of the item open in the editor
+    uploading: 0
   };
 
   const libSidebar = document.getElementById('lib-sidebar');
@@ -7418,25 +7667,35 @@
   const libSearchInput = document.getElementById('lib-search');
   const libAddBtn = document.getElementById('lib-add-btn');
   const libSeedBtn = document.getElementById('lib-seed-btn');
+  const libAddCategoryBtn = document.getElementById('lib-add-category-btn');
+  const libLayoutBtns = document.querySelectorAll('[data-lib-layout]');
   const libEditorModal = document.getElementById('lib-editor-modal');
   const libEditorTitle = document.getElementById('lib-editor-title');
   const libEditorForm = document.getElementById('lib-editor-form');
   const libEditorImagesSection = document.getElementById('lib-editor-images-section');
+  const libEditorImagesLabel = document.getElementById('lib-editor-images-label');
+  const libEditorImagesHint = document.getElementById('lib-editor-images-hint');
   const libEditorImages = document.getElementById('lib-editor-images');
   const libEditorDropzone = document.getElementById('lib-editor-dropzone');
   const libEditorFileInput = document.getElementById('lib-editor-file-input');
+  const libEditorHistory = document.getElementById('lib-editor-history');
   const libEditorDelete = document.getElementById('lib-editor-delete');
+  const libEditorArchive = document.getElementById('lib-editor-archive');
+  const libEditorDuplicate = document.getElementById('lib-editor-duplicate');
+  const libEditorSave = document.getElementById('lib-editor-save');
 
-  function libItemsOfType(type) {
-    return Array.from(state.libraries.values()).filter(it => it.type === type);
+  // Assets of one category ('garment' spans every garment category). Archived ones are left out unless asked for.
+  function libItemsOfType(type, includeArchived = false) {
+    const types = type === 'garment' ? GARMENT_TYPES : [type];
+    return Array.from(state.libraries.values()).filter(it => types.includes(it.type) && (includeArchived || !it.archived));
   }
 
   function nextLibraryCode(type) {
-    const prefix = LIBRARY_TYPES[type].codePrefix;
+    const prefix = catDef(type).codePrefix;
     if (!prefix) return '';
     const re = new RegExp('^' + prefix + '(\\d+)$', 'i');
     let max = 0;
-    libItemsOfType(type).forEach(it => {
+    libItemsOfType(type, true).forEach(it => {
       const m = re.exec(it.code || '');
       if (m) max = Math.max(max, parseInt(m[1], 10));
     });
@@ -7447,15 +7706,55 @@
     return 'lib_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
 
-  function saveLibraryItem(item) {
+  // Keep a short edit history on each asset: who did what, and which fields changed.
+  function recordLibraryHistory(item, action, fields) {
+    const entry = { at: new Date().toISOString(), by: state.currentUser.id, action };
+    if (fields && fields.length) entry.fields = fields;
+    item.history = [entry, ...(item.history || [])].slice(0, 25);
+  }
+
+  function saveLibraryItem(item, action, fields) {
     item.updatedAt = new Date().toISOString();
+    item.updatedBy = state.currentUser.id;
+    if (action) recordLibraryHistory(item, action, fields);
+    state.libraries.set(item.id, item);
+    putToStore('libraries', item);
+  }
+
+  // Usage and favourites change often; they don't count as edits.
+  function saveLibraryItemQuietly(item) {
     state.libraries.set(item.id, item);
     putToStore('libraries', item);
   }
 
   function applyRemoteLibraryOp(op) {
-    if (op.op === 'put') state.libraries.set(op.key, op.item);
+    if (op.op === 'put') state.libraries.set(op.key, upgradeLegacyItem(op.item));
     else state.libraries.delete(op.key);
+  }
+
+  // Called when a job starts using assets: bumps their usage count and last-used date.
+  function markAssetsUsed(ids) {
+    const now = new Date().toISOString();
+    ids.forEach(id => {
+      const item = state.libraries.get(id);
+      if (!item) return;
+      item.usageCount = (item.usageCount || 0) + 1;
+      item.lastUsedAt = now;
+      saveLibraryItemQuietly(item);
+    });
+  }
+
+  function isFavourite(item) {
+    return (item.favouredBy || []).includes(state.currentUser.id);
+  }
+
+  function toggleFavourite(item) {
+    if (!ensureCanEdit('libraries')) return;
+    const live = state.libraries.get(item.id) || item;
+    const me = state.currentUser.id;
+    live.favouredBy = isFavourite(live) ? live.favouredBy.filter(id => id !== me) : [...(live.favouredBy || []), me];
+    saveLibraryItemQuietly(live);
+    renderLibrariesView();
   }
 
   function normalizeUrl(u) {
@@ -7472,145 +7771,292 @@
     return parts[0] + '/' + slug;
   }
 
-  function cardMentionsProduct(card, product) {
-    const target = productKeyFromUrl(product.url);
-    if (!target || !card.pairedWith) return false;
-    return String(card.pairedWith).split(/[\s,]+/).some(u => productKeyFromUrl(u) === target);
+  const normText = (t) => String(t || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+  function libMatchesSearch(item, q) {
+    if (!q) return true;
+    return [item.name, item.code, ...(item.tags || []), ...(item.aliases || [])].some(v => v && normText(v).includes(q));
   }
 
-  // How many tracker jobs reference this item (models by character name, products by link).
-  function libUsageCount(item) {
-    let n = 0;
-    state.cards.forEach(card => {
-      if (item.type === 'model' && card.character && card.character.trim().toLowerCase() === (item.name || '').trim().toLowerCase()) n++;
-      else if (item.type === 'product' && cardMentionsProduct(card, item)) n++;
+  // Likely duplicates of `item`: same SKU/code, same name or alias in its category, or a shared image.
+  function findLikelyDuplicates(item) {
+    const name = normText(item.name);
+    const code = normText(item.code);
+    const aliases = (item.aliases || []).map(normText).filter(Boolean);
+    const urls = new Set((item.images || []).map(img => img.url));
+    const out = [];
+    state.libraries.forEach(other => {
+      if (other.id === item.id || other.archived) return;
+      let reason = '';
+      if (code && normText(other.code) === code) reason = 'same SKU / code';
+      else if (other.type === item.type) {
+        const otherNames = [normText(other.name), ...(other.aliases || []).map(normText)].filter(Boolean);
+        if (name && otherNames.includes(name)) reason = normText(other.name) === name ? 'same name' : 'matches one of its aliases';
+        else if (aliases.some(a => otherNames.includes(a))) reason = 'shares an alias';
+      }
+      if (!reason && (other.images || []).some(img => urls.has(img.url))) reason = 'same image';
+      if (reason) out.push({ item: other, reason });
     });
-    return n;
+    return out;
+  }
+
+  function memberName(id) {
+    if (!id) return 'Unknown';
+    if (id === 'sheet-sync') return 'Tracker sync';
+    const m = state.settings.members[id];
+    return m ? m.name : 'Former member';
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return '';
+    const s = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    if (s < 86400 * 30) return Math.floor(s / 86400) + 'd ago';
+    return new Date(iso).toLocaleDateString();
+  }
+
+  function usageText(item) {
+    if (!item.usageCount) return 'Not used yet';
+    return `Used ${item.usageCount}×` + (item.lastUsedAt ? ` · ${timeAgo(item.lastUsedAt)}` : '');
+  }
+
+  // Items for the current sidebar view, before search.
+  function libItemsForView(view) {
+    const all = Array.from(state.libraries.values());
+    if (view === 'all') return all.filter(it => !it.archived);
+    if (view === 'favourites') return all.filter(it => !it.archived && isFavourite(it));
+    if (view === 'recent') return all.filter(it => !it.archived && it.lastUsedAt);
+    if (view === 'archived') return all.filter(it => it.archived);
+    return libItemsOfType(view);
+  }
+
+  function libSortForView(view, items) {
+    if (view === 'recent') return items.sort((a, b) => String(b.lastUsedAt).localeCompare(String(a.lastUsedAt))).slice(0, 60);
+    if (view === 'archived') return items.sort((a, b) => String(b.archivedAt || '').localeCompare(String(a.archivedAt || '')));
+    return items.sort((a, b) => (a.code || a.name || '').localeCompare(b.code || b.name || '', undefined, { numeric: true }));
+  }
+
+  function renderLibrarySidebar() {
+    libSidebar.querySelectorAll('.lib-type-btn, .lib-sidebar-title.dynamic').forEach(b => b.remove());
+    const addBtn = (key, label, count) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'lib-type-btn' + (key === libUI.activeType ? ' active' : '');
+      btn.innerHTML = `<span>${escapeHtml(label)}</span><span class="lib-type-count">${count}</span>`;
+      btn.addEventListener('click', () => {
+        libUI.activeType = key;
+        renderLibrariesView();
+      });
+      libSidebar.insertBefore(btn, libSidebarFooter);
+    };
+    const addTitle = (text) => {
+      const t = document.createElement('div');
+      t.className = 'lib-sidebar-title dynamic';
+      t.textContent = text;
+      libSidebar.insertBefore(t, libSidebarFooter);
+    };
+    addTitle('Browse');
+    Object.entries(LIB_VIEWS).forEach(([key, v]) => addBtn(key, v.label, libItemsForView(key).length));
+    addTitle('Categories');
+    assetCategories().forEach(([key, def]) => addBtn(key, def.label, libItemsOfType(key).length));
+    libAddCategoryBtn.style.display = isAdminRole(state.currentUser.role) ? '' : 'none';
   }
 
   function renderLibrariesView() {
     if (!libBody) return;
-    const def = LIBRARY_TYPES[libUI.activeType];
+    if (!LIB_VIEWS[libUI.activeType] && !assetCategories().some(([k]) => k === libUI.activeType)) libUI.activeType = 'all';
+    renderLibrarySidebar();
 
-    // Sidebar type list
-    libSidebar.querySelectorAll('.lib-type-btn').forEach(b => b.remove());
-    Object.entries(LIBRARY_TYPES).forEach(([type, t]) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'lib-type-btn' + (type === libUI.activeType ? ' active' : '');
-      btn.innerHTML = `<span>${escapeHtml(t.label)}</span><span class="lib-type-count">${libItemsOfType(type).length}</span>`;
-      btn.addEventListener('click', () => {
-        libUI.activeType = type;
-        libUI.search = '';
-        libSearchInput.value = '';
-        renderLibrariesView();
-      });
-      libSidebar.insertBefore(btn, libSidebarFooter);
-    });
-
+    const view = libUI.activeType;
+    const isCategory = !LIB_VIEWS[view];
+    const def = isCategory ? catDef(view) : LIB_VIEWS[view];
     libTitle.textContent = def.label;
     libDesc.textContent = def.desc;
-    libAddBtn.textContent = '+ Add ' + def.singular;
+    libAddBtn.textContent = '+ Add ' + (isCategory ? def.singular : 'asset');
+    libAddBtn.style.display = view === 'archived' ? 'none' : '';
+    libLayoutBtns.forEach(b => b.classList.toggle('active', b.dataset.libLayout === libUI.layout));
 
-    const q = libUI.search.trim().toLowerCase();
-    const items = libItemsOfType(libUI.activeType)
-      .filter(it => !q || [it.name, it.code, it.snippet, it.notes, it.poseGroup, it.category, it.url]
-        .some(v => v && String(v).toLowerCase().includes(q)))
-      .sort((a, b) => (a.code || a.name || '').localeCompare(b.code || b.name || '', undefined, { numeric: true }));
+    if (!dbInstance) {
+      libBody.innerHTML = libraryLoadFailed
+        ? `<div class="lib-empty lib-error"><strong>Can't load the Asset Library</strong>The ListingFlow server could not be reached. Check it is running, then <button type="button" class="identity-link" data-lib-retry>try again</button>.</div>`
+        : `<div class="lib-empty"><span class="lib-spinner" aria-hidden="true"></span><strong>Loading assets…</strong></div>`;
+      const retry = libBody.querySelector('[data-lib-retry]');
+      if (retry) retry.addEventListener('click', () => location.reload());
+      return;
+    }
+
+    const q = normText(libUI.search);
+    const items = libSortForView(view, libItemsForView(view).filter(it => libMatchesSearch(it, q)));
 
     if (items.length === 0) {
-      libBody.innerHTML = q
-        ? `<div class="lib-empty"><strong>No matches</strong>Nothing in ${escapeHtml(def.label.toLowerCase())} matches "${escapeHtml(libUI.search)}".</div>`
-        : `<div class="lib-empty"><strong>No ${escapeHtml(def.label.toLowerCase())} yet</strong>Add your first ${escapeHtml(def.singular)}, or use "Fill from tracker" to start from what's already in the tracker.</div>`;
+      let msg;
+      if (q) msg = `<strong>No matches</strong>Nothing in ${escapeHtml(def.label.toLowerCase())} matches "${escapeHtml(libUI.search)}". Search looks at names, aliases, SKUs and tags.`;
+      else if (view === 'favourites') msg = '<strong>No favourites yet</strong>Click the star on any asset to keep it here.';
+      else if (view === 'recent') msg = '<strong>Nothing used yet</strong>Assets appear here once someone picks them in a job.';
+      else if (view === 'archived') msg = '<strong>Nothing archived</strong>Archived assets are kept here and can be restored.';
+      else if (view === 'all') msg = '<strong>The library is empty</strong>Click "+ Add asset" to add your first one, or use "Fill from tracker" to start from the tracker.';
+      else msg = `<strong>No ${escapeHtml(def.label.toLowerCase())} yet</strong>Add your first ${escapeHtml(def.singular)} with the button above.`;
+      libBody.innerHTML = `<div class="lib-empty">${msg}</div>`;
       return;
     }
 
     libBody.innerHTML = '';
+    if (libUI.layout === 'list') {
+      const list = document.createElement('div');
+      list.className = 'lib-list';
+      list.innerHTML = `<div class="lib-list-row lib-list-head"><span></span><span>Name</span><span>Category</span><span>Tags</span><span>Usage</span><span>Updated</span><span></span></div>`;
+      items.forEach(it => list.appendChild(createLibraryRowElement(it)));
+      libBody.appendChild(list);
+      return;
+    }
+
+    // Grid: group by the category's own field when one is set, otherwise one grid.
     const groups = new Map();
-    if (def.groupBy) {
-      const order = (def.fields.find(f => f.key === def.groupBy) || {}).options || [];
+    const groupKey = isCategory && def.groupBy;
+    if (groupKey) {
+      const order = (def.fields.find(f => f.key === groupKey) || {}).options || [];
       order.forEach(g => groups.set(g, []));
       items.forEach(it => {
-        const g = it[def.groupBy] || 'Other';
+        const g = it[groupKey] || 'Other';
         if (!groups.has(g)) groups.set(g, []);
         groups.get(g).push(it);
       });
     } else {
       groups.set('', items);
     }
-
     groups.forEach((groupItems, groupName) => {
       if (groupItems.length === 0) return;
       const section = document.createElement('div');
       section.className = 'lib-group';
-      if (groupName) {
-        section.innerHTML = `<div class="lib-group-title">${escapeHtml(groupName)} <span>${groupItems.length}</span></div>`;
-      }
+      if (groupName) section.innerHTML = `<div class="lib-group-title">${escapeHtml(groupName)} <span>${groupItems.length}</span></div>`;
       const grid = document.createElement('div');
       grid.className = 'lib-grid';
-      groupItems.forEach(it => grid.appendChild(createLibraryItemElement(it)));
+      groupItems.forEach(it => grid.appendChild(createLibraryItemElement(it, !isCategory)));
       section.appendChild(grid);
       libBody.appendChild(section);
     });
   }
 
-  function createLibraryItemElement(item) {
-    const def = LIBRARY_TYPES[item.type];
-    const el = document.createElement('button');
-    el.type = 'button';
-    el.className = 'lib-item';
+  function favButtonHtml(item) {
+    const on = isFavourite(item);
+    return `<button type="button" class="lib-fav-btn${on ? ' on' : ''}" data-fav title="${on ? 'Remove from favourites' : 'Add to favourites'}" aria-label="${on ? 'Remove from favourites' : 'Add to favourites'}" aria-pressed="${on}">${on ? '★' : '☆'}</button>`;
+  }
+
+  function tagsHtml(item, max) {
+    const tags = item.tags || [];
+    if (!tags.length) return '';
+    return `<div class="lib-tags">${tags.slice(0, max).map(t => `<span class="lib-tag">${escapeHtml(t)}</span>`).join('')}${tags.length > max ? `<span class="lib-tag">+${tags.length - max}</span>` : ''}</div>`;
+  }
+
+  function wireLibraryItemElement(el, item) {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('[data-fav]')) return;
+      openLibraryEditor(item);
+    });
+    el.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === el) { e.preventDefault(); openLibraryEditor(item); }
+    });
+    el.querySelector('[data-fav]').addEventListener('click', (e) => { e.stopPropagation(); toggleFavourite(item); });
+  }
+
+  function createLibraryItemElement(item, showCategory) {
+    const def = catDef(item.type);
+    const el = document.createElement('div');
+    el.className = 'lib-item' + (item.archived ? ' archived' : '');
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.dataset.assetId = item.id;
     const images = item.images || [];
     const initials = (item.name || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    const usage = (item.type === 'model' || item.type === 'product') ? libUsageCount(item) : 0;
-    const metaParts = [];
-    if (item.type === 'prop' && item.placement) metaParts.push(escapeHtml(item.placement));
-    if (usage) metaParts.push(`Used in ${usage} job${usage > 1 ? 's' : ''}`);
+    const metaParts = [escapeHtml(usageText(item))];
+    if (item.placement) metaParts.push(escapeHtml(item.placement));
     if (!item.snippet) metaParts.push(`<span class="lib-item-missing">No prompt text yet</span>`);
 
     el.innerHTML = `
+      ${favButtonHtml(item)}
       ${def.hasImages ? `
-      <div class="lib-thumb${images.length ? "" : " lib-thumb-empty"}">
+      <div class="lib-thumb${images.length ? '' : ' lib-thumb-empty'}">
         ${images.length
           ? `<img src="${escapeHtml(images[0].url)}" alt="" loading="lazy" />${images.length > 1 ? `<span class="lib-thumb-count">${images.length}</span>` : ''}`
           : `<span class="lib-thumb-initials">${escapeHtml(initials)}</span>`}
       </div>` : ''}
       <div class="lib-item-body">
+        ${showCategory || item.archived ? `<div class="lib-cat-label">${escapeHtml(def.label)}${item.archived ? ' · Archived' : ''}</div>` : ''}
         <div class="lib-item-top">
           ${item.code ? `<span class="lib-code">${escapeHtml(item.code)}</span>` : ''}
           <span class="lib-item-name" title="${escapeHtml(item.name || '')}">${escapeHtml(item.name || 'Untitled')}</span>
         </div>
         ${item.snippet ? `<div class="lib-item-snippet">${escapeHtml(item.snippet)}</div>` : ''}
-        ${metaParts.length ? `<div class="lib-item-meta">${metaParts.join(' · ')}</div>` : ''}
+        ${tagsHtml(item, 3)}
+        <div class="lib-item-meta">${metaParts.join(' · ')}</div>
       </div>`;
-    el.addEventListener('click', () => openLibraryEditor(item));
+    wireLibraryItemElement(el, item);
     return el;
   }
 
-  function openLibraryEditor(item) {
-    if (!ensureCanEdit('libraries')) return;
-    const isNew = !item;
-    const type = isNew ? libUI.activeType : item.type;
-    const def = LIBRARY_TYPES[type];
-    libUI.editing = isNew
-      ? { id: newLibraryId(), type, images: [], createdAt: new Date().toISOString(), createdBy: state.currentUser.id, _isNew: true }
-      : JSON.parse(JSON.stringify(item));
-    if (!libUI.editing.images) libUI.editing.images = [];
+  function createLibraryRowElement(item) {
+    const def = catDef(item.type);
+    const el = document.createElement('div');
+    el.className = 'lib-list-row' + (item.archived ? ' archived' : '');
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.dataset.assetId = item.id;
+    const img = (item.images || [])[0];
+    el.innerHTML = `
+      <span class="lib-list-thumb">${img ? `<img src="${escapeHtml(img.url)}" alt="" loading="lazy" />` : ''}</span>
+      <span class="lib-list-name">
+        <span class="lib-item-top">${item.code ? `<span class="lib-code">${escapeHtml(item.code)}</span>` : ''}<strong>${escapeHtml(item.name || 'Untitled')}</strong></span>
+        ${(item.aliases || []).length ? `<span class="lib-list-sub">aka ${escapeHtml(item.aliases.join(', '))}</span>` : ''}
+      </span>
+      <span>${escapeHtml(def.label)}${item.archived ? ' · Archived' : ''}</span>
+      <span>${tagsHtml(item, 4)}</span>
+      <span>${escapeHtml(usageText(item))}</span>
+      <span title="${escapeHtml(item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '')}">${escapeHtml(item.updatedAt ? timeAgo(item.updatedAt) + ' · ' + memberName(item.updatedBy || item.createdBy) : '')}</span>
+      ${favButtonHtml(item)}`;
+    wireLibraryItemElement(el, item);
+    return el;
+  }
 
+  // ---- Editor -------------------------------------------------------------
+  function renderLibraryEditorForm() {
+    const item = libUI.editing;
+    const def = catDef(item.type);
+    const isNew = item._isNew;
     libEditorTitle.textContent = (isNew ? 'New ' : 'Edit ') + def.singular;
-    libEditorDelete.style.display = isNew ? 'none' : '';
     libEditorImagesSection.style.display = def.hasImages ? '' : 'none';
+    libEditorImagesLabel.textContent = def.imagesLabel || 'Reference images';
+    libEditorImagesHint.textContent = def.imagesHint || 'The first image is the thumbnail and the one used in prompts.';
 
     libEditorForm.innerHTML = '';
-    def.fields.forEach(f => {
+    if (isNew) {
+      const group = document.createElement('div');
+      group.className = 'form-group';
+      group.innerHTML = `<label for="lib-field-type">Category</label><select class="form-select" id="lib-field-type">${assetCategories().map(([k, d]) =>
+        `<option value="${escapeHtml(k)}"${k === item.type ? ' selected' : ''}>${escapeHtml(d.label)}</option>`).join('')}</select>`;
+      group.querySelector('select').addEventListener('change', (e) => {
+        readLibraryEditorFields();
+        item.type = e.target.value;
+        renderLibraryEditorForm();
+      });
+      libEditorForm.appendChild(group);
+    }
+
+    [...def.fields, ...COMMON_FIELDS].forEach(f => {
       const group = document.createElement('div');
       group.className = 'form-group';
       const id = 'lib-field-' + f.key;
-      const value = libUI.editing[f.key] || (f.key === 'poseGroup' && isNew ? POSE_GROUPS[0] : '') || '';
+      let value = item[f.key];
+      if (f.type === 'list') value = (value || []).join(', ');
+      if ((value === undefined || value === '') && f.type === 'select') value = f.options[0];
+      value = value || '';
       let control;
       if (f.type === 'textarea') {
         control = `<textarea class="form-textarea" id="${id}" name="${f.key}" rows="${f.rows || 3}" placeholder="${escapeHtml(f.placeholder || '')}">${escapeHtml(value)}</textarea>`;
       } else if (f.type === 'select') {
-        control = `<select class="form-select" id="${id}" name="${f.key}">${f.options.map(o =>
+        const options = f.options.includes(value) ? f.options : [...f.options, value];
+        control = `<select class="form-select" id="${id}" name="${f.key}">${options.map(o =>
           `<option value="${escapeHtml(o)}"${o === value ? ' selected' : ''}>${escapeHtml(o)}</option>`).join('')}</select>`;
       } else {
         control = `<input class="form-input" id="${id}" name="${f.key}" value="${escapeHtml(value)}" placeholder="${escapeHtml(f.placeholder || '')}" />`;
@@ -7619,9 +8065,40 @@
       libEditorForm.appendChild(group);
     });
 
+    libEditorDelete.style.display = !isNew && item.archived && isAdminRole(state.currentUser.role) ? '' : 'none';
+    libEditorArchive.style.display = isNew ? 'none' : '';
+    libEditorArchive.textContent = item.archived ? 'Restore' : 'Archive';
+    libEditorDuplicate.style.display = isNew ? 'none' : '';
     renderLibraryEditorImages();
+    renderLibraryEditorHistory();
+  }
+
+  // Copy what is typed in the form onto the working copy.
+  function readLibraryEditorFields() {
+    const item = libUI.editing;
+    if (!item) return;
+    [...catDef(item.type).fields, ...COMMON_FIELDS].forEach(f => {
+      const el = libEditorForm.elements[f.key];
+      if (!el) return;
+      item[f.key] = f.type === 'list'
+        ? Array.from(new Set(el.value.split(',').map(s => s.trim()).filter(Boolean)))
+        : el.value.trim();
+    });
+  }
+
+  function openLibraryEditor(item, forType) {
+    if (!ensureCanEdit('libraries')) return;
+    const isNew = !item;
+    let type = forType || (isNew ? libUI.activeType : item.type);
+    if (isNew && LIB_VIEWS[type]) type = 'model';
+    libUI.editing = isNew
+      ? { id: newLibraryId(), type, images: [], tags: [], aliases: [], createdAt: new Date().toISOString(), createdBy: state.currentUser.id, _isNew: true }
+      : JSON.parse(JSON.stringify(state.libraries.get(item.id) || item));
+    if (!libUI.editing.images) libUI.editing.images = [];
+    libUI.editing._before = isNew ? null : JSON.stringify(libUI.editing);
+    renderLibraryEditorForm();
     libEditorModal.classList.add('active');
-    const first = libEditorForm.querySelector('input, textarea, select');
+    const first = libEditorForm.querySelector(isNew ? 'input' : 'input, textarea, select');
     if (first) setTimeout(() => first.focus(), 30);
   }
 
@@ -7631,34 +8108,81 @@
     images.forEach((img, idx) => {
       const tile = document.createElement('div');
       tile.className = 'lib-image-tile';
-      tile.innerHTML = `<img src="${escapeHtml(img.url)}" alt="${escapeHtml(img.name || '')}" /><button type="button" class="lib-image-remove" title="Remove image" aria-label="Remove image">✕</button>`;
+      tile.innerHTML = `<img src="${escapeHtml(img.url)}" alt="${escapeHtml(img.name || '')}" />
+        ${idx === 0 ? '<span class="lib-cover-badge">Thumbnail</span>' : '<button type="button" class="lib-image-cover" title="Use as thumbnail">Make thumbnail</button>'}
+        <button type="button" class="lib-image-remove" title="Remove image" aria-label="Remove image">✕</button>`;
       tile.querySelector('img').addEventListener('click', () => openImageZoomModal(img.url, img.name || ''));
+      const cover = tile.querySelector('.lib-image-cover');
+      if (cover) cover.addEventListener('click', () => {
+        const [moved] = libUI.editing.images.splice(idx, 1);
+        libUI.editing.images.unshift(moved);
+        renderLibraryEditorImages();
+      });
       tile.querySelector('.lib-image-remove').addEventListener('click', () => {
         libUI.editing.images.splice(idx, 1);
         renderLibraryEditorImages();
       });
       libEditorImages.appendChild(tile);
     });
+    for (let i = 0; i < libUI.uploading; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'lib-image-tile uploading';
+      tile.innerHTML = '<span class="lib-spinner" aria-hidden="true"></span><span>Uploading…</span>';
+      libEditorImages.appendChild(tile);
+    }
   }
+
+  function renderLibraryEditorHistory() {
+    const item = libUI.editing;
+    const history = (item && item.history) || [];
+    if (!item || item._isNew) {
+      libEditorHistory.innerHTML = '';
+      return;
+    }
+    const created = item.createdAt ? `Created ${new Date(item.createdAt).toLocaleString()} by ${escapeHtml(memberName(item.createdBy))}` : '';
+    const usage = escapeHtml(usageText(item));
+    libEditorHistory.innerHTML = `
+      <details class="lib-history">
+        <summary>History · ${usage}</summary>
+        <div class="lib-history-meta">${created}${item.updatedAt ? `<br>Last updated ${new Date(item.updatedAt).toLocaleString()} by ${escapeHtml(memberName(item.updatedBy || item.createdBy))}` : ''}<br><span class="lib-history-id">Asset ID: ${escapeHtml(item.id)}</span></div>
+        ${history.length ? `<ul>${history.map(h => `<li><span>${escapeHtml(new Date(h.at).toLocaleString())}</span> ${escapeHtml(memberName(h.by))} ${escapeHtml(h.action)}${h.fields && h.fields.length ? ': ' + escapeHtml(h.fields.join(', ')) : ''}</li>`).join('')}</ul>` : '<p>No edits recorded yet.</p>'}
+      </details>`;
+  }
+
+  const LIB_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+  const LIB_MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 
   async function addLibraryEditorImages(fileList) {
     if (!libUI.editing) return;
-    const files = Array.from(fileList || []).filter(f => isImageFile(f.name));
-    if (files.length === 0) {
-      showToast('No valid images selected', 'warning');
-      return;
-    }
-    libEditorDropzone.textContent = `Uploading ${files.length} image${files.length > 1 ? 's' : ''}...`;
+    const editingId = libUI.editing.id;
+    const files = [];
+    Array.from(fileList || []).forEach(f => {
+      const type = f.type || imageTypeFromName(f.name);
+      if (!LIB_IMAGE_TYPES.includes(type)) showToast(`${f.name} is not a supported image (JPG, PNG, WebP, GIF or AVIF)`, 'warning');
+      else if (f.size > LIB_MAX_IMAGE_BYTES) showToast(`${f.name} is larger than 25 MB`, 'warning');
+      else files.push(f);
+    });
+    if (!files.length) return;
+    libUI.uploading += files.length;
+    libEditorSave.disabled = true;
+    renderLibraryEditorImages();
+    let added = 0;
     for (const file of files) {
       try {
         const url = await uploadFileToServer(file);
-        libUI.editing.images.push({ url, name: file.name });
+        // The editor may have been closed or switched to another asset meanwhile.
+        if (libUI.editing && libUI.editing.id === editingId) {
+          libUI.editing.images.push({ url, name: file.name });
+          added++;
+        }
       } catch (e) {
-        showToast(`Could not upload ${file.name}`, 'error');
+        showToast(`Could not upload ${file.name}: ${e.message}`, 'error');
       }
+      libUI.uploading--;
+      if (libUI.editing && libUI.editing.id === editingId) renderLibraryEditorImages();
     }
-    libEditorDropzone.textContent = 'Drop images here or click to add';
-    renderLibraryEditorImages();
+    libEditorSave.disabled = libUI.uploading > 0;
+    if (added) showToast(`Added ${added} image${added > 1 ? 's' : ''}. Save to keep them.`, 'success');
   }
 
   function closeLibraryEditor() {
@@ -7670,36 +8194,134 @@
     if (!ensureCanEdit('libraries')) return;
     const item = libUI.editing;
     if (!item) return;
-    const def = LIBRARY_TYPES[item.type];
+    if (libUI.uploading > 0) {
+      showToast('Wait for the images to finish uploading', 'warning');
+      return;
+    }
+    readLibraryEditorFields();
+    const def = catDef(item.type);
     for (const f of def.fields) {
-      const el = libEditorForm.elements[f.key];
-      item[f.key] = el ? el.value.trim() : '';
       if (f.required && !item[f.key]) {
         showToast(`${f.label} is required`, 'warning');
+        const el = libEditorForm.elements[f.key];
         if (el) el.focus();
         return;
       }
     }
     if (!item.code && def.codePrefix) item.code = nextLibraryCode(item.type);
+
+    const dups = findLikelyDuplicates(item);
+    if (dups.length) {
+      const lines = dups.slice(0, 5).map(d => `• ${catDef(d.item.type).label}: ${d.item.code ? d.item.code + ' · ' : ''}${d.item.name} (${d.reason})`).join('\n');
+      if (!confirm(`This looks like an asset that already exists:\n\n${lines}\n\nSave anyway?`)) return;
+    }
+
     const isNew = item._isNew;
+    const before = item._before ? JSON.parse(item._before) : {};
     delete item._isNew;
-    saveLibraryItem(item);
+    delete item._before;
+    const changed = isNew ? [] : [...def.fields, ...COMMON_FIELDS, { key: 'images', label: 'Images' }]
+      .filter(f => JSON.stringify(before[f.key] || '') !== JSON.stringify(item[f.key] || ''))
+      .map(f => f.label);
+    if (!isNew && !changed.length) {
+      closeLibraryEditor();
+      return;
+    }
+    saveLibraryItem(item, isNew ? 'created' : 'edited', changed);
     closeLibraryEditor();
     renderLibrariesView();
     showToast(`${isNew ? 'Added' : 'Saved'} ${def.singular} "${item.name}"`, 'success');
+  }
+
+  function archiveLibraryEditorItem() {
+    if (!ensureCanEdit('libraries')) return;
+    const item = libUI.editing && state.libraries.get(libUI.editing.id);
+    if (!item) return;
+    const def = catDef(item.type);
+    if (item.archived) {
+      item.archived = false;
+      delete item.archivedAt;
+      saveLibraryItem(item, 'restored');
+      showToast(`Restored ${def.singular} "${item.name}"`, 'success');
+    } else {
+      if (!confirm(`Archive ${def.singular} "${item.name || 'Untitled'}"? It disappears from job pickers but jobs that already use it keep working. You can restore it from Archived.`)) return;
+      item.archived = true;
+      item.archivedAt = new Date().toISOString();
+      saveLibraryItem(item, 'archived');
+      showToast(`Archived ${def.singular} "${item.name}"`, 'info');
+    }
+    closeLibraryEditor();
+    renderLibrariesView();
+  }
+
+  function duplicateLibraryEditorItem() {
+    if (!ensureCanEdit('libraries')) return;
+    const source = libUI.editing && state.libraries.get(libUI.editing.id);
+    if (!source) return;
+    const now = new Date().toISOString();
+    const copy = {
+      ...JSON.parse(JSON.stringify(source)),
+      id: newLibraryId(),
+      name: (source.name || 'Untitled') + ' (copy)',
+      code: '',
+      archived: false,
+      favouredBy: [],
+      usageCount: 0,
+      lastUsedAt: null,
+      history: [],
+      createdAt: now,
+      createdBy: state.currentUser.id
+    };
+    delete copy.archivedAt;
+    if (catDef(copy.type).codePrefix) copy.code = nextLibraryCode(copy.type);
+    recordLibraryHistory(copy, `duplicated from ${source.code || source.name || source.id}`);
+    saveLibraryItem(copy);
+    closeLibraryEditor();
+    renderLibrariesView();
+    openLibraryEditor(copy);
+    showToast(`Duplicated as "${copy.name}". Rename it and save.`, 'success');
   }
 
   function deleteLibraryEditorItem() {
     if (!ensureCanEdit('libraries')) return;
     const item = libUI.editing;
     if (!item) return;
-    const def = LIBRARY_TYPES[item.type];
-    if (!confirm(`Delete ${def.singular} "${item.name || 'Untitled'}"? This removes it for the whole team.`)) return;
+    if (!isAdminRole(state.currentUser.role)) {
+      showToast('Only admins and the owner can delete assets. Archive it instead.', 'warning');
+      return;
+    }
+    const def = catDef(item.type);
+    const inUse = Array.from(state.cards.values()).filter(c => c.job && JSON.stringify(c.job).includes(`"${item.id}"`)).length;
+    const warn = inUse ? `\n\n${inUse} job${inUse > 1 ? 's' : ''} still use${inUse > 1 ? '' : 's'} it and will lose this asset from their prompts.` : '';
+    if (!confirm(`Delete ${def.singular} "${item.name || 'Untitled'}" for good? This removes it for the whole team.${warn}`)) return;
     state.libraries.delete(item.id);
     deleteFromStore('libraries', item.id);
     closeLibraryEditor();
     renderLibrariesView();
     showToast(`Deleted ${def.singular} "${item.name || 'Untitled'}"`, 'info');
+  }
+
+  // Admins can add categories; each gets the generic asset fields.
+  function addAssetCategory() {
+    if (!isAdminRole(state.currentUser.role)) {
+      showToast('Only admins and the owner can add categories', 'warning');
+      return;
+    }
+    if (!ensureCanEdit('settings')) return;
+    const label = (prompt('Name of the new category (e.g. Hats, Outerwear):') || '').trim();
+    if (!label) return;
+    if (label.length > 40) { showToast('Category names can be at most 40 characters', 'warning'); return; }
+    if (assetCategories().some(([, d]) => normText(d.label) === normText(label))) {
+      showToast(`There is already a "${label}" category`, 'warning');
+      return;
+    }
+    const key = 'custom_' + (normText(label).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'category') + '_' + Date.now().toString(36);
+    const singular = label.toLowerCase().replace(/s$/, '');
+    state.assetCategories = [...(state.assetCategories || []), { key, label, singular, createdAt: new Date().toISOString(), createdBy: state.currentUser.id }];
+    putToStore('settings', { key: 'assetCategories', value: state.assetCategories });
+    libUI.activeType = key;
+    renderLibrariesView();
+    showToast(`Added category "${label}"`, 'success');
   }
 
   function guessProductCategory(text) {
@@ -7708,7 +8330,12 @@
     if (/\b(pants?|trousers?|shorts|jeans?|joggers?|cargos?|chinos?|bottoms?|skirts?|bermudas?)\b/.test(s)) return 'Bottom';
     if (/\b(shirt|tee|t-shirt|tshirt|top|polo|henley|sweater|sweatshirt|hoodie|cardigan|vest|tank|knit)s?\b/.test(s)) return 'Top';
     if (/\bdenim\b/.test(s)) return 'Bottom';
+    if (/\b(sneakers?|trainers?|boots?|shoes?|loafers?|sandals?)\b/.test(s)) return 'Shoes';
     return 'Other';
+  }
+
+  function garmentTypeForGuess(category) {
+    return ({ Top: 'top', Outerwear: 'top', Bottom: 'bottom', Shoes: 'shoes' })[category] || 'accessory';
   }
 
   function productNameFromUrl(u) {
@@ -7729,14 +8356,14 @@
     return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   }
 
-  // Seed libraries from what the tracker already contains: model names from
+  // Seed the library from what the tracker already contains: model names from
   // "Character", paired products from "Paired With", and repeated "Note" text.
   function fillLibrariesFromTracker() {
     if (!ensureCanEdit('libraries')) return;
     const cards = Array.from(state.cards.values());
-    const knownModels = new Set(libItemsOfType('model').map(m => (m.name || '').trim().toLowerCase()));
-    const knownProducts = new Set(libItemsOfType('product').map(p => productKeyFromUrl(p.url)).filter(Boolean));
-    const knownPresets = new Set(libItemsOfType('preset').map(p => normalizeNoteText(p.snippet)));
+    const knownModels = new Set(libItemsOfType('model', true).map(m => (m.name || '').trim().toLowerCase()));
+    const knownProducts = new Set(libItemsOfType('garment', true).map(p => productKeyFromUrl(p.url)).filter(Boolean));
+    const knownPresets = new Set(libItemsOfType('preset', true).map(p => normalizeNoteText(p.snippet)));
 
     const modelCounts = new Map();
     const productUrls = new Map();
@@ -7767,39 +8394,49 @@
 
     const total = newModels.length + newProducts.length + newPresets.length;
     if (total === 0) {
-      showToast('Nothing new to add: the libraries already cover what is in the tracker', 'info');
+      showToast('Nothing new to add: the library already covers what is in the tracker', 'info');
       return;
     }
-    if (!confirm(`Add from the tracker:\n\n• ${newModels.length} models (from Character)\n• ${newProducts.length} products (from Paired With links)\n• ${newPresets.length} note presets (notes used 2+ times)\n\nYou can edit or delete any of them afterwards.`)) return;
+    if (!confirm(`Add from the tracker:\n\n• ${newModels.length} models (from Character)\n• ${newProducts.length} products (from Paired With links, sorted into tops, bottoms, shoes and accessories)\n• ${newPresets.length} note presets (notes used 2+ times)\n\nModel details are left empty for you to fill in. You can edit or archive any of them afterwards.`)) return;
 
     const now = new Date().toISOString();
-    const base = () => ({ id: newLibraryId(), createdAt: now, createdBy: state.currentUser.id, images: [] });
+    const base = () => ({ id: newLibraryId(), createdAt: now, createdBy: state.currentUser.id, images: [], tags: [], aliases: [] });
     newModels.forEach(name => {
-      saveLibraryItem({ ...base(), type: 'model', name, code: nextLibraryCode('model'), snippet: '', notes: 'Added from tracker' });
+      saveLibraryItem({ ...base(), type: 'model', name, code: nextLibraryCode('model'), snippet: '', notes: 'Added from tracker' }, 'created from tracker');
     });
     newProducts.forEach(([, url]) => {
       const name = productNameFromUrl(url);
-      saveLibraryItem({ ...base(), type: 'product', name, code: '', category: guessProductCategory(name), url, snippet: '', notes: 'Added from tracker' });
+      saveLibraryItem({ ...base(), type: garmentTypeForGuess(guessProductCategory(name)), name, code: '', url, snippet: '', notes: 'Added from tracker' }, 'created from tracker');
     });
     newPresets.forEach(([note]) => {
       const shortName = note.split(/\s+/).slice(0, 6).join(' ') + (note.split(/\s+/).length > 6 ? '…' : '');
-      saveLibraryItem({ ...base(), type: 'preset', name: shortName, code: nextLibraryCode('preset'), snippet: note });
+      saveLibraryItem({ ...base(), type: 'preset', name: shortName, code: nextLibraryCode('preset'), snippet: note }, 'created from tracker');
     });
 
     renderLibrariesView();
     showToast(`Added ${newModels.length} models, ${newProducts.length} products and ${newPresets.length} note presets`, 'success');
   }
 
+  let libSearchTimer = null;
   libSearchInput.addEventListener('input', (e) => {
     libUI.search = e.target.value;
-    renderLibrariesView();
+    clearTimeout(libSearchTimer);
+    libSearchTimer = setTimeout(renderLibrariesView, 120);
   });
+  libLayoutBtns.forEach(btn => btn.addEventListener('click', () => {
+    libUI.layout = btn.dataset.libLayout;
+    try { localStorage.setItem('listingflow_lib_layout', libUI.layout); } catch (e) {}
+    renderLibrariesView();
+  }));
   libAddBtn.addEventListener('click', () => openLibraryEditor(null));
   libSeedBtn.addEventListener('click', fillLibrariesFromTracker);
+  libAddCategoryBtn.addEventListener('click', addAssetCategory);
   document.getElementById('lib-editor-close').addEventListener('click', closeLibraryEditor);
   document.getElementById('lib-editor-cancel').addEventListener('click', closeLibraryEditor);
-  document.getElementById('lib-editor-save').addEventListener('click', saveLibraryEditor);
+  libEditorSave.addEventListener('click', saveLibraryEditor);
   libEditorDelete.addEventListener('click', deleteLibraryEditorItem);
+  libEditorArchive.addEventListener('click', archiveLibraryEditorItem);
+  libEditorDuplicate.addEventListener('click', duplicateLibraryEditorItem);
   libEditorForm.addEventListener('submit', (e) => { e.preventDefault(); saveLibraryEditor(); });
   libEditorDropzone.addEventListener('click', () => libEditorFileInput.click());
   libEditorFileInput.addEventListener('change', (e) => {
@@ -7861,7 +8498,7 @@
     if (model) out.modelId = model.id;
 
     const pairedKeys = String(card.pairedWith || '').split(/[\s,]+/).map(productKeyFromUrl).filter(Boolean);
-    out.pairedIds = libItemsOfType('product').filter(p => p.url && pairedKeys.includes(productKeyFromUrl(p.url))).map(p => p.id);
+    out.pairedIds = libItemsOfType('garment').filter(p => p.url && pairedKeys.includes(productKeyFromUrl(p.url))).map(p => p.id);
 
     const noteKey = normalizeNoteText(card.notes);
     const preset = noteKey && libItemsOfType('preset').find(p => normalizeNoteText(p.snippet) === noteKey);
@@ -7872,17 +8509,19 @@
 
   function suggestJobFromTracker(card) {
     const job = { ...emptyJob(), ...suggestFromTracker(card) };
-    // If this product is itself in the Products library (same SKU), reuse its garment lock.
-    const own = libItemsOfType('product').find(p => p.code && card.sku && p.code.trim().toLowerCase() === String(card.sku).trim().toLowerCase());
+    // If this product is itself in the Asset Library (same SKU), reuse its garment lock.
+    const own = libItemsOfType('garment').find(p => p.code && card.sku && p.code.trim().toLowerCase() === String(card.sku).trim().toLowerCase());
     if (own && own.snippet) job.garmentLock = own.snippet;
-    const backgrounds = libItemsOfType('background');
-    if (backgrounds.length === 1) job.backgroundId = backgrounds[0].id;
+    const styles = libItemsOfType('style');
+    if (styles.length === 1) job.backgroundId = styles[0].id;
     return job;
   }
 
   function getJob(card) {
     if (!card.job) return suggestJobFromTracker(card);
     const job = { ...emptyJob(), ...card.job };
+    // Copy the lists so edits to this job never change the saved card until it is saved.
+    ['pairedIds', 'propIds', 'presetIds', 'shotIds'].forEach(k => { job[k] = [...(job[k] || [])]; });
     job.shotEdits = { ...(card.job.shotEdits || {}) };
     return job;
   }
@@ -7899,11 +8538,20 @@
       renderJobAndPrompts(live, true);
       return false;
     }
+    const before = new Set(jobAssetIds(live.job));
     live.job = job;
     live.updatedAt = new Date().toISOString();
     state.cards.set(live.id, live);
     putToStore('cards', live);
+    markAssetsUsed(jobAssetIds(job).filter(id => !before.has(id)));
     return true;
+  }
+
+  // Every Asset Library id a job refers to.
+  function jobAssetIds(job) {
+    if (!job) return [];
+    return Array.from(new Set([job.modelId, job.backgroundId, ...(job.pairedIds || []), ...(job.propIds || []),
+      ...(job.presetIds || []), ...(job.shotIds || [])].filter(Boolean)));
   }
 
   function orderedShots(job) {
@@ -7953,14 +8601,15 @@
 
     job.pairedIds.map(libItem).filter(Boolean).forEach(p => {
       const url = firstImageUrl(p);
-      add({ kind: 'paired', label: p.name, detail: `Paired ${(p.category || 'item').toLowerCase()}`, missing: !url,
-        promptLine: `${p.name} (paired ${(p.category || 'item').toLowerCase()}). Style it together with the main product.` }, url ? [url] : []);
+      const kind = catDef(p.type).singular.toLowerCase();
+      add({ kind: 'paired', label: p.name, detail: `Paired ${kind}`, missing: !url,
+        promptLine: `${p.name} (paired ${kind}). Style it together with the main product.` }, url ? [url] : []);
     });
 
     const bg = libItem(job.backgroundId);
     if (bg && firstImageUrl(bg)) {
-      add({ kind: 'background', label: bg.name, detail: 'Background',
-        promptLine: `${bg.name} (background reference). Match this backdrop and its lighting.` }, [firstImageUrl(bg)]);
+      add({ kind: 'background', label: bg.name, detail: 'Style',
+        promptLine: `${bg.name} (style reference). Match this backdrop, lighting and camera look.` }, [firstImageUrl(bg)]);
     }
 
     job.propIds.map(libItem).filter(Boolean).forEach(pr => {
@@ -7987,19 +8636,21 @@
 
     // Library text may or may not end with a full stop; normalise to exactly one.
     const sentence = (t) => String(t).trim().replace(/[\s.]+$/, '') + '.';
+    // Fixed constraints from the Asset Library are added unchanged.
+    const keep = (item) => item && item.constraints && item.constraints.trim() ? ' Must keep: ' + sentence(item.constraints) : '';
 
-    if (model) lines.push(`Model: ${sentence(model.snippet || `the person in the ${model.name} reference`)} Keep the face and body identical to the model reference.`);
+    if (model) lines.push(`Model: ${sentence(model.snippet || `the person in the ${model.name} reference`)} Keep the face and body identical to the model reference.${keep(model)}`);
     lines.push(`Outfit: ${sentence(card.name || 'the product')} ${sentence(job.garmentLock || 'Reproduce the garment exactly as in the product photos')}`);
     job.pairedIds.map(libItem).filter(Boolean).forEach(p => {
-      lines.push(`Paired with: ${sentence(p.name)}${p.snippet ? ' ' + sentence(p.snippet) : ''}`);
+      lines.push(`Paired with: ${sentence(p.name)}${p.snippet ? ' ' + sentence(p.snippet) : ''}${keep(p)}`);
     });
-    lines.push(`Pose (${pose.poseGroup || 'pose'}): ${sentence(pose.snippet || pose.name)}`);
+    lines.push(`Pose (${pose.poseGroup || 'pose'}): ${sentence(pose.snippet || pose.name)}${keep(pose)}`);
     if (pose.poseGroup === 'Back view') {
       lines.push('Back view: the model faces away from the camera. Show the back of the garment exactly as in the product photos; if no back photo is given, do not invent prints, logos or seams on the back.');
     }
-    if (bg) lines.push(`Background and lighting: ${sentence(bg.snippet || bg.name)}`);
+    if (bg) lines.push(`Style, background and lighting: ${sentence(bg.snippet || bg.name)}${keep(bg)}`);
     job.propIds.map(libItem).filter(Boolean).forEach(pr => {
-      lines.push(`Prop: ${sentence(pr.name + (pr.placement ? ', ' + pr.placement.trim() : ''))}${pr.snippet ? ' ' + sentence(pr.snippet) : ''}`);
+      lines.push(`Prop: ${sentence(pr.name + (pr.placement ? ', ' + pr.placement.trim() : ''))}${pr.snippet ? ' ' + sentence(pr.snippet) : ''}${keep(pr)}`);
     });
 
     const instructions = job.presetIds.map(libItem).filter(Boolean).map(p => (p.snippet || p.name).trim());
@@ -8017,13 +8668,13 @@
     const model = libItem(job.modelId);
     if (!model) w.push('No model chosen.');
     else {
-      if (!model.snippet) w.push(`${model.name} has no identity lock text in Libraries → Models.`);
-      if (!firstImageUrl(model)) w.push(`${model.name} has no reference image in Libraries → Models.`);
+      if (!model.snippet) w.push(`${model.name} has no identity lock text in Asset Library → Models.`);
+      if (!firstImageUrl(model)) w.push(`${model.name} has no reference image in Asset Library → Models.`);
     }
     if (!(card.rawFiles || []).length) w.push('No raw product photos on the Details tab.');
     if (!job.garmentLock) w.push('No garment description for this product (Job setup → This product).');
-    refInfo.refs.filter(r => r.kind === 'paired' && r.missing).forEach(r => w.push(`Paired product "${r.label}" has no image in Libraries → Products.`));
-    shots.filter(p => !p.snippet).forEach(p => w.push(`Pose "${p.name}" has no prompt text in Libraries → Poses.`));
+    refInfo.refs.filter(r => r.kind === 'paired' && r.missing).forEach(r => w.push(`Paired product "${r.label}" has no image in the Asset Library.`));
+    shots.filter(p => !p.snippet).forEach(p => w.push(`Pose "${p.name}" has no prompt text in Asset Library → Poses.`));
     return w;
   }
 
@@ -8048,18 +8699,23 @@
   }
 
   function libOptionLabel(item) {
-    return (item.code ? item.code + ' · ' : '') + (item.name || 'Untitled');
+    return (item.code ? item.code + ' · ' : '') + (item.name || 'Untitled') + (item.archived ? ' (archived)' : '');
   }
 
   function renderJobSetup(card) {
     const job = getJob(card);
     const editable = canCurrentUserWrite('cards');
     const dis = editable ? '' : ' disabled';
-    const models = libItemsOfType('model').sort((a, b) => libOptionLabel(a).localeCompare(libOptionLabel(b), undefined, { numeric: true }));
-    const backgrounds = libItemsOfType('background');
+    // Archived assets are hidden from pickers, except the ones this job already uses.
+    const withSelected = (items, ...ids) => {
+      ids.flat().forEach(id => { const it = libItem(id); if (it && it.archived && !items.includes(it)) items.push(it); });
+      return items;
+    };
+    const models = withSelected(libItemsOfType('model'), job.modelId).sort((a, b) => libOptionLabel(a).localeCompare(libOptionLabel(b), undefined, { numeric: true }));
+    const backgrounds = withSelected(libItemsOfType('style'), job.backgroundId);
     const model = libItem(job.modelId);
     const modelImg = firstImageUrl(model);
-    const poses = libItemsOfType('pose');
+    const poses = withSelected(libItemsOfType('pose'), job.shotIds);
 
     const linkList = (text) => String(text || '').split(/[\s,]+/).filter(u => /^https?:\/\//i.test(u))
       .map(u => `<a href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer">${escapeHtml(u.replace(/^https?:\/\/(www\.)?/, '').split(/[?#]/)[0].slice(0, 60))}</a>`).join('<br>');
@@ -8077,7 +8733,7 @@
 
       <div class="job-section">
         <div class="job-section-head"><span class="job-section-title">Model</span>
-          ${models.length ? '' : `<button class="identity-link" data-go-lib="model">Add models in Libraries →</button>`}</div>
+          ${models.length ? '' : `<button class="identity-link" data-go-lib="model">Add models in the Asset Library →</button>`}</div>
         <div class="job-row">
           ${modelImg ? `<img class="job-thumb" src="${escapeHtml(modelImg)}" alt="" data-zoom="${escapeHtml(modelImg)}" />` : ''}
           <select class="form-select" data-field="modelId"${dis}>
@@ -8085,7 +8741,7 @@
             ${models.map(m => `<option value="${escapeHtml(m.id)}"${m.id === job.modelId ? ' selected' : ''}>${escapeHtml(libOptionLabel(m))}</option>`).join('')}
           </select>
         </div>
-        ${model && !model.snippet ? `<span class="job-warn">${escapeHtml(model.name)} has no identity lock text yet. <button class="identity-link" data-go-lib="model">Add it in Libraries</button></span>` : ''}
+        ${model && !model.snippet ? `<span class="job-warn">${escapeHtml(model.name)} has no identity lock text yet. <button class="identity-link" data-go-lib="model">Add it in the Asset Library</button></span>` : ''}
       </div>
 
       <div class="job-section">
@@ -8097,13 +8753,13 @@
       <div class="job-section">
         <div class="job-section-head"><span class="job-section-title">Paired with</span></div>
         <div class="chip-list" data-chips="pairedIds"></div>
-        <select class="form-select" data-add="pairedIds" data-type="product"${dis}></select>
+        <select class="form-select" data-add="pairedIds" data-type="garment"${dis}></select>
       </div>
 
       <div class="job-section">
-        <span class="job-section-title">Background</span>
+        <span class="job-section-title">Style</span>
         <select class="form-select" data-field="backgroundId"${dis}>
-          <option value="">${backgrounds.length ? 'No background block' : 'No backgrounds in Libraries yet'}</option>
+          <option value="">${backgrounds.length ? 'No style block' : 'No styles in the Asset Library yet'}</option>
           ${backgrounds.map(b => `<option value="${escapeHtml(b.id)}"${b.id === job.backgroundId ? ' selected' : ''}>${escapeHtml(libOptionLabel(b))}</option>`).join('')}
         </select>
       </div>
@@ -8129,7 +8785,7 @@
             <button class="btn btn-secondary btn-sm" data-shots="clear"${dis}>Clear</button>
           </div>
         </div>
-        ${poses.length ? '' : `<span class="job-section-sub">No poses yet. <button class="identity-link" data-go-lib="pose">Add poses in Libraries →</button></span>`}
+        ${poses.length ? '' : `<span class="job-section-sub">No poses yet. <button class="identity-link" data-go-lib="pose">Add poses in the Asset Library →</button></span>`}
         <div data-shot-list></div>
       </div>
 
@@ -8168,11 +8824,12 @@
       const type = sel.dataset.type;
       const available = libItemsOfType(type).filter(it => !job[field].includes(it.id))
         .sort((a, b) => libOptionLabel(a).localeCompare(libOptionLabel(b), undefined, { numeric: true }));
+      const labels = pickerLabels(type);
       const emptyLabel = libItemsOfType(type).length
-        ? 'All ' + LIBRARY_TYPES[type].label.toLowerCase() + ' already added'
-        : 'No ' + LIBRARY_TYPES[type].label.toLowerCase() + ' in Libraries yet';
-      sel.innerHTML = `<option value="">${available.length ? '+ Add ' + LIBRARY_TYPES[type].singular + '…' : emptyLabel}</option>` +
-        available.map(it => `<option value="${escapeHtml(it.id)}">${escapeHtml(libOptionLabel(it))}${it.category ? ' (' + escapeHtml(it.category) + ')' : ''}</option>`).join('');
+        ? 'All ' + labels.label.toLowerCase() + ' already added'
+        : 'No ' + labels.label.toLowerCase() + ' in the Asset Library yet';
+      sel.innerHTML = `<option value="">${available.length ? '+ Add ' + labels.singular + '…' : emptyLabel}</option>` +
+        available.map(it => `<option value="${escapeHtml(it.id)}">${escapeHtml(libOptionLabel(it))}${type === 'garment' ? ' (' + escapeHtml(catDef(it.type).singular) + ')' : ''}</option>`).join('');
       sel.addEventListener('change', () => {
         if (!sel.value) return;
         const id = sel.value;
